@@ -8,7 +8,8 @@ Este website contiene el material para la materia Bases de Datos No Relacionales
 
 1. [Seven databases in Seven Weeks](http://barbra-coco.dyndns.org/yuri/seven/seven2.pdf)
 2. [Learning Spark](https://pages.databricks.com/rs/094-YMS-629/images/LearningSpark2.0.pdf)
-
+3. [Apuntes de miguelito](https://drive.google.com/file/d/1yS4RXly7kGCKBjklfX11dwK-fhvMpm-s/view?usp=sharing)
+4. 
 ### Cómo vamos a calificar?
 
 1. 1er Parcial (teórico): 10%
