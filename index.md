@@ -10,6 +10,7 @@ Este website contiene el material para la materia Bases de Datos No Relacionales
 2. [Learning Spark](https://pages.databricks.com/rs/094-YMS-629/images/LearningSpark2.0.pdf)
 3. [Apuntes de miguelito](https://drive.google.com/file/d/1yS4RXly7kGCKBjklfX11dwK-fhvMpm-s/view?usp=sharing)
 
+
 ### Cómo vamos a calificar?
 
 1. 1er Parcial (teórico): 10%
