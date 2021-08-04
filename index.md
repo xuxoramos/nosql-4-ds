@@ -2,6 +2,12 @@
 
 Este website contiene el material para la materia Bases de Datos No Relacionales (o NoSQL para brevedad) para Ciencia de Datos.
 
+## Qué vamos a ver en esta materia?
+
+Las BDs relacionales no son suficientes para contar toda la historia de un evento o de un objeto de negocio, de una orden, de un cliente, o de un envío. Frecuentemente la huella está dispersa en transacciones de una base de datos, visitas a unas páginas web, audios de atención a cliente, geolocalizaciones a lo largo de una ruta, texto libre en comentarios, grafos de redes sociales, y datos en memoria de los sistemas involucrados. Necesitamos saber interactuar con dichas bases de datos, y sobre todo, necesitamos poder consolidarlas en un repositorio central para lograr hacer analítica de todas las partes de la historia, sin dejar fuera ninguna fuente con la que corramos peligro de "quedar ciegos". En esta materia veremos como interactuar con dichas BDs no-relacionales (NoSQL = Not only SQL), y como construir dicho repositorio central.
+
+En una frase, esta materia trata de **consolidación de datos** para contar una historia completa.
+
 ##   Rules of the game
 
 ### Qué texto vamos a usar?
@@ -85,4 +91,4 @@ A continuación el temario, fecha por fecha:
 
 | Num de sesión | Fecha de sesión | Temas |
 |---------------|-----------------|-------|
-| 0             | 2021/01/13      | 
+| 1             | 2021/08/04      | Intro / 2-speed IT ([apunte](https://drive.google.com/file/d/1yS4RXly7kGCKBjklfX11dwK-fhvMpm-s/view?usp=sharing)/[video](https://drive.google.com/file/d/1ieoOT-bMrxuAFETPJRegX0bBlerJRWXd/view?usp=sharing))
