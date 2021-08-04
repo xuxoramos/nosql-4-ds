@@ -9,7 +9,7 @@ Este website contiene el material para la materia Bases de Datos No Relacionales
 1. [Seven databases in Seven Weeks](http://barbra-coco.dyndns.org/yuri/seven/seven2.pdf)
 2. [Learning Spark](https://pages.databricks.com/rs/094-YMS-629/images/LearningSpark2.0.pdf)
 3. [Apuntes de miguelito](https://drive.google.com/file/d/1yS4RXly7kGCKBjklfX11dwK-fhvMpm-s/view?usp=sharing)
-4. 
+
 ### Cómo vamos a calificar?
 
 1. 1er Parcial (teórico): 10%
@@ -55,20 +55,20 @@ Es importante que si nunca has usado Github, o algún otro sistema de control de
 
 ### Qué necesito para la clase?
 
-1. Document - MongoDB - https://www.mongodb.com/try/download/community
-2. Graph - Neo4J - https://neo4j.com/download/
-3. Wide column - MonetDB - https://www.monetdb.org/Downloads
-3. Key-value store - Apache Ignite - https://ignite.apache.org/
-4. DAta lake - Spark - https://spark.apache.org/
-5. Cuenta de AWS - https://aws.amazon.com/free/?sc_icampaign=acq_aws_takeover-1st-visit-free-tier&sc_ichannel=ha&sc_icontent=awssm-evergreen-1st-visit&sc_iplace=hero&trk=ha_awssm-evergreen-1st-visit&all-free-tier.sort-by=item.additionalFields.SortRank&all-free-tier.sort-order=asc&awsf.Free%20Tier%20Types=*all&awsf.Free%20Tier%20Categories=*all
+1. Document - MongoDB - [Download](https://www.mongodb.com/try/download/community)
+2. Graph - Neo4J - [Download](https://neo4j.com/download/)
+3. Wide column - MonetDB - [Download](https://www.monetdb.org/Downloads)
+3. Key-value store - Apache Ignite - [Download](https://ignite.apache.org/)
+4. DAta lake - Spark - [Download](https://spark.apache.org/)
+5. Cuenta de AWS - [Download](https://aws.amazon.com/free/?sc_icampaign=acq_aws_takeover-1st-visit-free-tier&sc_ichannel=ha&sc_icontent=awssm-evergreen-1st-visit&sc_iplace=hero&trk=ha_awssm-evergreen-1st-visit&all-free-tier.sort-by=item.additionalFields.SortRank&all-free-tier.sort-order=asc&awsf.Free%20Tier%20Types=*all&awsf.Free%20Tier%20Categories=*all)
 
 #### Solamente eso?
 
 Dependiendo de como vengan de experiencia y las materias previas que hayan cursado, necesitarán:
 
-1. VSCode - https://code.visualstudio.com/download
-2. Python (mediante miniconda) - https://docs.conda.io/en/latest/miniconda.html
-3. .NET SDK - https://dotnet.microsoft.com/download
+1. VSCode - [Download](https://code.visualstudio.com/download)
+2. Python (mediante miniconda) - [Download](https://docs.conda.io/en/latest/miniconda.html)
+3. .NET SDK - [Download](https://dotnet.microsoft.com/download)
 
 Ya veremos qué necesitaremos de todos estos.
 
