@@ -1,39 +1,86 @@
-## Welcome to GitHub Pages
+## Bases de Datos No-Relacionales para Ciencia de Datos
 
-texto: http://barbra-coco.dyndns.org/yuri/seven/seven2.pdf
+Este website contiene el material para la materia Bases de Datos No Relacionales (o NoSQL para brevedad) para Ciencia de Datos.
 
-You can use the [editor on GitHub](https://github.com/xuxoramos/nosql-4-ds/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
+##   Rules of the game
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+### Qué texto vamos a usar?
 
-### Markdown
+1. [Seven databases in Seven Weeks](http://barbra-coco.dyndns.org/yuri/seven/seven2.pdf)
+2. [Learning Spark](https://pages.databricks.com/rs/094-YMS-629/images/LearningSpark2.0.pdf)
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+### Cómo vamos a calificar?
 
-```markdown
-Syntax highlighted code block
+1. 1er Parcial (teórico): 10%
+2. 2o Parcial (avance proyecto final): 10%
+3. 3er Parcial (avance proyecto final): 20%
+4. Proyecto final: 50%
+5. Tareas: 10%
 
-# Header 1
-## Header 2
-### Header 3
+### Cómo serán los exámenes?
+Tendrán un componente teórico y/o un componente práctico.
 
-- Bulleted
-- List
+El componente práctico consistirá generalmente en uno de a) crear o alterar una BD, b) diseñar una BD, c) generar datos en una BD con una cierta forma, o d)  generar un reporte analítico.
 
-1. Numbered
-2. List
+El componente teórico es un examen de opción múltiplemen la plataforma [Socrative](https://www.socrative.com/) en el cual podrás sacar apuntes o usar una o varias de las plataformas que configuraremos a lo largo del semestre (PostgreSQL, DBeaver, VSCode, Anaconda, etc).
 
-**Bold** and _Italic_ and `Code` text
+### Y cómo será el examen final?
+Será enteramente práctico y consistirá en el desarrollo de un proyecto integral con todo lo visto en el semestre. Daremos más detalles más adelante durante el curso.
 
-[Link](url) and ![Image](src)
-```
+### Cómo me contacto con ud, prof?
+Usen el el correo institucional (jesus.ramos@itam.mx) o Slack, o escriban a ramos.cardona@gmail.com.
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
+Pero preferentemente usen Slack.
 
-### Jekyll Themes
+### Cómo nos comunicaremos?
+Por [Slack](https://slack.com), que es un chat orientado a equipos y trabajo. Comenzó como un juego tipo "Among Us", pero cuando hicieron el chat para el juego quedó tan chingón, que lo sacaron como producto separado. Abajo las ligas de descarga:
+- [Windows](https://slack.com/downloads/windows)
+- [Mac](https://slack.com/help/articles/207677868-Download-Slack-for-Mac)
+- [Linux](https://slack.com/downloads/linux) - .rpm para Fedora o RedHat, .deb para Ubuntu
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/xuxoramos/nosql-4-ds/settings/pages). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+Una vez que descarguen Slack, hagan click [en esta liga](https://join.slack.com/t/nosql4ds-aug-dec-2021/shared_invite/zt-ty8xeun7-KGFTNAdK1D7ylLa5XnoZsg) para que sean automágicamente agregados a nuestro workspace.
 
-### Support or Contact
+### Por dónde serán las sesiones?
 
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
+Lunes y Miércoles de 2:30pm a 4:00pm.
+
+La sesión 0 será por [Teams de Microsoft](https://www.microsoft.com/es-mx/microsoft-365/microsoft-teams/download-app), y posteriormente nos moveremos a [Zoom](https://zoom.us/download), en [este link](https://itam.zoom.us/my/xuxoramos).
+
+### Dónde estará el material?
+Aquí en Github. Github es una plataforma de colaboración y control de versiones para no andar como este meme:
+![](https://i.redd.it/05b6u19pseoz.png)
+
+Es importante que si nunca has usado Github, o algún otro sistema de control de versiones, [leas esta guía](https://guides.github.com/activities/hello-world/) para que no te agarren en curva y tengas de menos los fundamentos de estas plataformas.
+
+### Qué necesito para la clase?
+
+1. Document - MongoDB - https://www.mongodb.com/try/download/community
+2. Graph - Neo4J - https://neo4j.com/download/
+3. Wide column - MonetDB - https://www.monetdb.org/Downloads
+3. Key-value store - Apache Ignite - https://ignite.apache.org/
+4. DAta lake - Spark - https://spark.apache.org/
+5. Cuenta de AWS - https://aws.amazon.com/free/?sc_icampaign=acq_aws_takeover-1st-visit-free-tier&sc_ichannel=ha&sc_icontent=awssm-evergreen-1st-visit&sc_iplace=hero&trk=ha_awssm-evergreen-1st-visit&all-free-tier.sort-by=item.additionalFields.SortRank&all-free-tier.sort-order=asc&awsf.Free%20Tier%20Types=*all&awsf.Free%20Tier%20Categories=*all
+
+#### Solamente eso?
+
+Dependiendo de como vengan de experiencia y las materias previas que hayan cursado, necesitarán:
+
+1. VSCode - https://code.visualstudio.com/download
+2. Python (mediante miniconda) - https://docs.conda.io/en/latest/miniconda.html
+3. .NET SDK - https://dotnet.microsoft.com/download
+
+Ya veremos qué necesitaremos de todos estos.
+
+### NEWS & UPDATES
+
+Check back here often.
+
+#### 2021-08-04
+Bienvenidos!
+
+### Temario + Fechas = Plan de Materia
+A continuación el temario, fecha por fecha:
+
+| Num de sesión | Fecha de sesión | Temas |
+|---------------|-----------------|-------|
+| 0             | 2021/01/13      | 
