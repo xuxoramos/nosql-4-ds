@@ -93,5 +93,4 @@ A continuación el temario, fecha por fecha:
 |---------------|-----------------|-------|
 | 1             | 2021/08/04      | Intro / 2-speed IT ([apunte](https://drive.google.com/file/d/1yS4RXly7kGCKBjklfX11dwK-fhvMpm-s/view?usp=sharing)/[video](https://drive.google.com/file/d/1ieoOT-bMrxuAFETPJRegX0bBlerJRWXd/view?usp=sharing))
 | 2             | 2021/08/09      | 2-speed IT / Data Warehouse VS Data Lake ([apunte](https://drive.google.com/file/d/1yS4RXly7kGCKBjklfX11dwK-fhvMpm-s/view?usp=sharing)/[video](https://drive.google.com/file/d/1l6x1-kBVJ2J7OhMVgSCPrmdQn7ze_oQ_/view?usp=sharing))
-
-https://drive.google.com/file/d/1l6x1-kBVJ2J7OhMVgSCPrmdQn7ze_oQ_/view?usp=sharing
+| 3             | 2021/08/11      | BDs analíticas VS BDs transaccionales / BDs columnares VS BDs relacionales ([apunte](https://drive.google.com/file/d/1yS4RXly7kGCKBjklfX11dwK-fhvMpm-s/view?usp=sharing)/[video](https://drive.google.com/file/d/1uurA9_b-LqRqZOrSPzbCWqDMDmsxYhjq/view?usp=sharing))
