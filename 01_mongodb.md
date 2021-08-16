@@ -51,7 +51,7 @@ Todo esto termina la instalación de mugres que vamos a necesitar para interactu
 
 ## Uso de MongoDB
 
-### Creando una DB
+### Creando una DB e insertando documentos
 
 Vamos a usar `mongosh` para tener una línea de comandos. Entraremos el comando:
 
@@ -92,7 +92,65 @@ El paréntesis que abre `(` indica el inicio de los argumentos de la función `i
 
 La llave que abre `{` indica que viene un documento JSON.
 
-2. Inicia el documento con atributos `name` (string), `population` (number), `lastCensus` (Date), `famousFor` (array de strings), y `mayor` de tipo DOCUMENTO, que es otro objeto anidado con sus propios atributos.  
+2. Inicia el documento con atributos `name` (string), `population` (number), `lastCensus` (Date), `famousFor` (array de strings), y `mayor` de tipo DOCUMENTO, que es otro objeto anidado con sus propios atributos, ⚠️TODO SEPARADO POR COMAS:warning:.
+
+Qué pasa si se nos para una coma❓
+
+Un error como estos:
+
+![image](https://user-images.githubusercontent.com/1316464/129617183-b60c21f4-b3d2-4120-be57-c75d745daaf6.png)
+
+Fíjense igual que `mongosh` nos ayuda a identar la función principal, y los documentos anidados.
+
+3. Al cerrar llaves y paréntesis, debemos tener esta salida:
+
+![image](https://user-images.githubusercontent.com/1316464/129617366-03acc5a7-cdc1-4e57-866f-f1d037a9eeb7.png)
+
+Qué pasa si volvemos a ejecutar la misma inserción❓
+
+![image](https://user-images.githubusercontent.com/1316464/129617366-03acc5a7-cdc1-4e57-866f-f1d037a9eeb7.png)
+
+### Inertando múltiples documentos
+
+Intentemos ahora:
+
+```javascript {.line-numbers}
+db.towns.insertMany([
+   {name: "New York", 
+   population: 22200000, 
+   lastCensus: ISODate("2016-07-01"), 
+   famousFor: ["the MOMA", "food", "The Met"], 
+   mayor: { 
+      name: "Bill de Blasio", 
+      party: "D"
+      }
+   },
+   {name: "London", 
+   population: 15000000, 
+   lastCensus: ISODate("2018-01-01"), 
+   famousFor: ["The British Museum", "Fish & Chips", "The Tate Modern"], 
+   mayor: { 
+      name: "Sadiq Khan", 
+      party: "L"
+      }
+   },
+   {name: "Mexicalpan de las Tunas", 
+   population: 20000000, 
+   lastCensus: ISODate("2019-01-01"), 
+   famousFor: ["Museo Nacional de Antropología", "Tacos de Canasta", "Tlacoyos"], 
+   mayor: { 
+      name: "Claudia Sheinbaum", 
+      party: "MORENA"
+      }
+   }
+])
+```
+Debemos tener esta salida:
+
+![image](https://user-images.githubusercontent.com/1316464/129618720-de6017ca-4bde-4919-81e6-b5807567be2e.png)
+
+Examinémosla con Robo 3T:
+
 
 
 
