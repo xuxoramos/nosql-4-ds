@@ -58,6 +58,7 @@ Vamos a usar `mongosh` para tener una línea de comandos. Entraremos el comando:
 ```javascript 
 use book
 ```
+
 De acuerdo a la documentación, este comando "crea una base de datos", pero esto no es enteramente cierto. Esto solo aparta espacio en el MongoDB para comenzar a agregar documentos (ojo: no son registros). No tenemos una BD formalmente creada hasta no agregar documentos a esa BD. Vamos a agregar un documento:
 
 ```javascript 
