@@ -20,7 +20,6 @@ Los documentos JSON, como ya vimos, tienen la sig forma:
 
 ![image](https://user-images.githubusercontent.com/1316464/129585366-ec4adfc9-d6e2-4a21-bc82-1423af855a8c.png)
 
-![image](https://user-images.githubusercontent.com/1316464/129505957-740593d2-85aa-4e00-9c34-ad7710d913be.png)
 
 5. Vamos ahora a instalar el comando `mongosh`, que es el shell de MongoDB y que será una 2a forma de interactuar con esa DB. [Aquí los pasos para la instalación](https://docs.mongodb.com/mongodb-shell/install/#std-label-mdb-shell-install)
 
