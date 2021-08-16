@@ -55,11 +55,23 @@ Todo esto termina la instalación de mugres que vamos a necesitar para interactu
 
 Vamos a usar `mongosh` para tener una línea de comandos. Entraremos el comando:
 
-```javascript
+```javascript {.line-numbers}
 use book
 ```
 De acuerdo a la documentación, este comando "crea una base de datos", pero esto no es enteramente cierto. Esto solo aparta espacio en el MongoDB para comenzar a agregar documentos (ojo: no son registros). No tenemos una BD formalmente creada hasta no agregar documentos a esa BD. Vamos a agregar un documento:
 
+```javascript {.line-numbers}
+db.towns.insertOne({
+   name: "New York", 
+   population: 22200000, 
+   lastCensus: ISODate("2016-07-01"), 
+   famousFor: ["the MOMA", "food", "The Met"], 
+   mayor: { 
+      name: "Bill de Blasio", 
+      party: "D"
+   }
+})
+```
 
-
+Analicemos línea por línea 
 
