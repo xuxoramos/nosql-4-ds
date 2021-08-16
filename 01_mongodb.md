@@ -2,7 +2,9 @@
 
 Las Document Databases guardan documentos JSON.
 
-Los documentos JSON 
+Los documentos JSON, como ya vimos, tienen la sig forma:
+
+![image](https://user-images.githubusercontent.com/1316464/129584321-118512a6-0d63-4fe4-b508-991e1597fa7b.png)
 
 ## Descarga e instalación
 
@@ -14,11 +16,9 @@ Los documentos JSON
 
 ![image](https://user-images.githubusercontent.com/1316464/129503596-c00274a9-75ad-4dd1-b523-6e75bccff0b5.png)
 
-3. La instalación por default va a instalar y abrir MongoDB Compass, que es como el DBeaver de MongoDB. Habrá que capturar uno por uno los parámetros de conexión:
+3. La instalación por default va a instalar y abrir MongoDB Compass, que es como el DBeaver de MongoDB. No lo pelen, vamos a instalar un cliente más pro: el RoboMongo. [Descárguenlo de aquí](https://robomongo.org/). Les va a pedir datos inútiles. Capturen lo que sea para que les permita bajarlo:
 
-![image](https://user-images.githubusercontent.com/1316464/129505781-973886e0-cd43-4732-be15-38e3a70ecc37.png)
-
-4. En la pantalla siguiente vamos a simplemente dar click en "Connect". El resto de los params son por default.
+![image](https://user-images.githubusercontent.com/1316464/129585366-ec4adfc9-d6e2-4a21-bc82-1423af855a8c.png)
 
 ![image](https://user-images.githubusercontent.com/1316464/129505957-740593d2-85aa-4e00-9c34-ad7710d913be.png)
 
