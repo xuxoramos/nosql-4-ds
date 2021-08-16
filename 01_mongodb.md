@@ -80,5 +80,19 @@ Analicemos línea por línea:
 
 Esto significa que estamos creando una colección de documentos llamada `towns`.
 
+Igual, pongan atención a uno de los features más relevantes de las Document Databases: :**¡No necesitamos predefinir estructura/esquema para crear colecciones ni documentos!** 🤓
+
+Por fin! Libres de la tiranía de tener que definir, pensar, diseñar antes de tirar código!
+
+![image](https://user-images.githubusercontent.com/1316464/129604124-35f006ca-592d-4639-861e-9499fab807b1.png)
+
+El `insertOne` sirve para insertar solo 1 documento en la colección.
+
+El paréntesis que abre `(` indica el inicio de los argumentos de la función `insertOne`.
+
+La llave que abre `{` indica que viene un documento JSON.
+
+2. Inicia el documento con atributos `name` (string), `population` (number), `lastCensus` (Date), `famousFor` (array de strings), y `mayor` de tipo DOCUMENTO, que es otro objeto anidado con sus propios atributos.  
+
 
 
