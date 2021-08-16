@@ -73,5 +73,12 @@ db.towns.insertOne({
 })
 ```
 
-Analicemos línea por línea 
+Analicemos línea por línea:
+1. **db** es el objeto con el que `mongosh` se refiere a la BD que estamos usando, en este caso `book`. ⚠️**IMPORTANTE**:warning: - después del elemento db, tenemos el elemento **towns**, esto es una **COLECCIÓN**. Recuerden la jerarquía de los JSON:
+
+![image](https://user-images.githubusercontent.com/1316464/129602030-b2d9e0e3-43e3-440c-97c4-ecbdc6008d4c.png)
+
+Esto significa que estamos creando una colección de documentos llamada `towns`.
+
+
 
