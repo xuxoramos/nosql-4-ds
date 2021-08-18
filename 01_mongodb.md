@@ -59,7 +59,21 @@ Vamos a usar `mongosh` para tener una línea de comandos. Entraremos el comando:
 use book
 ```
 
-De acuerdo a la documentación, este comando "crea una base de datos", pero esto no es enteramente cierto. Esto solo aparta espacio en el MongoDB para comenzar a agregar documentos (ojo: no son registros). No tenemos una BD formalmente creada hasta no agregar documentos a esa BD. Vamos a agregar un documento:
+De acuerdo a la documentación, este comando "crea una base de datos", pero esto no es enteramente cierto. Esto solo aparta espacio en el MongoDB para comenzar a agregar documentos (ojo: no son registros). No tenemos una BD formalmente creada hasta no agregar documentos a esa BD.
+
+Para saber qué BD estamos usando:
+
+```javascript
+db
+```
+
+Y para ver todas las DBs que tenemos disponibles:
+
+```javascript
+show dbs
+```
+
+Vamos ahora a agregar un documento:
 
 ```javascript 
 db.towns.insertOne({
@@ -109,7 +123,18 @@ Fíjense igual que `mongosh` nos ayuda a identar la función principal, y los do
 
 Qué pasa si volvemos a ejecutar la misma inserción❓
 
-![image](https://user-images.githubusercontent.com/1316464/129617366-03acc5a7-cdc1-4e57-866f-f1d037a9eeb7.png)
+Las Document Databases no tienen "llaves" como las BDs relacionales, entonces **al ejecutar una inserción 2 veces, para MongoDB son objetos enteramente diferentes**, y de hecho cada inserción se forma un ID autoasignado diferente (similar a las secuencias de las BDs relacionales). Adicionalmente, MongoDB crea un atributo llamado `_id` EN AUTOMÁGICO, sin preguntarnos, que es donde se guarda esta llave autogenerada. Este atributo se encuentra en TODOS los documentos de 1er nivel (es decir, no está en los documentos _anidados_).
+
+Estos IDs autogenerados son de 12 bytes y tienen la siguiente estructura:
+
+![image](https://user-images.githubusercontent.com/1316464/129835091-5da5e77a-55ae-4f2c-b4b5-cb54107f0458.png)
+
+- **`time`**: timestamp del sistema operativo
+- **`machine id`**: ID de la máquina
+- **`process id`**: ID del proceso (un concepto de Unix)
+- **`increment`**: contador autoincrementado de 3 bytes
+
+Este tipo de IDs autogenerados es que podemos tener varias instancias de MongoDB corriendo en la misma máquina y no tendremos riesgos de colisiones. YAY!
 
 ### Inertando múltiples documentos
 
@@ -151,8 +176,108 @@ Debemos tener esta salida:
 
 ![image](https://user-images.githubusercontent.com/1316464/129618720-de6017ca-4bde-4919-81e6-b5807567be2e.png)
 
-Examinémosla con Robo 3T:
+## SQL es a BDs relacionales como JavaScript es a MongoDB
 
+El lenguaje base de MongoDB es JavaScript. JavaScript tiene mala fama entre la comunidad de ingeniería de software, pero es ampliamente gustado por la comunidad de desarrollo web. Principalmente por su inconsistencia...
 
+![image](https://user-images.githubusercontent.com/1316464/129836528-7d962188-c6ba-4733-90d9-cf18c97394a0.png)
 
+...por su abundancia de frameworks inútiles...
 
+![image](https://user-images.githubusercontent.com/1316464/129836673-14b6ec20-2775-4c5c-8348-33f7f445c765.png)
+
+...aunque es el primero que nos ofrece productividad expedita.
+
+Usaremos JavaScript para todo con MongoDB, hasta pedor ayuda:
+
+```javascript
+db.help()
+db.towns.help()
+```
+
+Igual podemos identificar el tipo de un objeto, justo como en JavaScript:
+
+```javascript
+typeof db
+typeof db.towns
+typeof db.towns.insertOne
+```
+
+Examinemos el código fuente de la función `insertOne`:
+
+```javascript
+db.towns.insertOne //sin paréntesis
+> [Function: insertOne] AsyncFunction {
+  apiVersions: [ 1, Infinity ],
+  serverVersions: [ '3.2.0', '999.999.999' ],
+  returnsPromise: true,
+  topologies: [ 0, 2, 3, 1 ],
+  returnType: { type: 'unknown', attributes: {} },
+  deprecated: false,
+  platforms: [ 0, 1, 2 ],
+  isDirectShellCommand: false,
+  shellCommandCompleter: undefined,
+  help: [Function (anonymous)] Help
+}
+```
+
+Esto sería como ver qué hay dentro del comando `INSERT` en una BD relacional, cosa que no podemos hacer!
+
+Vamos a crear nuestra propia función para insertar ciudades en la colección `db.towns`:
+
+```javascript
+function insertCity(name, population, lastCensus, famousFor, mayorInfo) {
+   db.towns.insertOne({
+      name: name,
+      population: population,
+      lastCensus: ISODate(lastCensus),
+      famousFor: famousFor,
+      mayor : mayorInfo
+   });
+}
+```
+
+Esto es como un `create function insertcity (string, numeric, date, string, string) AS 'insert into table city values ($1,$2,$3,$4,$5)'` para PostgreSQL.
+
+Podemos llamar esta función ahora sin el `db.towns.insertOne`. No es mucho ahorro, pero con _user-defined functions_ podemos hacer cosas más elaboradas:
+
+```javascript
+insertCity("Punxsutawney", 6200, '2016-01-31', ["Punxsutawney Phil"], { name : "Richard Alexander" })
+insertCity("Portland", 582000, '2016-09-20', ["beer", "food", "Portlandia"], { name : "Ted Wheeler", party : "D" })
+```
+
+## Leyendo datos: SELECT en SQL, find() en MongoDB
+
+Para ensayar las funciones de consulta, debemos importar algunas BDs de prueba.
+
+1. Vamos a clonar este repo en nuestro directorio preferido. Opcionalmente podemos bajar el archivo ZIP de ese URL
+
+```sh
+git clone https://github.com/neelabalan/mongodb-sample-dataset
+```
+
+2. Vamos a necesitar el comando `mongoimport`, que no se instala por default. Lo descargaremos [de aquí](https://www.mongodb.com/try/download/database-tools?tck=docs_databasetools).
+
+3. En Windows muy probablemente el comando se instaló en `C:\Program Files\MongoDB\Tools\100\bin`, mientras que el Linux y en Mac ya está instalado.
+
+4. Vamos a utilizar el comando import de esa localidad para insertar uno de los JSONs del repo que descargamos:
+
+```sh
+mongoimport --db trainingsessions --drop --file C:\Users\ramos\mongodb-sample-dataset\sample_training\tweets.json
+```
+
+5. Validamos que haya sido insertada esa colección correctamente:
+
+```javascript
+use trainingsessions
+db.getCollectionNames()
+db.tweets.find()
+```
+
+Ahora si vamos a leer estos datos. Para leer datos en MongoDB la función base es `find()`:
+
+- `db.towns.find()` trae todos los _documentos_ de la _colección_ `towns`.
+- `db.towns.find({ "_id" : ObjectId("611ce2e73afe7ee944574e51") })` va a traer el documento con ID `611ce2e73afe7ee944574e51`. Recordemos que los ID son autogenerados y el atributo `_id` es creado automáticamente
+- `db.towns.find( {"_id" : ObjectId("611ce2e73afe7ee944574e51")}, {population : 1} )` va a traer el documento con ID `611ce2e73afe7ee944574e51` pero solo su atributo `population` similar a un `select population from towns where id = 611ce2e73afe7ee944574e51`
+- `db.towns.find( {"_id" : ObjectId("611ce2e73afe7ee944574e51")}, {population : 0} )` va a traer el mismo documento, pero ahora con todos sus atributos **EXCEPTO** `population`
+- `db.towns.find( {population : 6200})` va a traer el documento con `population` igual a 6200
