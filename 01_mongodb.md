@@ -331,7 +331,114 @@ db.tweets.find({"entities.hashtags.text":/^polit/})
 En este caso, el caracter `^` indica que el match debe darse desde el principio, porque si no lo ponemos, vamos a hacer match con este tuit que anda por ahí:
 
 ```json
-{"_id":{"$oid":"5c8eccb1caa187d17ca64de8"},"text":"Balmoral, booze and the rest of Blair's book digested  http://bit.ly/9KwcSP  #Blair #AJourney #UKpolitics #Labour #Bush","in_reply_to_status_id":null,"retweet_count":null,"contributors":null,"created_at":"Thu Sep 02 18:34:32 +0000 2010","geo":null,"source":"<a href=\"http://www.tweetdeck.com\" rel=\"nofollow\">TweetDeck</a>","coordinates":null,"in_reply_to_screen_name":null,"truncated":false,"entities":{"user_mentions":[],"urls":[{"indices":[55,75],"url":"http://bit.ly/9KwcSP","expanded_url":null}],"hashtags":[{"text":"Blair","indices":[77,83]},{"text":"AJourney","indices":[84,93]},{"text":"UKpolitics","indices":[94,105]},{"text":"Labour","indices":[106,113]},{"text":"Bush","indices":[114,119]}]},"retweeted":false,"place":null,"user":{"friends_count":556,"profile_sidebar_fill_color":"DDEEF6","location":"","verified":false,"follow_request_sent":null,"favourites_count":0,"profile_sidebar_border_color":"C0DEED","profile_image_url":"http://a2.twimg.com/profile_images/1026348478/US-UK-blend_normal.png","geo_enabled":false,"created_at":"Sat Jun 26 14:58:34 +0000 2010","description":"Promoting and discussing the special relatonship between the United States and the United Kingdom.","time_zone":null,"url":null,"screen_name":"USUKrelations","notifications":null,"profile_background_color":"C0DEED","listed_count":4,"lang":"en","profile_background_image_url":"http://a3.twimg.com/profile_background_images/116769793/specialrelations.jpg","statuses_count":647,"following":null,"profile_text_color":"333333","protected":false,"show_all_inline_media":false,"profile_background_tile":true,"name":"Special Relationship","contributors_enabled":false,"profile_link_color":"0084B4","followers_count":264,"id":159870717,"profile_use_background_image":true,"utc_offset":null},"favorited":false,"in_reply_to_user_id":null,"id":{"$numberLong":"22820800600"}}
+{
+   "_id":{
+      "$oid":"5c8eccb1caa187d17ca64de8"
+   },
+   "text":"Balmoral, booze and the rest of Blair's book digested  http://bit.ly/9KwcSP  #Blair #AJourney #UKpolitics #Labour #Bush",
+   "in_reply_to_status_id":null,
+   "retweet_count":null,
+   "contributors":null,
+   "created_at":"Thu Sep 02 18:34:32 +0000 2010",
+   "geo":null,
+   "source":"<a href=\"http://www.tweetdeck.com\" rel=\"nofollow\">TweetDeck</a>",
+   "coordinates":null,
+   "in_reply_to_screen_name":null,
+   "truncated":false,
+   "entities":{
+      "user_mentions":[
+         
+      ],
+      "urls":[
+         {
+            "indices":[
+               55,
+               75
+            ],
+            "url":"http://bit.ly/9KwcSP",
+            "expanded_url":null
+         }
+      ],
+      "hashtags":[
+         {
+            "text":"Blair",
+            "indices":[
+               77,
+               83
+            ]
+         },
+         {
+            "text":"AJourney",
+            "indices":[
+               84,
+               93
+            ]
+         },
+         {
+            "text":"UKpolitics",
+            "indices":[
+               94,
+               105
+            ]
+         },
+         {
+            "text":"Labour",
+            "indices":[
+               106,
+               113
+            ]
+         },
+         {
+            "text":"Bush",
+            "indices":[
+               114,
+               119
+            ]
+         }
+      ]
+   },
+   "retweeted":false,
+   "place":null,
+   "user":{
+      "friends_count":556,
+      "profile_sidebar_fill_color":"DDEEF6",
+      "location":"",
+      "verified":false,
+      "follow_request_sent":null,
+      "favourites_count":0,
+      "profile_sidebar_border_color":"C0DEED",
+      "profile_image_url":"http://a2.twimg.com/profile_images/1026348478/US-UK-blend_normal.png",
+      "geo_enabled":false,
+      "created_at":"Sat Jun 26 14:58:34 +0000 2010",
+      "description":"Promoting and discussing the special relatonship between the United States and the United Kingdom.",
+      "time_zone":null,
+      "url":null,
+      "screen_name":"USUKrelations",
+      "notifications":null,
+      "profile_background_color":"C0DEED",
+      "listed_count":4,
+      "lang":"en",
+      "profile_background_image_url":"http://a3.twimg.com/profile_background_images/116769793/specialrelations.jpg",
+      "statuses_count":647,
+      "following":null,
+      "profile_text_color":"333333",
+      "protected":false,
+      "show_all_inline_media":false,
+      "profile_background_tile":true,
+      "name":"Special Relationship",
+      "contributors_enabled":false,
+      "profile_link_color":"0084B4",
+      "followers_count":264,
+      "id":159870717,
+      "profile_use_background_image":true,
+      "utc_offset":null
+   },
+   "favorited":false,
+   "in_reply_to_user_id":null,
+   "id":{
+      "$numberLong":"22820800600"
+   }
+}
 ```
 
 En esta materia no veremos a fondo expresiones regulares, pero aquí 2 ligas útiles:
