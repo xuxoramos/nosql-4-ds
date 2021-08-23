@@ -280,13 +280,15 @@ Ahora si vamos a leer estos datos. Para leer datos en MongoDB la función base e
 - `db.towns.find({ "_id" : ObjectId("611ce2e73afe7ee944574e51") })` va a traer el documento con ID `611ce2e73afe7ee944574e51`. Recordemos que los ID son autogenerados y el atributo `_id` es creado automáticamente
 - `db.towns.find( {"_id" : ObjectId("611ce2e73afe7ee944574e51")}, {population : 1} )` va a traer el documento con ID `611ce2e73afe7ee944574e51` pero solo su atributo `population` similar a un `select population from towns where id = 611ce2e73afe7ee944574e51`
 - `db.towns.find( {"_id" : ObjectId("611ce2e73afe7ee944574e51")}, {population : 0} )` va a traer el mismo documento, pero ahora con todos sus atributos **EXCEPTO** `population`
-- `db.towns.find( {population : 6200})` va a traer el documento con `population` igual a 6200
-- `db.towns.find( {name : "London"})` va a traer el documento con `name` igual a "London"
+- `db.towns.find( {population : 6200})` va a traer el documento con `population` igual a _6200_
+- `db.towns.find( {name : "London"})` va a traer el documento con `name` igual a _"London"_
 
 En general, podemos decir que la función `find()` frecuentemente es llamada con 2 _documentos_ como argumento:
 
 - 1 para filtrado, similar al `WHERE` de SQL. Esto se le llama **FILTER** en bases de datos de documentos.
 - 1 para _selección_ de atributos, similar al `SELECT` de SQL. Esto se le llama **PROJECT** en bases de datos de documentos.
+
+
 
 Vamos a establecer las equivalencias entre SQL y MongoDB con la siguiente tabla y la colección `tweets` que acabamos de importar. Para ejecutar los ejemplos primero debemos entrar `use trainingsessions`.
 
@@ -295,9 +297,9 @@ Vamos a establecer las equivalencias entre SQL y MongoDB con la siguiente tabla 
 | Equality               | {<key>:{$eg;<value>}}                         | db.tweets.find({"source":"web"}).pretty()               | where source = 'web'                                                       |
 | Less Than              | {<key>:{$lt:<value>}}                         | db.tweets.find({"user.friends_count":{$lt:50}}).pretty()                     | where user.friends_count < 50 (aquí estamos "viajando" del documento principal al documento anidado `user` y de ahí a su atributo `friends_count`                                                                   |
 | Less Than Equals       | {<key>:{$lte:<value>}}                        | db.tweets.find({"user.friends_count":{$lte:50}}).pretty()                    | where user.friends_count <= 50                                                             |
-| Greater Than           | {<key>:{$gt:<value>}}                         | db.tweets.find({"user.friends_countes":{$gt:50}}).pretty()                     | where user.friends_count > 50                                                                   |
-| Greater Than Equals    | {<key>:{$gte:<value>}}                        | db.tweets.find({"user.friends_count":{$gte:50}}).pretty()                    | where user.friends_count <= 50                                                                  |
+| Greater Than           | {<key>:{$gt:<value>}}                         | db.tweets.find({"user.friends_count":{$gt:50}}).pretty()                     | where user.friends_count > 50                                                                   |
+| Greater Than Equals    | {<key>:{$gte:<value>}}                        | db.tweets.find({"user.friends_count":{$gte:50}}).pretty()                    | where user.friends_count >= 50                                                                  |
 | Not Equals             | {<key>:{$ne:<value>}}                         | db.tweets.find({"user.friends_count":{$ne:50}}).pretty()                     | where user.friends_count != 50                                                                  |
-| Values in an array     | {<key>:{$in:[<value1>, <value2>,……<valueN>]}} | db.tweets.find({"name":{$in:["Raj", "Ram", "Raghu"]}}).pretty() | Where name matches any of the value in :["Raj", "Ram", "Raghu"]                    |
+| Values in an array     | {<key>:{$in:[<value1>, <value2>,……<valueN>]}} | db.tweets.find({"entities.user_mentions":{$in:["Raj", "Ram", "Raghu"]}}).pretty() | Where name matches any of the value in :["Raj", "Ram", "Raghu"]                    |
 | Values not in an array | {<key>:{$nin:<value>}}                        | db.tweets.find({"name":{$nin:["Ramu", "Raghav"]}}).pretty()     | Where name values is not in the array :["Ramu", "Raghav"] or, doesn’t exist at all |
 
