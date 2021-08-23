@@ -288,18 +288,116 @@ En general, podemos decir que la función `find()` frecuentemente es llamada con
 - 1 para filtrado, similar al `WHERE` de SQL. Esto se le llama **FILTER** en bases de datos de documentos.
 - 1 para _selección_ de atributos, similar al `SELECT` de SQL. Esto se le llama **PROJECT** en bases de datos de documentos.
 
+Vamos a establecer algunas equivalencias entre SQL y MongoDB con la siguiente tabla y la colección `tweets` que acabamos de importar. Para ejecutar los ejemplos primero debemos entrar `use trainingsessions`.
 
-
-Vamos a establecer las equivalencias entre SQL y MongoDB con la siguiente tabla y la colección `tweets` que acabamos de importar. Para ejecutar los ejemplos primero debemos entrar `use trainingsessions`.
-
-| Operation              | Syntax                    | Example                                                        | RDBMS Equivalent                                                                   |
+| Operación              | Sintaxis                    | E.g.                                                    | Equivalencia RDBMS                                                                    |
 |------------------------|---------------------------|----------------------------------------------------------------|------------------------------------------------------------------------------------|
-| Equality               | {"key":{$eg;[value]}}     | `db.tweets.find({"source":"web"}).pretty()`                | where source = 'web'                                                       |
-| Less Than              | {"key":{$lt:[value]}}     | `db.tweets.find({"user.friends_count":{$lt:50}}).pretty()` | where user.friends_count < 50 (aquí estamos "viajando" del documento principal al documento anidado `user` y de ahí a su atributo `friends_count`                                                                   |
-| Less Than Equals       | {"key":{$lte:[value]}}    | `db.tweets.find({"user.friends_count":{$lte:50}}).pretty()` | where user.friends_count <= 50                                                             |
-| Greater Than           | {"key":{$gt:[value]}}     | `db.tweets.find({"user.friends_count":{$gt:50}}).pretty()`  | where user.friends_count > 50                                                                   |
-| Greater Than Equals    | {"key":{$gte:[value]}}    | `db.tweets.find({"user.friends_count":{$gte:50}}).pretty()` | where user.friends_count >= 50                                                                  |
-| Not Equals             | {"key":{$ne:[value]}}     | `db.tweets.find({"user.friends_count":{$ne:50}}).pretty()`  | where user.friends_count != 50                                                                  |
-| Values in an array     | {"key":{$in:[value1,value2...valueN]}} | `db.tweets.find({"entities.urls.indices":{$in:[54,74]}}).pretty()` | where entities.urls.indices **in** (54,74)                    |
-| Values not in an array | {"key":{$nin:[value]}}                 | `db.tweets.find({"name":{$nin:["Ramu", "Raghav"]}}).pretty()`     | where entities.urls.indices **not in** (54,74) |
+| Igual a X              | `{"key":[value]}`     | `db.tweets.find({"source":"web"}).pretty()`                | where source = 'web'                                                       |
+| AND en el WHERE              | `{"key1":[value1],"key2":[value2]}`     | `db.tweets.find({"source":"web","favorited":false})`                | where source = 'web' **and** favorited = false                                                       |
+| Menor que              | `{"key":{$lt:[value]}}`     | `db.tweets.find({"user.friends_count":{$lt:50}})` | where user.friends_count < 50 (aquí estamos "viajando" del documento principal al documento anidado `user` y de ahí a su atributo `friends_count`                                                                   |
+| Menor o igual a       | `{"key":{$lte:[value]}}`    | `db.tweets.find({"user.friends_count":{$lte:50}})` | where user.friends_count <= 50                                                             |
+| Mayor que           | `{"key":{$gt:[value]}}`     | `db.tweets.find({"user.friends_count":{$gt:50}})`  | where user.friends_count > 50                                                                   |
+| Mayor o igual a    | `{"key":{$gte:[value]}}`    | `db.tweets.find({"user.friends_count":{$gte:50}})` | where user.friends_count >= 50                                                                  |
+| Diferente a             | `{"key":{$ne:[value]}}`     | `db.tweets.find({"user.friends_count":{$ne:50}})`  | where user.friends_count != 50                                                                  |
+| Valores presentes en array     | `{"key":{$in:[value1,value2...valueN]}}` | `db.tweets.find({"entities.urls.indices":{$in:[54,74]}})` | where entities.urls.indices **in** (54,74)                    |
+| Valores ausentes en array | `{"key":{$nin:[value]}}`                 | `db.tweets.find({"entities.urls.indices":{$nin:[54,74]}})`     | where entities.urls.indices **not in** (54,74) |
 
+La función `pretty()` cambia de este output:
+
+
+
+### Uso de expresiones regulares en `find()`
+
+Para lograr emular el `LIKE` de SQL en MongoDB, debemos usar forzosamente expresiones regulares. Por ejemplo:
+
+```javascript
+db.tweets.find({"user.url":/^http(s|):\/\/(www\.|)facebook\.com/})
+```
+
+Esto es similar a la sentencia SQL:
+
+```sql
+...where user.url like 'http?://facebook.com%'
+```
+
+Esto va a encontrar todos los tuits cuyo URL del perfil de usuario sean ligas a perfiles de FB.
+
+Para encontrar todos los tuits con el hashtag que comience on `#polit`:
+
+```javascript
+db.tweets.find({"entities.hashtags.text":/^polit/})
+```
+
+En este caso, el caracter `^` indica que el match debe darse desde el principio, porque si no lo ponemos, vamos a hacer match con este tuit que anda por ahí:
+
+```json
+{"_id":{"$oid":"5c8eccb1caa187d17ca64de8"},"text":"Balmoral, booze and the rest of Blair's book digested  http://bit.ly/9KwcSP  #Blair #AJourney #UKpolitics #Labour #Bush","in_reply_to_status_id":null,"retweet_count":null,"contributors":null,"created_at":"Thu Sep 02 18:34:32 +0000 2010","geo":null,"source":"<a href=\"http://www.tweetdeck.com\" rel=\"nofollow\">TweetDeck</a>","coordinates":null,"in_reply_to_screen_name":null,"truncated":false,"entities":{"user_mentions":[],"urls":[{"indices":[55,75],"url":"http://bit.ly/9KwcSP","expanded_url":null}],"hashtags":[{"text":"Blair","indices":[77,83]},{"text":"AJourney","indices":[84,93]},{"text":"UKpolitics","indices":[94,105]},{"text":"Labour","indices":[106,113]},{"text":"Bush","indices":[114,119]}]},"retweeted":false,"place":null,"user":{"friends_count":556,"profile_sidebar_fill_color":"DDEEF6","location":"","verified":false,"follow_request_sent":null,"favourites_count":0,"profile_sidebar_border_color":"C0DEED","profile_image_url":"http://a2.twimg.com/profile_images/1026348478/US-UK-blend_normal.png","geo_enabled":false,"created_at":"Sat Jun 26 14:58:34 +0000 2010","description":"Promoting and discussing the special relatonship between the United States and the United Kingdom.","time_zone":null,"url":null,"screen_name":"USUKrelations","notifications":null,"profile_background_color":"C0DEED","listed_count":4,"lang":"en","profile_background_image_url":"http://a3.twimg.com/profile_background_images/116769793/specialrelations.jpg","statuses_count":647,"following":null,"profile_text_color":"333333","protected":false,"show_all_inline_media":false,"profile_background_tile":true,"name":"Special Relationship","contributors_enabled":false,"profile_link_color":"0084B4","followers_count":264,"id":159870717,"profile_use_background_image":true,"utc_offset":null},"favorited":false,"in_reply_to_user_id":null,"id":{"$numberLong":"22820800600"}}
+```
+
+En esta materia no veremos a fondo expresiones regulares, pero aquí 2 ligas útiles:
+
+1. https://regexone.com/ es un crash course rápido para aprender las bases de las expresiones regulares
+2. https://regexr.com/ es una plataformita para probar sus regexp contra ejemplos suyos o de terceros
+
+⚠️**IMPORTANTE:**⚠️ Las expresiones regulares que deben ir en estos queries son [Perl-compatible Regular Expressions (PCRE)](https://en.wikipedia.org/wiki/Perl_Compatible_Regular_Expressions)
+
+### Queries a arrays
+
+A diferencia de las RDBMS, las Document Databases aceptan en sus atributos arrays de valores.
+
+Recuerden que las reglas de diseño de las relacionales nos obligan a que **un atributo tenga solo 1 valor**, mientras que en las de documentos un atributo puede ser un string, un número, o un arreglo de cualquiera de ambos.
+
+Este query va a regresar el documento que tenga **ÚNICA Y EXACTA Y ORDENADAMENTE** los elementos **54 y 74**.
+
+```javascript
+db.tweets.find({"entities.urls.indices":[54,74]})
+```
+Osea, si hay un elemento que tiene el orden **74 y 54**, no no lo va a encontrar.
+
+Para buscarlos a todos, **sin importar orden**, usamos el operador `$all`:
+
+```javascript
+db.tweets.find({"entities.urls.indices":{$all:[54,74]}})
+```
+
+Para buscar todos los documentos que **AL MENOS** tengan uno de los elementos:
+
+```javascript
+db.tweets.find({"entities.urls.indices":54})
+```
+
+O usar el operador `$in` que vimos arriba.
+
+Para buscar un rango en un array numérico, en este caso, entre 50 y 90, inclusive:
+
+```javascript
+db.tweets.find({"entities.urls.indices":{$lte:50, $gte:90}})
+```
+
+Y para buscar documentos cuyo N-avo elemento sea igual a X:
+
+```javascript
+db.tweets.find({"entities.urls.indices.1":59})
+```
+
+Recordemos  que los arrays en MongoDB **están indexados desde 0 y no desde 1**.
+
+Para buscar un documento por el tamaño de uno de sus atributos de tipo array:
+
+```javascript
+db.tweets.find({"entities.hashtags":{$size:7}})
+```
+
+### Queries a documentos y objetos anidados
+
+Para los siguientes ejemplos vamos a insertar estos documentos con la función `insertMany()`:
+
+```json
+[
+   { item: "journal", instock: [ { warehouse: "A", qty: 5 }, { warehouse: "C", qty: 15 } ] },
+   { item: "notebook", instock: [ { warehouse: "C", qty: 5 } ] },
+   { item: "paper", instock: [ { warehouse: "A", qty: 60 }, { warehouse: "B", qty: 15 } ] },
+   { item: "planner", instock: [ { warehouse: "A", qty: 40 }, { warehouse: "B", qty: 5 } ] },
+   { item: "postcard", instock: [ { warehouse: "B", qty: 15 }, { warehouse: "C", qty: 35 } ] }
+]
+```
