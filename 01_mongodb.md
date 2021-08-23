@@ -575,9 +575,31 @@ El siguiente query va a regresar todos los artículos que estén en en warehouse
 db.inventory.find( { "instock": { warehouse: "A", qty: 5 } } )
 ```
 
+El valor de retorno es:
+
+```json
+[
+  {
+    _id: ObjectId("612339842cd2fe46682acd32"),
+    item: 'journal',
+    instock: [ { warehouse: 'A', qty: 5 }, { warehouse: 'C', qty: 15 } ]
+  }
+]
+```
+
+El query no nos está regresando 2 documentos, sino el documento en el array `instock` que hace match con las condiciones que le dimos.
+
 **👀OJO:👀** esta sintaxis es parecida a la búsqueda de documentos de 1er nivel (`find("key1":value1,"key2":value2`), pero como estamos buscando documentos **ANIDADOS O EN ARRAY**, entonces debemos de especificar el nombre del array `instock` antes de los params de búsqueda.
 
-El siguiente query va a regresar todos los documentos de `instock` que tengan un `qty` menor o igual a 20 
+Una gran diferencia es en el orden de los atributos que estemos buscando en el array de documentos. Por ejemplo, si ejecutamos esto:
+
+```javascript
+db.inventory.fnd( { "instock": { qty: 5, warehouse: "A" } } )
+```
+
+Va a regresar **NADA**, porque ningún documento dentro del array tiene primero el atributo `qty`.
+
+El siguiente query va a regresar todos los documentos de `instock` que tengan un `qty` menor o igual a 20, junto con los documentos que acompañen a ese que hace match:
 
 ```javascript
 db.inventory.find( { "instock.qty": { $lte: 20 } } )
@@ -585,8 +607,231 @@ db.inventory.find( { "instock.qty": { $lte: 20 } } )
 
 Este query también es similar a los que vimos para consultar documentos de 1er nivel, con la diferencia de que `instock` es un array de documentos y no un atributo o un array de elementos individuales.
 
+Si deseamos limitar la búsqueda a un índice del array, como para evitar tener un documento que no cumpla con las condiciones, podemos especificarlo así:
 
+```javascript
+db.inventory.find( { 'instock.0.qty': { $lte: 20 } } )
+```
 
+Este query nos regresará del arreglo `instock` los **PRIMEROS** documentos (índice 0) cuyo atributo `qty` sea igual o menor a 20.
+
+### El operador `$elemMatch`
+
+Hay estructuras de documentos de varios niveles y con arreglos anidados donde al lanzar queries a estos arreglos puede regresarnos documentos que no necesariamente cumplen el criterio.
+
+1. Vamos a crear otra BD llamada "store"
+2. Con una colección llamada "articles"
+3. Insertamos este array de documentos con `insertMany`
+
+```javascript
+db.articles.insert([
+{
+	"_id" : 1,
+	"description" : "DESCRIPTION ARTICLE AB",
+	"article_code" : "AB",
+	"purchase" : [
+		{
+			"company" : 1,
+			"cost" : NumberDecimal("80.010000")
+		},
+		{
+			"company" : 2,
+			"cost" : NumberDecimal("85.820000")
+		},
+		{
+			"company" : 3,
+			"cost" : NumberDecimal("79.910000")
+		}
+	],
+	"stock" : [
+	    {
+	        "country" : "01",
+	        "warehouse" : {
+	            "code" : "02",
+	            "units" : 10
+	        }
+	    },
+	    {
+	        "country" : "02",
+	        "warehouse" : {
+	            "code" : "02",
+	            "units" : 8
+	        }
+	    }
+	]
+},
+{
+	"_id" : 2,
+	"description" : "DESCRIPTION ARTICLE AC",
+	"article_code" : "AC",
+	"purchase" : [
+		{
+			"company" : 1,
+			"cost" : NumberDecimal("90.010000")
+		},
+		{
+			"company" : 2,
+			"cost" : NumberDecimal("95.820000")
+		},
+		{
+			"company" : 3,
+			"cost" : NumberDecimal("89.910000")
+		}
+	],
+	"stock" : [
+	    {
+	        "country" : "01",
+	        "warehouse" : {
+	            "code" : "01",
+	            "units" : 20
+	        }
+	    },
+	    {
+	        "country" : "02",
+	        "warehouse" : {
+	            "code" : "02",
+	            "units" : 28
+	        }
+	    }
+	]
+}
+]);
+```
+
+Qué función `find()` necesitamos para obtener los "artículos" con `stock` en el `warehouse` 01 en el `country` 02?
+
+```javascript
+// TBD: respuesta de mis queridos alumnos
+```
+
+Ese query nos va a regresar esto:
+
+```json
+{
+	"_id" : 1,
+	"description" : "DESCRIPTION ARTICLE AB",
+	"article_code" : "AB",
+	"purchase" : [
+		{
+			"company" : 1,
+			"cost" : NumberDecimal("80.010000")
+		},
+		{
+			"company" : 2,
+			"cost" : NumberDecimal("85.820000")
+		},
+		{
+			"company" : 3,
+			"cost" : NumberDecimal("79.910000")
+		}
+	],
+	"stock" : [
+		{
+			"country" : "01",
+			"warehouse" : {
+				"code" : "02",
+				"units" : 10
+			}
+		},
+		{
+			"country" : "02",
+			"warehouse" : {
+				"code" : "02",
+				"units" : 8
+			}
+		}
+	]
+}
+{
+	"_id" : 2,
+	"description" : "DESCRIPTION ARTICLE AC",
+	"article_code" : "AC",
+	"purchase" : [
+		{
+			"company" : 1,
+			"cost" : NumberDecimal("90.010000")
+		},
+		{
+			"company" : 2,
+			"cost" : NumberDecimal("95.820000")
+		},
+		{
+			"company" : 3,
+			"cost" : NumberDecimal("89.910000")
+		}
+	],
+	"stock" : [
+		{
+			"country" : "01",
+			"warehouse" : {
+				"code" : "01",
+				"units" : 20
+			}
+		},
+		{
+			"country" : "02",
+			"warehouse" : {
+				"code" : "02",
+				"units" : 28
+			}
+		}
+	]
+}
+```
+
+Qué `_id` tiene el documento de 1er nivel en donde uno de sus subdocumentos cumple con nuestras condiciones del query❓
+
+Como podemos ver, el documento de 1er nivel con `_id` 2 solo cumple con 1 de las condiciones, por lo tanto este query nos puede regresar resultados espurios.
+
+Para tener el comportamiento esperado, debemos usar el operador `$elemMatch`:
+
+```javascript
+db.articles.find({ stock : { $elemMatch : { country : "01", "warehouse.code" : "02" } } })
+```
+
+Esto nos debe dar el documento correcto:
+
+```json
+{
+	"_id" : 1,
+	"description" : "DESCRIPTION ARTICLE AB",
+	"article_code" : "AB",
+	"purchase" : [
+		{
+			"company" : 1,
+			"cost" : NumberDecimal("80.010000")
+		},
+		{
+			"company" : 2,
+			"cost" : NumberDecimal("85.820000")
+		},
+		{
+			"company" : 3,
+			"cost" : NumberDecimal("79.910000")
+		}
+	],
+	"stock" : [
+		{
+			"country" : "01",
+			"warehouse" : {
+				"code" : "02",
+				"units" : 10
+			}
+		},
+		{
+			"country" : "02",
+			"warehouse" : {
+				"code" : "02",
+				"units" : 8
+			}
+		}
+	]
+}
+```
+
+### Agregaciones
+
+Próxima clase
 
 
 
