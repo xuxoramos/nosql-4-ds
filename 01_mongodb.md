@@ -292,7 +292,7 @@ Vamos a establecer algunas equivalencias entre SQL y MongoDB con la siguiente ta
 
 | Operación              | Sintaxis                    | E.g.                                                    | Equivalencia RDBMS                                                                    |
 |------------------------|---------------------------|----------------------------------------------------------------|------------------------------------------------------------------------------------|
-| Igual a X              | `{"key":[value]}`     | `db.tweets.find({"source":"web"}).pretty()`                | where source = 'web'                                                       |
+| Igual a X              | `{"key":[value]}`     | `db.tweets.find({"source":"web"})`                | where source = 'web'                                                       |
 | AND en el WHERE              | `{"key1":[value1],"key2":[value2]}`     | `db.tweets.find({"source":"web","favorited":false})`                | where source = 'web' **and** favorited = false                                                       |
 | Menor que              | `{"key":{$lt:[value]}}`     | `db.tweets.find({"user.friends_count":{$lt:50}})` | where user.friends_count < 50 (aquí estamos "viajando" del documento principal al documento anidado `user` y de ahí a su atributo `friends_count`                                                                   |
 | Menor o igual a       | `{"key":{$lte:[value]}}`    | `db.tweets.find({"user.friends_count":{$lte:50}})` | where user.friends_count <= 50                                                             |
@@ -446,7 +446,7 @@ En esta materia no veremos a fondo expresiones regulares, pero aquí 2 ligas út
 1. https://regexone.com/ es un crash course rápido para aprender las bases de las expresiones regulares
 2. https://regexr.com/ es una plataformita para probar sus regexp contra ejemplos suyos o de terceros
 
-⚠️**IMPORTANTE:**⚠️ Las expresiones regulares que deben ir en estos queries son [Perl-compatible Regular Expressions (PCRE)](https://en.wikipedia.org/wiki/Perl_Compatible_Regular_Expressions)
+**⚠️IMPORTANTE:⚠️** Las expresiones regulares que deben ir en estos queries son [Perl-compatible Regular Expressions (PCRE)](https://en.wikipedia.org/wiki/Perl_Compatible_Regular_Expressions)
 
 ### Queries a arrays
 
@@ -495,16 +495,98 @@ Para buscar un documento por el tamaño de uno de sus atributos de tipo array:
 db.tweets.find({"entities.hashtags":{$size:7}})
 ```
 
-### Queries a documentos y objetos anidados
+### Queries a documentos anidados y arrays de documentos
 
 Para los siguientes ejemplos vamos a insertar estos documentos con la función `insertMany()`:
 
 ```json
 [
-   { item: "journal", instock: [ { warehouse: "A", qty: 5 }, { warehouse: "C", qty: 15 } ] },
-   { item: "notebook", instock: [ { warehouse: "C", qty: 5 } ] },
-   { item: "paper", instock: [ { warehouse: "A", qty: 60 }, { warehouse: "B", qty: 15 } ] },
-   { item: "planner", instock: [ { warehouse: "A", qty: 40 }, { warehouse: "B", qty: 5 } ] },
-   { item: "postcard", instock: [ { warehouse: "B", qty: 15 }, { warehouse: "C", qty: 35 } ] }
+   {
+      "item":"journal",
+      "instock":[
+         {
+            "warehouse":"A",
+            "qty":5
+         },
+         {
+            "warehouse":"C",
+            "qty":15
+         }
+      ]
+   },
+   {
+      "item":"notebook",
+      "instock":[
+         {
+            "warehouse":"C",
+            "qty":5
+         }
+      ]
+   },
+   {
+      "item":"paper",
+      "instock":[
+         {
+            "warehouse":"A",
+            "qty":60
+         },
+         {
+            "warehouse":"B",
+            "qty":15
+         }
+      ]
+   },
+   {
+      "item":"planner",
+      "instock":[
+         {
+            "warehouse":"A",
+            "qty":40
+         },
+         {
+            "warehouse":"B",
+            "qty":5
+         }
+      ]
+   },
+   {
+      "item":"postcard",
+      "instock":[
+         {
+            "warehouse":"B",
+            "qty":15
+         },
+         {
+            "warehouse":"C",
+            "qty":35
+         }
+      ]
+   }
 ]
 ```
+
+1. Creen una nueva BD llamada `warehouse`
+2. Creen una colección llamada `inventory`
+3. Inserten estos documentos de arriba
+
+El siguiente query va a regresar todos los artículos que estén en en warehouse A y de los que tengamos 5 en inventario:
+
+```javascript
+db.inventory.find( { "instock": { warehouse: "A", qty: 5 } } )
+```
+
+**👀OJO:👀** esta sintaxis es parecida a la búsqueda de documentos de 1er nivel (`find("key1":value1,"key2":value2`), pero como estamos buscando documentos **ANIDADOS O EN ARRAY**, entonces debemos de especificar el nombre del array `instock` antes de los params de búsqueda.
+
+El siguiente query va a regresar todos los documentos de `instock` que tengan un `qty` menor o igual a 20 
+
+```javascript
+db.inventory.find( { "instock.qty": { $lte: 20 } } )
+```
+
+Este query también es similar a los que vimos para consultar documentos de 1er nivel, con la diferencia de que `instock` es un array de documentos y no un atributo o un array de elementos individuales.
+
+
+
+
+
+
