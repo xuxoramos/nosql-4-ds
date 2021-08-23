@@ -781,6 +781,10 @@ Ese query nos va a regresar esto:
 
 Qué `_id` tiene el documento de 1er nivel en donde uno de sus subdocumentos cumple con nuestras condiciones del query❓
 
+```javascript
+/// TBD respuesta de mis queridos alumnos
+```
+
 Como podemos ver, el documento de 1er nivel con `_id` 2 solo cumple con 1 de las condiciones, por lo tanto este query nos puede regresar resultados espurios.
 
 Para tener el comportamiento esperado, debemos usar el operador `$elemMatch`:
