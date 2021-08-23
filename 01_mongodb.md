@@ -294,12 +294,12 @@ Vamos a establecer las equivalencias entre SQL y MongoDB con la siguiente tabla 
 
 | Operation              | Syntax                    | Example                                                        | RDBMS Equivalent                                                                   |
 |------------------------|---------------------------|----------------------------------------------------------------|------------------------------------------------------------------------------------|
-| Equality               | {"key":{$eg;<value>}}     | `db.tweets.find({"source":"web"}).pretty()`                | where source = 'web'                                                       |
-| Less Than              | {"key":{$lt:<value>}}     | `db.tweets.find({"user.friends_count":{$lt:50}}).pretty()` | where user.friends_count < 50 (aquí estamos "viajando" del documento principal al documento anidado `user` y de ahí a su atributo `friends_count`                                                                   |
-| Less Than Equals       | {"key":{$lte:<value>}}    | `db.tweets.find({"user.friends_count":{$lte:50}}).pretty()` | where user.friends_count <= 50                                                             |
-| Greater Than           | {"key":{$gt:<value>}}     | `db.tweets.find({"user.friends_count":{$gt:50}}).pretty()`  | where user.friends_count > 50                                                                   |
-| Greater Than Equals    | {"key":{$gte:<value>}}    | `db.tweets.find({"user.friends_count":{$gte:50}}).pretty()` | where user.friends_count >= 50                                                                  |
-| Not Equals             | {"key":{$ne:<value>}}     | `db.tweets.find({"user.friends_count":{$ne:50}}).pretty()`  | where user.friends_count != 50                                                                  |
-| Values in an array     | {"key":{$in:[<value1>, <value2>,……<valueN>]}} | `db.tweets.find({"entities.urls.indices":{$in:[54,74]}}).pretty()` | where entities.urls.indices in (54,74)                    |
-| Values not in an array | {"key":{$nin:<value>}}                        | `db.tweets.find({"name":{$nin:["Ramu", "Raghav"]}}).pretty()`     | Where name values is not in the array :["Ramu", "Raghav"] or, doesn’t exist at all |
+| Equality               | {"key":{$eg;[value]}}     | `db.tweets.find({"source":"web"}).pretty()`                | where source = 'web'                                                       |
+| Less Than              | {"key":{$lt:[value]}}     | `db.tweets.find({"user.friends_count":{$lt:50}}).pretty()` | where user.friends_count < 50 (aquí estamos "viajando" del documento principal al documento anidado `user` y de ahí a su atributo `friends_count`                                                                   |
+| Less Than Equals       | {"key":{$lte:[value]}}    | `db.tweets.find({"user.friends_count":{$lte:50}}).pretty()` | where user.friends_count <= 50                                                             |
+| Greater Than           | {"key":{$gt:[value]}}     | `db.tweets.find({"user.friends_count":{$gt:50}}).pretty()`  | where user.friends_count > 50                                                                   |
+| Greater Than Equals    | {"key":{$gte:[value]}}    | `db.tweets.find({"user.friends_count":{$gte:50}}).pretty()` | where user.friends_count >= 50                                                                  |
+| Not Equals             | {"key":{$ne:[value]}}     | `db.tweets.find({"user.friends_count":{$ne:50}}).pretty()`  | where user.friends_count != 50                                                                  |
+| Values in an array     | {"key":{$in:[value1,value2...valueN]}} | `db.tweets.find({"entities.urls.indices":{$in:[54,74]}}).pretty()` | where entities.urls.indices **in** (54,74)                    |
+| Values not in an array | {"key":{$nin:[value]}}                 | `db.tweets.find({"name":{$nin:["Ramu", "Raghav"]}}).pretty()`     | where entities.urls.indices **not in** (54,74) |
 
