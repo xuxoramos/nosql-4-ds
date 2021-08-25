@@ -302,8 +302,6 @@ Vamos a establecer algunas equivalencias entre SQL y MongoDB con la siguiente ta
 | Valores presentes en array     | `{"key":{$in:[value1,value2...valueN]}}` | `db.tweets.find({"entities.urls.indices":{$in:[54,74]}})` | where entities.urls.indices **in** (54,74)                    |
 | Valores ausentes en array | `{"key":{$nin:[value]}}`                 | `db.tweets.find({"entities.urls.indices":{$nin:[54,74]}})`     | where entities.urls.indices **not in** (54,74) |
 
-La función `pretty()` cambia de este output:
-
 
 
 ### Uso de expresiones regulares en `find()`
