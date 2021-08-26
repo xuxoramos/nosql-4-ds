@@ -97,4 +97,4 @@ A continuación el temario, fecha por fecha:
 | 4             | 2021/08/16      | Revisión de [tarea 1](https://docs.google.com/spreadsheets/d/1vAfKm4FhWRxNLE7i9uCAhLwyY-GBkY-Z/edit?usp=sharing&ouid=112731314315641508878&rtpof=true&sd=true), Showcase de [herramienta de desduplicación](https://dedupe.io/), Instalación de [MongoDB y accesorios](https://xuxoramos.github.io/nosql-4-ds/01_mongodb) / [video](https://drive.google.com/file/d/1PsGHNzYT7OPvNlR0zdvIM9RQX_tdr7bd/view?usp=sharing)
 | 5             | 2021/08/18      | **CLASE A REPONER** |
 | 6             | 2021/08/23      | Funciones `insert` y `find` en [MongoDB](https://xuxoramos.github.io/nosql-4-ds/01_mongodb) / [video](https://drive.google.com/file/d/163qpEwLeXLFY1_17gx-xCLfRjH3NA_0p/view?usp=sharing)
-| 7             | 2021/08/23      | Más de la funció `insert` [MongoDB](https://xuxoramos.github.io/nosql-4-ds/01_mongodb) 
+| 7             | 2021/08/25      | Más de la funció `insert` [MongoDB](https://xuxoramos.github.io/nosql-4-ds/01_mongodb) / [video](https://drive.google.com/file/d/1uicMJ_S5rMgZWhBYajXHJAMwOkMvfLiy/view?usp=sharing)
