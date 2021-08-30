@@ -493,6 +493,8 @@ Para buscar un documento por el tamaño de uno de sus atributos de tipo array:
 db.tweets.find({"entities.hashtags":{$size:7}})
 ```
 
+⚠️TBD: Agregar ejemplo para queries a arrays que tengan un num de elementos **MAYOR** o **MENOR** a N 
+
 ### Queries a documentos anidados y arrays de documentos
 
 Para los siguientes ejemplos vamos a insertar estos documentos con la función `insertMany()`:
