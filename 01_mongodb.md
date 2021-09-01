@@ -493,7 +493,13 @@ Para buscar un documento por el tamaño de uno de sus atributos de tipo array:
 db.tweets.find({"entities.hashtags":{$size:7}})
 ```
 
-⚠️TBD: Agregar ejemplo para queries a arrays que tengan un num de elementos **MAYOR** o **MENOR** a N 
+Y para buscar documentos cuyos atributos tipo array tengan más de 7 elementos:
+
+```javascript
+db.tweets.find({"entities.hashtags.7":{$exists:true}})
+```
+
+El racional de esta forma de `find()` es que si buscamos arrays con num de elementos mayores a 7, entonces tendremos arrays cuyo elemento en la posición 7 (que realmente es la posición 8 porque **comenzamos desde 0**) debe tener un elemento presente.
 
 ### Queries a documentos anidados y arrays de documentos
 
