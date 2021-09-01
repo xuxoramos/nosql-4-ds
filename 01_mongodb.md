@@ -704,7 +704,7 @@ db.articles.insert([
 ]);
 ```
 
-Qué función `find()` necesitamos para obtener los "artículos" con `stock` en el `warehouse` 01 en el `country` 02?
+Qué función `find()` necesitamos para obtener los "artículos" con `stock` en el `warehouse` 02 en el `country` 01?
 
 ```javascript
 db.articles.find({"stock.country":"01","stock.warehouse.code":"02"})
