@@ -707,10 +707,10 @@ db.articles.insert([
 Qué función `find()` necesitamos para obtener los "artículos" con `stock` en el `warehouse` 01 en el `country` 02?
 
 ```javascript
-// TBD: respuesta de mis queridos alumnos
+db.articles.find({"stock.country":"01","stock.warehouse.code":"02"})
 ```
 
-Ese query nos va a regresar esto:
+Ese query nos va a regresar los 2 documentos que insertamos:
 
 ```json
 {
@@ -785,13 +785,7 @@ Ese query nos va a regresar esto:
 }
 ```
 
-Qué `_id` tiene el documento de 1er nivel en donde uno de sus subdocumentos cumple con nuestras condiciones del query❓
-
-```javascript
-/// TBD respuesta de mis queridos alumnos
-```
-
-Como podemos ver, el documento de 1er nivel con `_id` 2 solo cumple con 1 de las condiciones, por lo tanto este query nos puede regresar resultados espurios.
+Como podemos ver, el array `stock` del documento de 1er nivel con `_id` 2 cumple con las condiciones **POR SEPARADO**, por lo tanto este query nos puede regresar resultados espurios _si es que estamos buscando solamente el documento cuyo array `stock` tenga un elemento que cumpla **CON AMBOS CRITERIOS**.
 
 Para tener el comportamiento esperado, debemos usar el operador `$elemMatch`:
 
@@ -841,9 +835,17 @@ Esto nos debe dar el documento correcto:
 
 El operador `$elemMatch` sirve para encontrar elementos individuales **que cumplan con múltiples criterios _TODOS JUNTOS_ (a manera de `and`)**, al contrario del funcionamiento normal sobre arrays, donde nos regresa los arreglos que cumplan con **_AL MENOS_** uno de los criterios **_POR SEPARADO_**.
 
-El operador `$slice`
+El operador `$slice`, por su parte, "rebana" un arreglo de un documento para regresarnos solamente N elementos:
 
+```javascript
+db.articles.find({},{"purchase":{$slice:1}})
+```
 
+Este query nos regresará todos los documentos, pero su array `purchase` solo tendrá el 1er elemento. `$slice` acepta **números positivos** para "rebanar" el array de izq a derecha, y **números negativos** para "rebanarlo" de derecha a izq:}
+
+```javascript
+db.articles.find({},{"purchase":{$slice:-2}})
+```
 
 ### Ejercicios
 
