@@ -835,7 +835,7 @@ Esto nos debe dar el documento correcto:
 
 El operador `$elemMatch` sirve para encontrar elementos individuales **que cumplan con múltiples criterios _TODOS JUNTOS_ (a manera de `and`)**, al contrario del funcionamiento normal sobre arrays, donde nos regresa los arreglos que cumplan con **_AL MENOS_** uno de los criterios **_POR SEPARADO_**.
 
-### El operador `$elemMatch`
+### El operador `$slice`
 
 El operador `$slice`, por su parte, "rebana" un arreglo de un documento para regresarnos solamente N elementos:
 
