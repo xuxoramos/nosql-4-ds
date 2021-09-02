@@ -855,6 +855,14 @@ Este query nos regresará todos los documentos, pero su array `purchase` solo te
 db.articles.find({},{"purchase":{$slice:-2}})
 ```
 
+Del mismo modo, podemos usar el operador `$slice` para obtener un elemento en específico del array usando la forma `find({},{atributo:{$slice:[indice_inicio, numero_de_elementos]}}`. El siguiente comando traerá solamente el 2o elemento de los arrays `purchase`.
+
+```javascript
+db.articles.find({},{purchase:{$slice:[1,1]}})
+```
+
+Aquí nos posicionamos en el índice 1 (el 2o elemento), y a partir de ahí, traemos 1 elemento.
+
 ### Ejercicios
 
 Usaremos la BD `restaurants.json` para estos ejercicios.
@@ -899,41 +907,112 @@ Vamos a responder las siguientes preguntas:
 
 1. Escribe una función find() para mostrar todos los documentos de la colección de restaurantes.
 
+```javascript
+db.restaurants.find()
+```
+
 
 2. Escribe una función find() para mostrar los campos restaurant_id, nombre, municipio y cocina para todos los documentos en el restaurante de la colección.
 
+```javascript
+db.restaurants.find({},{restaurant_id:1,name:1,borough:1,cuisine:1})
+```
 
-3. Escribe una función find() para mostrar los campos restaurant_id, nombre, municipio y cocina, pero excluya el campo _id para todos los documentos de la colección restaurant.
+
+3. Escribe una función find() para mostrar los campos restaurant_id, nombre, municipio y cocina, pero excluya el campo \_id para todos los documentos de la colección restaurant.
+
+```javascript
+db.restaurants.find({},{restaurant_id:1,name:1,borough:1,cuisine:1,_id:0})
+```
 
 
-4. Escribe una función find() para mostrar los campos restaurant_id, nombre, municipio y código postal, pero excluya el campo _id para todos los documentos de la colección restaurant.
+4. Escribe una función find() para mostrar los campos restaurant_id, nombre, municipio y código postal, pero excluya el campo \_id para todos los documentos de la colección restaurant.
+
+```javascript
+db.restaurants.find({},{restaurant_id:1,name:1,borough:1,"address.zipcode":1,_id:0})
+```
 
 
 5. Escribe una función find() para mostrar todos los restaurantes que se encuentran en el distrito del Bronx.
 
+```javascript
+db.restaurants.find({borough:"Bronx"})
+```
+
 
 6. Escribe una función find() para mostrar los primeros 5 restaurantes que se encuentran en el condado del Bronx.
+
+```javascript
+db.restaurants.find({borough:"Bronx"}).limit(5)
+```
 
 
 7. Escribe una función find() para mostrar los siguientes 5 restaurantes después de omitir los primeros 5 que se encuentran en el condado del Bronx.
 
+```javascript
+db.restaurants.find({borough:"Bronx"}).skip(5).limit(5)
+```
+
 
 8. Escribe una función find() para encontrar los restaurantes que obtuvieron una puntuación de más de 90.
+
+```javascript
+db.restaurants.find({"grades.score":{$gt:90}},{"grades.score":1})
+```
+
+Como podemos ver aquí, se cumple la regla de MongoDB donde en un query a un array, si todas las condiciones por separado son cumplidas por algunos elementos del array, se regresa todo el array.
 
 
 9. Escribe una función find() para encontrar los restaurantes que obtuvieron una puntuación, más de 80 pero menos de 100.
 
+El siguiente query cumple con la regla que mencionamos arriba.
+
+```javascript
+db.restaurants.find({"grades.score":{$gt:80,$lt:100}},{"grades.score":1})
+```
+
+Y por ello tenemos elementos del array de `score` como `131`, el cual es mayor a 80, y `11`, que es menor a 100.
+
+Para buscar los elementos que cumplan **exactamente** con ambos criterios debemos usar el operador `$elemMatch`:
+
+```javascript
+db.restaurants.find({"grades":{$elemMatch:{"score":{$gt:80,$lt:100}}}},{"grades.score":1})
+```
+
+Y de ese modo obtenemos arreglos que tengan al menos 1 elemento que cumpla con ambos criterios.
 
 10. Escribe una función find() para encontrar los restaurantes que se ubican en un valor de latitud menor que -95.754168.
+
+Suponiendo que el atributo tipo array `coord` tiene la latitud en el índice 0:
+
+```javascript
+db.restaurants.find({"address.coord.0":{$lte:-95.754168}},{"address.coord":1})
+```
 
 
 11. Escribe una función find() para encontrar los restaurantes que no preparan ningún tipo de cocina de 'estadounidense' y su puntuación de calificación es superior a 70 y latitud inferior a -65.754168.
 
+Tenemos 2 opciones. Sin expresiones regulares, usando el oeprador _not equals_ (`$ne`) y atendiendo que por alguna razón el tipo de cocina `"American "` tiene un espacio al final:
 
-12. Escribe una función find() para encontrar los restaurantes que no preparan ninguna cocina de 'estadounidense' y lograron una puntuación superior a 70 y se ubicaron en la longitud inferior a -65.754168.
+```javascript
+db.restaurants.find({"cuisine":{$ne:"American "},"grades.score":{$gt:70},"address.coord.0":{$lt:-65.754168}},{"cuisine":1,"grades":1,"address.coord":1})
+```
+
+O con expresiones regulares y ayudándonos del operador booleano `$not`. Usamos el `^` para indicar "inicio de línea", y así evitar sacar del query a los restaurantes de cocina "Latin American/Caribbean":
+
+```javascript
+db.restaurants.find({"cuisine":{$not:/^American/},"grades.score":{$gt:70},"address.coord.0":{$lt:-65.754168}},{"cuisine":1,"grades":1,"address.coord":1})
+```
 
 
-13. Escribe una función find() para encontrar los restaurantes que no preparan ninguna cocina de 'estadounidense' y obtuvieron una calificación de 'A' que no pertenece al distrito de Brooklyn. El documento debe mostrarse según la cocina en orden descendente.
+12. Escribe una función find() para encontrar los restaurantes que no preparan ninguna cocina del continente americano y lograron una puntuación superior a 70 y se ubicaron en la longitud inferior a -65.754168.
+
+```javascript
+# De este ejercicio hasta el num 32 se deja de tarea para entregar el Lunes 6 antes de las 11:59:59, en su repo de Github
+```
+
+
+13. Escribe una función find() para encontrar los restaurantes que no preparan ninguna cocina del continente americano y obtuvieron una calificación de 'A' que no pertenece al distrito de Brooklyn. El documento debe mostrarse según la cocina en orden descendente.
 
 
 14. Escribe una función find() para encontrar el ID del restaurante, el nombre, el municipio y la cocina de aquellos restaurantes que contienen 'Wil' como las primeras tres letras de su nombre.
