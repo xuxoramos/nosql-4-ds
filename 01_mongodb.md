@@ -499,6 +499,12 @@ Y para buscar documentos cuyos atributos tipo array tengan más de 7 elementos:
 db.tweets.find({"entities.hashtags.7":{$exists:true}})
 ```
 
+Podemos combinar operadores `$exists`, `$gte` y `$lte` para buscar documentos que tengan un array entre N y M elementos. El siguiente query regresa los tuits que tengan **EXACTAMENTE** un hashtag, aprovechando la _dot notation (.)_ para viajar de `entities->hashtags->[elemento del array con índice 0]` y verificar su existencia con `{$exists:true}`, y hacer elk mismo viaje al `[elemento del array con índice 1]` y asegurarnos que no existe con `{$exists:false}`. 
+
+```javascript
+db.tweets.find({"entities.hashtags.1":{$exists:false},"entities.hashtags.0":{$exists:true}},{"entities":1})
+```
+
 El racional de esta forma de `find()` es que si buscamos arrays con num de elementos mayores a 7, entonces tendremos arrays cuyo elemento en la posición 7 (que realmente es la posición 8 porque **comenzamos desde 0**) debe tener un elemento presente.
 
 ### Queries a documentos anidados y arrays de documentos
