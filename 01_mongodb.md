@@ -1136,7 +1136,7 @@ db.restaurants.find(
 ```
 
 
-21. Escribe una función find() para encontrar el ID del restaurante, el nombre, el municipio y la cocina de aquellos restaurantes que prepararon platos excepto 'Americano' y 'Chinees' o el nombre del restaurante comienza con la letra 'Wil'.
+21. Escribe una función find() para encontrar el ID del restaurante, el nombre, el municipio y la cocina de aquellos restaurantes que prepararon platos excepto 'Americano' y 'Chinese' o el nombre del restaurante comienza con la letra 'Wil'.
 
 ```javascript
 db.restaurants.find(
@@ -1144,7 +1144,7 @@ db.restaurants.find(
 		{name: /^Wil/}, 
 		{"$and": [
 			{"cuisine" : {$ne :"American "}}, 
-			{"cuisine" : {$ne :"Chinees"}}	]
+			{"cuisine" : {$ne :"Chinese"}}	]
 		}]
 	}
 	,{
