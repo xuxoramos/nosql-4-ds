@@ -1335,6 +1335,188 @@ Las agregaciones son queries que colapsan registros individuales en un solo resu
 
 Estas operaciones **destruyen información**, es decir, el promedio, suma o conteo del grupo colapsado pierde información de cada miembro individual.
 
-### Agregaciones 
+Como analistas de datos pocas veces haremos agregaciones directo en las bases de datos fuente, y probablemente primero las movamos a nuestro data lake y ahí hacerlas. Pero si no tuvieramos uno, esta es la forma de hacerlas:
+
+Para esta parte de la sesión vamos a crear la BD `aggregations` y la colección `persons`
+
+```javascript
+use aggregations;
+db.persons.insertMany([
+  {
+    "person_id": "6392529400",
+    "firstname": "Elise",
+    "lastname": "Smith",
+    "dateofbirth": ISODate("1972-01-13T09:32:07Z"),
+    "vocation": "ENGINEER",
+    "address": { 
+        "number": 5625,
+        "street": "Tipa Circle",
+        "city": "Wojzinmoj",
+    },
+  },
+  {
+    "person_id": "1723338115",
+    "firstname": "Olive",
+    "lastname": "Ranieri",
+    "dateofbirth": ISODate("1985-05-12T23:14:30Z"),    
+    "gender": "FEMALE",
+    "vocation": "ENGINEER",
+    "address": {
+        "number": 9303,
+        "street": "Mele Circle",
+        "city": "Tobihbo",
+    },
+  },
+  {
+    "person_id": "8732762874",
+    "firstname": "Toni",
+    "lastname": "Jones",
+    "dateofbirth": ISODate("1991-11-23T16:53:56Z"),    
+    "vocation": "POLITICIAN",
+    "address": {
+        "number": 1,
+        "street": "High Street",
+        "city": "Upper Abbeywoodington",
+    },
+  },
+  {
+    "person_id": "7363629563",
+    "firstname": "Bert",
+    "lastname": "Gooding",
+    "dateofbirth": ISODate("1941-04-07T22:11:52Z"),    
+    "vocation": "FLORIST",
+    "address": {
+        "number": 13,
+        "street": "Upper Bold Road",
+        "city": "Redringtonville",
+    },
+  },
+  {
+    "person_id": "1029648329",
+    "firstname": "Sophie",
+    "lastname": "Celements",
+    "dateofbirth": ISODate("1959-07-06T17:35:45Z"),    
+    "vocation": "ENGINEER",
+    "address": {
+        "number": 5,
+        "street": "Innings Close",
+        "city": "Basilbridge",
+    },
+  },
+  {
+    "person_id": "7363626383",
+    "firstname": "Carl",
+    "lastname": "Simmons",
+    "dateofbirth": ISODate("1998-12-26T13:13:55Z"),    
+    "vocation": "ENGINEER",
+    "address": {
+        "number": 187,
+        "street": "Hillside Road",
+        "city": "Kenningford",
+    },
+  },
+]);
+```
+
+Las agregaciones en MongoDB se hacen a través de **PIPELINES**, esto tiene la siguiente forma:
+
+```
+funcion_f(w).funcion_g(x).funcion_h(y).funcion_i(z)
+```
+
+Estos pipelines son idénticos a hacer esto:
+
+```javascript
+funcion_f(funcion_g(funcion_h(funcion_i(w,x,y,z))))
+```
+
+Con la diferencia que esto es mucho menos legible.
+
+Un pipeline primero debe ser definido:
+
+```javascript
+var pipeline = [
+  // Solo hacer match con vocation = ENGINEER
+  {"$match": {
+    "vocation": "ENGINEER",
+  }},
+    
+  // Ordenar por edad de manera ascendente
+  {"$sort": {
+    "dateofbirth": -1,
+  }},      
+    
+  // Solo seleccionar a los 3 más jovenes
+  {"$limit": 3},  
+
+  // Proyectar para quitar _id, vocation, address
+  {"$unset": [
+    "_id",
+    "vocation",
+    "address",
+  ]},    
+];
+```
+
+Si se fijan, estamos definiendo un arreglo de condiciones y operadores.
+
+Para ejecutar este pipeline:
+
+```javascript
+db.persons.aggregate(pipeline);
+```
+
+Y para que MongoDB nos expliquen el execution plan:
+
+```javascript
+db.persons.explain("executionStats").aggregate(pipeline);
+```
+
+El resultado esperado es:
+
+```javascript
+[
+  {
+    person_id: '7363626383',
+    firstname: 'Carl',
+    lastname: 'Simmons',
+    dateofbirth: ISODate('1998-12-26T13:13:55.000Z')
+  },
+  {
+    person_id: '1723338115',
+    firstname: 'Olive',
+    lastname: 'Ranieri',
+    dateofbirth: ISODate('1985-05-12T23:14:30.000Z'),
+    gender: 'FEMALE'
+  },
+  {
+    person_id: '6392529400',
+    firstname: 'Elise',
+    lastname: 'Smith',
+    dateofbirth: ISODate('1972-01-13T09:32:07.000Z')
+  }
+]
+```
+
+NOTAS:
+
+1. Podemos acelerar el query con un índice. Qué campos incluirían en dicho índice?
+2. Estamos usando `$unset` en lugar de `$project`, que es lo mismo que usar `{"atributo":[1|0]}`.
+3. Oiga, pero esto podemos hacerlo con `find` solito!
+
+Si, de este modo:
+
+```javascript
+db.persons.find(
+    {"vocation": "ENGINEER"},
+    {"_id": 0, "vocation": 0, "address": 0},
+  ).sort(
+    {"dateofbirth": -1}
+  ).limit(3);
+```
+
+
+
+
 
 
