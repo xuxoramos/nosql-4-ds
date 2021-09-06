@@ -1173,7 +1173,7 @@ db.restaurants.find(
 );
 ```
 
-**👀OJO👀**: Aquí la palabra clave es _"entre muchas de las fechas de la encuesta"_, porque implica el comportamiento de los queries sobre los arrays, en donde todos sus elementos deben de ayudar a cumplir todas las condiciones. En este caso, entre todos los grades deben ayudar a cumplir el criterio de 1) fecha del 11 de Agosto de 2014, 2) grade = A, y 3) score = 11.
+**👀OJO👀**: Aquí la palabra clave es _"entre muchas de las fechas de la encuesta"_, porque implica el comportamiento esperado de los queries sobre los arrays, en donde todos sus elementos deben de ayudar a cumplir todas las condiciones. En este caso, entre todos los grades deben ayudar a cumplir el criterio de 1) fecha del 11 de Agosto de 2014, 2) grade = A, y 3) score = 11.
 
 23. Escribe una función find() para encontrar el ID del restaurante, el nombre y las calificaciones de aquellos restaurantes donde el segundo elemento de la matriz de calificaciones contiene una calificación de "A" y una puntuación de 9 en un ISODate "2014-08-11T00: 00: 00Z".
 
@@ -1192,15 +1192,25 @@ db.restaurants.find(
 );
 ```
 
-Si intentamos buscar estos criterios y que los satisfaga 1 y solo 1 elemento del array:
+Si intentamos buscar estos criterios y que los satisfaga 1 y solo 1 elemento del array con `$elemMatch`:
 
 ```javascript
-reviews> db.restaurants.find( {"grades.1": {$elemMatch:{"date": ISODate("2014-08-11T00:00:00Z"), "grade": "A", "score": 9 }}}, { "restaurant_id": 1, "name": 1, "grades": 1 });
+db.restaurants.find( {"grades.1": {$elemMatch:{"date": ISODate("2014-08-11T00:00:00Z"), "grade": "A", "score": 9 }}}, { "restaurant_id": 1, "name": 1, "grades": 1 });
 ```
 
 No vamos a encontrar nada.
 
-24. Escribe una función find() para encontrar el ID del restaurante, el nombre, la dirección y la ubicación geográfica para aquellos restaurantes donde el segundo elemento de la matriz de coordenadas contiene un valor que sea más de 42 y hasta 52 ..
+Esto es porque `$elemMatch` espera como entrada un array, y al apuntar la búsqueda a `grades.1` estamos pasando solo 1 elemento.
+
+Si en lugar de `grades.1` pasamos todo el arreglo de `grades` a `$elemMatch`:
+
+```javascript
+db.restaurants.find( {"grades": {$elemMatch:{"date": ISODate("2014-08-11T00:00:00Z"), "grade": "A", "score": 9 }}}, { "restaurant_id": 1, "name": 1, "grades": 1 });
+```
+
+Nos regresa los 2 restaurantes cuyos `grades` tienen elementos que cumplen con los 3 criterios.
+
+24. Escribe una función find() para encontrar el ID del restaurante, el nombre, la dirección y la ubicación geográfica para aquellos restaurantes donde el segundo elemento de la matriz de coordenadas contiene un valor que sea más de 42 y hasta 52.
 
 ```javascript
 db.restaurants.find( 
@@ -1219,50 +1229,112 @@ db.restaurants.find(
 25. Escribe una función find() para organizar el nombre de los restaurantes en orden ascendente junto con todas las columnas.
 
 ```javascript
-db.restaurants.find({name: /^Wil/}, {"restaurant_id":1, "name":1, "borough":1, "cuisine":1});
+db.restaurants.find().sort({"name":1});
 ```
 
 26. Escribe una función find() para organizar el nombre de los restaurantes en orden descendente junto con todas las columnas.
 
 ```javascript
-db.restaurants.find({name: /^Wil/}, {"restaurant_id":1, "name":1, "borough":1, "cuisine":1});
+db.restaurants.find().sort({"name":-1});
 ```
 
 27. Escribe una función find() para organizar el nombre de la cocina en orden ascendente y para ese mismo distrito de cocina debe estar en orden descendente.
 
 ```javascript
-db.restaurants.find({name: /^Wil/}, {"restaurant_id":1, "name":1, "borough":1, "cuisine":1});
+db.restaurants.find().sort({"cuisine":1,"borough" : -1,});
 ```
 
 28. Escribe una función find() para saber si todas las direcciones contienen la calle o no.
 
 ```javascript
-db.restaurants.find({name: /^Wil/}, {"restaurant_id":1, "name":1, "borough":1, "cuisine":1});
+db.restaurants.find({"address.street" : { $exists : true } } );
 ```
+
+Otras formas de checar existencia (o nulidad) son:
+
+- usando la condición `{"address.street" : {$type : 10}}`, que checa que el tipo sea `null` (ver ejercicio 29)
+- usando `{"address.street" : null}`
 
 29. Escribe una función find() que seleccionará todos los documentos de la colección de restaurantes donde el valor del campo coord es Double.
 
 ```javascript
-db.restaurants.find({name: /^Wil/}, {"restaurant_id":1, "name":1, "borough":1, "cuisine":1});
+db.restaurants.find({"address.coord" : {$type : 1} } );
 ```
+
+El operador `$type` nos permite explorar el tipo de dato que tiene un atributo. Recordemos que javascript es _weakly-typed_ y las variables no tienen tipo hasta que tienen un dato. A continuación los valores `$type` comunes:
+
+| Type | Number | Alias | Notes |
+|---|---|---|---|
+| Double | 1 | "double" |  |
+| String | 2 | "string" |  |
+| Object | 3 | "object" |  |
+| Array | 4 | "array" |  |
+| Binary data | 5 | "binData" |  |
+| Undefined | 6 | "undefined" | Deprecated. |
+| ObjectId | 7 | "objectId" |  |
+| Boolean | 8 | "bool" |  |
+| Date | 9 | "date" |  |
+| Null | 10 | "null" |  |
+| Regular Expression | 11 | "regex" |  |
+| 32-bit integer | 16 | "int" |  |
+| Timestamp | 17 | "timestamp" |  |
+| 64-bit integer | 18 | "long" |  |
+| Decimal128 | 19 | "decimal" | New in version 3.4. |
 
 30. Escribe una función find() que seleccionará el ID del restaurante, el nombre y las calificaciones para esos restaurantes que devuelve 0 como resto después de dividir la puntuación por 7.
 
 ```javascript
-db.restaurants.find({name: /^Wil/}, {"restaurant_id":1, "name":1, "borough":1, "cuisine":1});
+db.restaurants.find({"grades.score" : {$mod : [7,0]} }, {"restaurant_id" : 1,"name":1,"grades":1});
 ```
 
 
 31. Escribe una función find() para encontrar el nombre del restaurante, el municipio, la longitud y la actitud y la cocina de aquellos restaurantes que contienen "mon" como tres letras en algún lugar de su nombre.
 
 ```javascript
-db.restaurants.find({name: /^Wil/}, {"restaurant_id":1, "name":1, "borough":1, "cuisine":1});
+db.restaurants.find(
+	{
+		name : {
+			$regex : "mon.*", $options: "i"
+		} 
+	},
+	{
+		"name":1,
+		"borough":1,
+		"address.coord":1,
+		"cuisine" :1
+	}
+);
 ```
+
+El operador `$options` modifica como se comportará la expresión regular. En este caso, `$options:"i"` realiza una búsqueda _case insensitive_, por lo que va a hacer match con "Mon", "mon", "MON", "MoN", "moN", etc.
 
 32. Escribe una función find() para encontrar el nombre del restaurante, el distrito, la longitud y la latitud y la cocina de aquellos restaurantes que contienen 'Mad' como las primeras tres letras de su nombre.
 
 ```javascript
-db.restaurants.find({name: /^Wil/}, {"restaurant_id":1, "name":1, "borough":1, "cuisine":1});
+
+db.restaurants.find(
+	{
+		name : {
+			$regex : /^Mad/i
+		} 
+	},
+	{
+		"name":1,
+		"borough":1,
+		"address.coord":1,
+		"cuisine" :1
+	}
+);
 ```
+
+Al igual que el caso anterior, pero la ubicación de las opciones modificadoras de la expresión regular es dentro de la expresión misma mediante la sintaxis `/patrón_1/opción`, similar al comando `sed` de Unix.
+
+### Agregaciones
+
+Las agregaciones son queries que colapsan registros individuales en un solo resultado al mismo tiempo que aplican algún operador sobre ellos como conteo, sumar, promedios, etc.
+
+Estas operaciones **destruyen información**, es decir, el promedio, suma o conteo del grupo colapsado pierde información de cada miembro individual.
+
+### Agregaciones 
 
 
