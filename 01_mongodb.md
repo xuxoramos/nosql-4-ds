@@ -1521,9 +1521,12 @@ En general, un pipeline de agregación en MongoDB tiene la siguiente forma:
 
 ![image](https://user-images.githubusercontent.com/1316464/133106415-6386846b-aac4-47cd-8ba3-e6d5a1f814f3.png)
 
-Es una
+Es una generalización de una secuencia de funciones:
 
-![image](https://user-images.githubusercontent.com/1316464/133106294-0021e35b-35f1-4c93-9155-9f4833f9f651.png)
+1. ´$match´: filtrado de todos los documentos que nos interesan para el query (como el ´WHERE´ en SQL)
+2. ´$group´: agrega los renglones seleccionados previo a aplicar algun operador
+3. ´$sort´:  ordena los resultados de acuerdo a un criterio
+
 
 
 
