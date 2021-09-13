@@ -1674,6 +1674,37 @@ Entonces tenemos el siguiente resultado:
 
 Para qué sirve esto?
 
+Para hacer cosas como contar los registros de alumnos de 2017:
+
+```javascript
+db.universities.aggregate([
+  { $unwind : '$students' },
+  { $project : { _id : 0, 'students.year' : 1, 'students.number' : 1 } },
+  { $match: {'students.year':2017}},
+  { $group:{_id: "students.year", conteo:{$sum:1}} },
+])
+```
+
+### Stage `$sort`
+
+El sort puede usarse como stage de un pipeline de agregación, o puede usarse _standalone_ como lo hemos hecho antes para ordenar resulsets individuales.
+
+### Stage `$limit`
+
+### Stage `$addFields`
+
+### Stage `$count`
+
+### Stage `$lookup`
+
+### Stage `$sortByCount`
+
+### Stage `$facet`
+
+
+
+
+
 
 
 
