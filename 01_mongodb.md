@@ -1410,20 +1410,16 @@ Un pipeline primero debe ser definido:
 
 ```javascript
 var pipeline = [
-  // Solo hacer match con vocation = ENGINEER
   {"$match": {
     "level": "Excellent",
   }},
     
-  // Ordenar por edad de manera ascendente
   {"$sort": {
     "name": -1,
   }},      
     
-  // Solo seleccionar a los 3 más jovenes
   {"$limit": 1},  
 
-  // Proyectar para quitar _id, vocation, address
   {"$unset": [
     "_id",
     "name",
@@ -1543,7 +1539,6 @@ db.universities.aggregate([
     { $project:{_id : 0, country : 1, city : 1, name : 1} },
     { $group:{_id: "$name", conteo:{$sum:1}} },
     { $project:{_id : 0, "uni" : "$_id", conteo:1} },
-    { $unwind : '$students' },
     { $out:"miranomas" }
 ])
 ```
