@@ -1515,6 +1515,17 @@ db.persons.find(
   ).limit(3);
 ```
 
+Pero tenemos menos legibilidad y no podemos hacer operaciones de agregación, como las que siguen.
+
+En general, un pipeline de agregación en MongoDB tiene la siguiente forma:
+
+![image](https://user-images.githubusercontent.com/1316464/133106415-6386846b-aac4-47cd-8ba3-e6d5a1f814f3.png)
+
+Es una
+
+![image](https://user-images.githubusercontent.com/1316464/133106294-0021e35b-35f1-4c93-9155-9f4833f9f651.png)
+
+
 
 
 
