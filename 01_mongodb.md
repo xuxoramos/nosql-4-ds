@@ -1337,84 +1337,58 @@ Estas operaciones **destruyen información**, es decir, el promedio, suma o cont
 
 Como analistas de datos pocas veces haremos agregaciones directo en las bases de datos fuente, y probablemente primero las movamos a nuestro data lake y ahí hacerlas. Pero si no tuvieramos uno, esta es la forma de hacerlas:
 
-Para esta parte de la sesión vamos a crear la BD `aggregations` y la colección `persons`
+Para esta parte de la sesión vamos a crear la BD `3tdb` y laa colecciones `universities` y `courses`
 
 ```javascript
-use aggregations;
-db.persons.insertMany([
-  {
-    "person_id": "6392529400",
-    "firstname": "Elise",
-    "lastname": "Smith",
-    "dateofbirth": ISODate("1972-01-13T09:32:07Z"),
-    "vocation": "ENGINEER",
-    "address": { 
-        "number": 5625,
-        "street": "Tipa Circle",
-        "city": "Wojzinmoj",
-    },
+use 3tdb;
+db.universities.insertMany([
+{
+  country : 'Spain',
+  city : 'Salamanca',
+  name : 'USAL',
+  location : {
+    type : 'Point',
+    coordinates : [ -5.6722512,17, 40.9607792 ]
   },
-  {
-    "person_id": "1723338115",
-    "firstname": "Olive",
-    "lastname": "Ranieri",
-    "dateofbirth": ISODate("1985-05-12T23:14:30Z"),    
-    "gender": "FEMALE",
-    "vocation": "ENGINEER",
-    "address": {
-        "number": 9303,
-        "street": "Mele Circle",
-        "city": "Tobihbo",
-    },
+  students : [
+    { year : 2014, number : 24774 },
+    { year : 2015, number : 23166 },
+    { year : 2016, number : 21913 },
+    { year : 2017, number : 21715 }
+  ]
+},
+{
+  country : 'Spain',
+  city : 'Salamanca',
+  name : 'UPSA',
+  location : {
+    type : 'Point',
+    coordinates : [ -5.6691191,17, 40.9631732 ]
   },
-  {
-    "person_id": "8732762874",
-    "firstname": "Toni",
-    "lastname": "Jones",
-    "dateofbirth": ISODate("1991-11-23T16:53:56Z"),    
-    "vocation": "POLITICIAN",
-    "address": {
-        "number": 1,
-        "street": "High Street",
-        "city": "Upper Abbeywoodington",
-    },
-  },
-  {
-    "person_id": "7363629563",
-    "firstname": "Bert",
-    "lastname": "Gooding",
-    "dateofbirth": ISODate("1941-04-07T22:11:52Z"),    
-    "vocation": "FLORIST",
-    "address": {
-        "number": 13,
-        "street": "Upper Bold Road",
-        "city": "Redringtonville",
-    },
-  },
-  {
-    "person_id": "1029648329",
-    "firstname": "Sophie",
-    "lastname": "Celements",
-    "dateofbirth": ISODate("1959-07-06T17:35:45Z"),    
-    "vocation": "ENGINEER",
-    "address": {
-        "number": 5,
-        "street": "Innings Close",
-        "city": "Basilbridge",
-    },
-  },
-  {
-    "person_id": "7363626383",
-    "firstname": "Carl",
-    "lastname": "Simmons",
-    "dateofbirth": ISODate("1998-12-26T13:13:55Z"),    
-    "vocation": "ENGINEER",
-    "address": {
-        "number": 187,
-        "street": "Hillside Road",
-        "city": "Kenningford",
-    },
-  },
+  students : [
+    { year : 2014, number : 4788 },
+    { year : 2015, number : 4821 },
+    { year : 2016, number : 6550 },
+    { year : 2017, number : 6125 }
+  ]
+}
+]);
+db.courses.insertMany([
+{
+  university : 'USAL',
+  name : 'Computer Science',
+  level : 'Excellent'
+},
+{
+  university : 'USAL',
+  name : 'Electronics',
+  level : 'Intermediate'
+},
+{
+  university : 'USAL',
+  name : 'Communication',
+  level : 'Excellent'
+}
 ]);
 ```
 
@@ -1438,22 +1412,22 @@ Un pipeline primero debe ser definido:
 var pipeline = [
   // Solo hacer match con vocation = ENGINEER
   {"$match": {
-    "vocation": "ENGINEER",
+    "level": "Excellent",
   }},
     
   // Ordenar por edad de manera ascendente
   {"$sort": {
-    "dateofbirth": -1,
+    "name": -1,
   }},      
     
   // Solo seleccionar a los 3 más jovenes
-  {"$limit": 3},  
+  {"$limit": 1},  
 
   // Proyectar para quitar _id, vocation, address
   {"$unset": [
     "_id",
-    "vocation",
-    "address",
+    "name",
+    "level",
   ]},    
 ];
 ```
@@ -1463,39 +1437,19 @@ Si se fijan, estamos definiendo un arreglo de condiciones y operadores.
 Para ejecutar este pipeline:
 
 ```javascript
-db.persons.aggregate(pipeline);
+db.courses.aggregate(pipeline);
 ```
 
 Y para que MongoDB nos expliquen el execution plan:
 
 ```javascript
-db.persons.explain("executionStats").aggregate(pipeline);
+db.courses.explain("executionStats").aggregate(pipeline);
 ```
 
 El resultado esperado es:
 
 ```javascript
-[
-  {
-    person_id: '7363626383',
-    firstname: 'Carl',
-    lastname: 'Simmons',
-    dateofbirth: ISODate('1998-12-26T13:13:55.000Z')
-  },
-  {
-    person_id: '1723338115',
-    firstname: 'Olive',
-    lastname: 'Ranieri',
-    dateofbirth: ISODate('1985-05-12T23:14:30.000Z'),
-    gender: 'FEMALE'
-  },
-  {
-    person_id: '6392529400',
-    firstname: 'Elise',
-    lastname: 'Smith',
-    dateofbirth: ISODate('1972-01-13T09:32:07.000Z')
-  }
-]
+[ { university: 'USAL' } ]
 ```
 
 NOTAS:
@@ -1507,15 +1461,15 @@ NOTAS:
 Si, de este modo:
 
 ```javascript
-db.persons.find(
-    {"vocation": "ENGINEER"},
-    {"_id": 0, "vocation": 0, "address": 0},
+db.courses.find(
+    {"level": "Excellent"},
+    {"_id": 0, "name": 0, "level": 0},
   ).sort(
-    {"dateofbirth": -1}
-  ).limit(3);
+    {"name": -1}
+  ).limit(1);
 ```
 
-Pero tenemos menos legibilidad y no podemos hacer operaciones de agregación, como las que siguen.
+Pero tenemos menos legibilidad y no podemos encadenar operaciones de agregación, como las que siguen.
 
 En general, un pipeline de agregación en MongoDB tiene la siguiente forma:
 
@@ -1523,12 +1477,202 @@ En general, un pipeline de agregación en MongoDB tiene la siguiente forma:
 
 Es una generalización de una secuencia de funciones:
 
-1. ´$match´: filtrado de todos los documentos que nos interesan para el query (como el ´WHERE´ en SQL)
-2. ´$group´: agrega los renglones seleccionados previo a aplicar algun operador
-3. ´$sort´:  ordena los resultados de acuerdo a un criterio
+1. `$match`: filtrado de todos los documentos que nos interesan para el query (como el `WHERE` en SQL). Se puede conjuntar con `$project`.
+2. `$group`: agrega los renglones seleccionados previo a aplicar algun operador
+3. `$sort`:  ordena los resultados de acuerdo a un criterio
 
+El input de la agregación puede ser 1 o más documentos en array.
 
+No hay límites en cuanto al num de elementos de cada tipo para el pipeline (les llamamos _stages_), es decir, podemos combinar cualquier número de operadores. **SIN EMBARGO** el límite por pipeline en cuanto a su memory footprint es de **100MB**.
 
+### Stage `$match`
+
+El primer stage en los pipelines de agregación es similar al `find()` para filtrar documentos en los que estamos interesados:
+
+```javascript
+db.universities.aggregate([
+  { $match : { country : 'Spain', city : 'Salamanca' } }
+])
+```
+
+Y al igual que el `find()`, podemos hacer `$project`:
+
+```javascript
+ db.universities.aggregate([ 
+    { $match:{country: 'Spain', city: 'Salamanca'} },
+    { $project:{_id : 0, country : 1, city : 1, name : 1} }
+ ])
+```
+
+### Stage `$group`
+
+El `group by` de MongoDB y el corazón de operaciones como count, sum, avg, etc.
+
+```javascript
+ db.universities.aggregate([ 
+    { $match:{country: 'Spain', city: 'Salamanca'} },
+    { $project:{_id : 0, country : 1, city : 1, name : 1} },
+    { $group:{_id: "$name", conteo:{$sum:1}} },
+    { $project:{_id : 0, "uni" : "$_id"} }
+ ])
+ ```
+ 
+ 👀OJO!👀 En el `$group` hay algunos elementos de sintaxis **mandatorios**:
+ 
+ 1. el atributo de agrupación se debe llamar **`_id`**.
+    - Podemos renombrarlo agregando otro stage de `$project` así:
+    ```javascript
+    db.universities.aggregate([ 
+	    { $match:{country: 'Spain', city: 'Salamanca'} },
+	    { $project:{_id : 0, country : 1, city : 1, name : 1} },
+	    { $group:{_id: "$name", conteo:{$sum:1}} },
+	    { $project:{_id : 0, "uni" : "$_id"} }
+    ])
+    ```
+ 2. el atributo por el cual vamos a agregar debe ir con la notación `$` como si se tratara de una variable (porque lo es) y entrecomillado.
+ 3. el atributo en el cual guardaremos el resultado de la función de agregación puede llamarse como nosotros deseemos
+ 4. `{$sum:1}` es similar al `COUNT(*)` de SQL en el sentido de que va sumando 1 por cada documento que encuentra de acuerdo al stage de `$match`
+
+### Stage `$out`
+
+Toma la ejecución de toda la salida del pipeline y lo guarda en otra colección.
+
+```javascript
+db.universities.aggregate([ 
+    { $match:{country: 'Spain', city: 'Salamanca'} },
+    { $project:{_id : 0, country : 1, city : 1, name : 1} },
+    { $group:{_id: "$name", conteo:{$sum:1}} },
+    { $project:{_id : 0, "uni" : "$_id", conteo:1} },
+    { $unwind : '$students' },
+    { $out:"miranomas" }
+])
+```
+
+### Stage `$unwind`
+
+Si nuestros documentos tienen arrays, el stage `$group` no nos permite llegar a ellos para agregarlos.
+
+El stage `$unwind` nos permite un hack para darle la vuelta a esta limitante.
+
+Lo que hace es explotar el array de un documento, tomar cada uno de los N elementos, y clavárselos a N copias del atributo que lo contiene.
+
+Por ejemplo:
+
+```javascript
+db.universities.aggregate([
+  { $match : { name : 'USAL' } }
+])
+```
+
+Esto obviamente nos regresa 1 documento:
+
+```javascript
+{
+  country : 'Spain',
+  city : 'Salamanca',
+  name : 'USAL',
+  location : {
+    type : 'Point',
+    coordinates : [ -5.6722512,17, 40.9607792 ]
+  },
+  students : [
+    { year : 2014, number : 24774 },
+    { year : 2015, number : 23166 },
+    { year : 2016, number : 21913 },
+    { year : 2017, number : 21715 }
+  ]
+}
+```
+
+Pero si corremos la siguiente agregación:
+
+```javascript
+db.universities.aggregate([
+  { $match : { name : 'USAL' } },
+  { $unwind : '$students' }
+])
+```
+
+Entonces tenemos el siguiente resultado:
+
+```javascript
+{
+	"_id" : ObjectId("5b7d9d9efbc9884f689cdba9"),
+	"country" : "Spain",
+	"city" : "Salamanca",
+	"name" : "USAL",
+	"location" : {
+		"type" : "Point",
+		"coordinates" : [
+			-5.6722512,
+			17,
+			40.9607792
+		]
+	},
+	"students" : {
+		"year" : 2014,
+		"number" : 24774
+	}
+}
+{
+	"_id" : ObjectId("5b7d9d9efbc9884f689cdba9"),
+	"country" : "Spain",
+	"city" : "Salamanca",
+	"name" : "USAL",
+	"location" : {
+		"type" : "Point",
+		"coordinates" : [
+			-5.6722512,
+			17,
+			40.9607792
+		]
+	},
+	"students" : {
+		"year" : 2015,
+		"number" : 23166
+	}
+}
+{
+	"_id" : ObjectId("5b7d9d9efbc9884f689cdba9"),
+	"country" : "Spain",
+	"city" : "Salamanca",
+	"name" : "USAL",
+	"location" : {
+		"type" : "Point",
+		"coordinates" : [
+			-5.6722512,
+			17,
+			40.9607792
+		]
+	},
+	"students" : {
+		"year" : 2016,
+		"number" : 21913
+	}
+}
+{
+	"_id" : ObjectId("5b7d9d9efbc9884f689cdba9"),
+	"country" : "Spain",
+	"city" : "Salamanca",
+	"name" : "USAL",
+	"location" : {
+		"type" : "Point",
+		"coordinates" : [
+			-5.6722512,
+			17,
+			40.9607792
+		]
+	},
+	"students" : {
+		"year" : 2017,
+		"number" : 21715
+	}
+}
+```
+
+👀OJO!👀 Fíjense en el `_id` que **ES EL MISMO** en todos los casos, esto es, es el mismo objeto `university` pero con el array `students` _descompuesto_ e insertado en copias de cada elemento.
+
+Para qué sirve esto?
 
 
 
