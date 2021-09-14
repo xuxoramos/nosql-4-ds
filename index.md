@@ -100,3 +100,6 @@ A continuación el temario, fecha por fecha:
 | 7             | 2021/08/25      | [Más de la función `find`](https://xuxoramos.github.io/nosql-4-ds/01_mongodb) / [video](https://drive.google.com/file/d/1uicMJ_S5rMgZWhBYajXHJAMwOkMvfLiy/view?usp=sharing)
 | 8             | 2021/08/30      | [La función `find` sobre arrays de elementos y arrays de diccionarios/objetos](https://xuxoramos.github.io/nosql-4-ds/01_mongodb) / [video](https://drive.google.com/file/d/10vUhMDTksjWHVQzV2uljwfw8zyF2B97W/view?usp=sharing)
 | 9             | 2021/09/01      | [`find()` sobre arrays de objetos/diccionarios, los operadores `$elemMatch` y `$slice`, y ejercicios](https://xuxoramos.github.io/nosql-4-ds/01_mongodb) / [video](https://drive.google.com/file/d/1Ue5E5tQjNdHr5KqTnUT1H_ayaDKpyGj7/view?usp=sharing)
+| 10             | 2021/09/06      | [Revisión y solución de ejercicios](https://xuxoramos.github.io/nosql-4-ds/01_mongodb) / [video](https://drive.google.com/file/d/1ZegIut_kc4C1DxFBpxwkA9-yZvlaaZkv/view?usp=sharing)
+| 11             | 2021/09/08      | **CLASE A REPONER**
+| 12             | 2021/09/13      | [Aggregations, pipelines, grouping](https://xuxoramos.github.io/nosql-4-ds/01_mongodb) / [video](https://drive.google.com/file/d/1mpZTq96WXuJV47VJ8OPHKczbrzrUIddd/view?usp=sharing)
