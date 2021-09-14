@@ -1529,6 +1529,25 @@ El `group by` de MongoDB y el corazón de operaciones como count, sum, avg, etc.
  3. el atributo en el cual guardaremos el resultado de la función de agregación puede llamarse como nosotros deseemos
  4. `{$sum:1}` es similar al `COUNT(*)` de SQL en el sentido de que va sumando 1 por cada documento que encuentra de acuerdo al stage de `$match`
 
+#### Caso especial: agregación total (sin grupos)
+
+En caso de que deseemos hacer una agregación de todos los documentos, sin armar grupos:
+
+```javascript
+db.universities.aggregate([ 
+    { $match:{country: 'Spain', city: 'Salamanca'} },
+    { $project:{_id : 0, country : 1, city : 1, name : 1} },
+    { $group: { _id: null, conteo: { $count: {} } } }
+    { $project: { _id: 0, conteo:1 } }
+])
+```
+
+Resultado:
+
+```javascript
+[ { conteo: 2 } ]
+```
+
 ### Stage `$out`
 
 Toma la ejecución de toda la salida del pipeline y lo guarda en otra colección.
@@ -1550,6 +1569,8 @@ Si nuestros documentos tienen arrays, el stage `$group` no nos permite llegar a 
 El stage `$unwind` nos permite un hack para darle la vuelta a esta limitante.
 
 Lo que hace es explotar el array de un documento, tomar cada uno de los N elementos, y clavárselos a N copias del atributo que lo contiene.
+
+En efecto, lo "desenrolla" 🤣
 
 Por ejemplo:
 
@@ -1667,7 +1688,13 @@ Entonces tenemos el siguiente resultado:
 
 👀OJO!👀 Fíjense en el `_id` que **ES EL MISMO** en todos los casos, esto es, es el mismo objeto `university` pero con el array `students` _descompuesto_ e insertado en copias de cada elemento.
 
-Para qué sirve esto?
+#### Casos especiales
+
+1. `$unwind` de un array vacío no regresará nada
+2. `$unwind` de un atributo simple regresará el mismo _enclosing document_
+3. `$unwind` de un array de un diccionario que tiene un 2o o 3er array, solo va a "desenrollar" el diccionario que solicitamos en ese operador, por lo que los otros arrays estarán repetidos
+
+#### Para qué sirve esto?
 
 Para hacer cosas como contar los registros de alumnos de 2017:
 
@@ -1676,8 +1703,126 @@ db.universities.aggregate([
   { $unwind : '$students' },
   { $project : { _id : 0, 'students.year' : 1, 'students.number' : 1 } },
   { $match: {'students.year':2017}},
-  { $group:{_id: "students.year", conteo:{$sum:1}} },
+  { $group:{_id: "$students.year", conteo:{$count:{}}} },
 ])
+```
+
+O acumular los alumnos de cada año:
+
+```javascript
+db.universities.aggregate([
+	{ $unwind: '$students' },
+	{ $project: { _id: 0, "name": 1, 'students.year': 1, 'students.number': 1 } },
+	{ $group: { _id: "$name", totalAlumnos: { $sum: "$students.number" } } },
+	{$project:{_id:0,"uni":"$_id",totalAlumnos:1}}
+])
+```
+
+O el promedio de alumnos de 2014 a 2017
+
+```javascript
+db.universities.aggregate([
+	{ $unwind: '$students' },
+	{ $project: { _id: 0, "name": 1, 'students.year': 1, 'students.number': 1 } },
+	{ $group: { _id: "$name", promedioAlumnos: { $avg: "$students.number" } } },
+	{$project:{_id:0,"uni":"$_id",promedioAlumnos:1}}
+])
+```
+
+O cualquiera de estas funciones:
+
+|Función|Descrip|
+|---------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| $addToSet     | Después de agrupar, agrega elementos individuales a un array|
+| $avg          | Promedio|
+| $count        | Conteo (igual a `{$sum:1}`|
+| $first        | Regresa el 1er documento o diccionario de cada grupo. ⚠️No confundir con el operador `$first` aplicable a arrays. Este operador no se ocupa del orden, eso se garantiza desde el stage `$sort` del pipeline |
+| $last         | Regresa el último documento o diccionario de cada grupo. Mismas reglas y observaciones que `$first`|
+| $max          | Regresa el máximo de cada grupo|
+| $mergeObjects | Después de armar los grupos, combinar los objetos/diccionarios/documentos que correspondan al grupo en uno solo|
+| $min          | Regresa el mínimo de cada grupo|
+| $stdDevPop    | Regresa la [desviación estándar de la población](https://statistics.laerd.com/statistical-guides/measures-of-spread-standard-deviation.php) (entre _n_) de cada grupo|
+| $stdDevSamp   | Regresa la [desviación estándar de la muestra](https://statistics.laerd.com/statistical-guides/measures-of-spread-standard-deviation.php) (entre _n-1_) de cada grupo|
+| $sum          | Suma acumulativa de cada grupo|
+
+#### Ejemplo `$addToSet`
+
+Vamos a crear la sig colección en la BD que sea:
+
+```javascript
+db.sales.insertMany([
+	{ "_id" : 1, "item" : "abc", "price" : 10, "quantity" : 2, "date" : ISODate("2014-01-01T08:00:00Z") },
+	{ "_id" : 2, "item" : "jkl", "price" : 20, "quantity" : 1, "date" : ISODate("2014-02-03T09:00:00Z") },
+	{ "_id" : 3, "item" : "xyz", "price" : 5, "quantity" : 5, "date" : ISODate("2014-02-03T09:05:00Z") },
+	{ "_id" : 4, "item" : "abc", "price" : 10, "quantity" : 10, "date" : ISODate("2014-02-15T08:00:00Z") },
+	{ "_id" : 5, "item" : "xyz", "price" : 5, "quantity" : 10, "date" : ISODate("2014-02-15T09:12:00Z") }
+]);
+```
+
+Vemos que solo hay 2 fechas. Si queremos agrupar por esa fecha y aglutinar los `item` en un solo array, podemos hacer:
+
+```javascript
+db.sales.aggregate([
+	{$group: 
+		{_id: { day: { $dayOfYear: "$date"}, year: { $year: "$date" } }, itemsSold: { $addToSet: "$item" } }
+	}
+]);
+```
+
+👀OJO!👀 Estamos utilizando 2 operadores para objetos `ISODate`:
+
+1. `$dayOfYear`: extrae de un objeto `ISODate` un dato numérico entre 1 y 365 (o 366 si es año bisiesto) representando el día del año.
+2. `$year`: extrae de un objeto `ISODate` el año en numérico.
+
+A continuación los operadores más comunes sobre `ISODate`:
+
+| Función | Descripción y Ejemplo|
+|-----------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| $dateAdd        | `{ $dateAdd: {startDate: ISODate("2020-10-31T12:10:05Z"), unit: "month", amount: 1} }` - Agrega `amount` al campo `unit` de la fecha `startDate`                                                                                                                            |
+| $dateDiff       | `{ $dateDiff: { startDate: ISODate("2014-01-01T08:00:00Z"), endDate: ISODate("2014-02-03T09:00:00Z"), unit: "day"} }` - Regresa la diferencia en `unit` entre `startDate` y `endDate`  |
+| $dateFromString | `{ $dateFromString: {dateString: "15-06-2018", format: "%d-%m-%Y"} }` - Parsea el string `dateString` representando una fecha en formato `format` para convertirlo en un objeto `ISODate` que contenga esa misma fecha.                                                                                                                            |
+| $dateSubtract   | `{ $dateSubtract: {startDate: ISODate("2020-10-31T12:10:05Z"), unit: "month", amount: 1} }` - Susbtrae `amount` al campo `unit` de la fecha `startDate`                                                                                                                     |
+| $dateToParts    | `$dateToParts: { date: ISODate("2017-01-01T01:29:09.123Z") }` - Descompone el `date` en sus partes. Retorna `"date" : {"year" : 2017, "month" : 1, "day" : 1, "hour" : 1, "minute" : 29, "second" : 9, "millisecond" : 123}`                                                                                                          |
+| $dateToString   | `{ $dateToString: { format: "%Y-%m-%d %H:%M:%S", date: ISODate("2014-01-01T08:15:39.736Z") } }` - Convierte un `ISODate` en un string con una fecha formateada por `format`. Retorna `"2014-01-01 03:15:39"`. Ver [opciones de formato](https://docs.mongodb.com/manual/reference/operator/aggregation/dateToString/).                                                                                                                           |
+| $dayOfMonth     | Los siguientes operadores tienen la sintaxis `{ $[operador]: [objeto ISODate] }`. Regresa un numérico entre 1 y 31 del objeto `ISODate`.                                                                                                    |
+| $dayOfWeek      | Regresa un numérico entre 1 (Domingo) y 7 (Sábado) del objeto `ISODate`. |
+| $dayOfYear      | Regresa un numérico entre 1 y 366 (bisiesto) del objeto `ISODate`. |
+| $hour           | Regresa un numérico entre 0 y 23 del objeto `ISODate`. |
+| $isoDayOfWeek   | Regresa un numérico entre 1 (Lunes) y 7 (Domingo) del objeto `ISODate`. No confundir con `$dayOfWeek` |
+| $isoWeek        | Regresa un numérico entre 1 y 53 del objeto `ISODate`.  |
+| $millisecond    | Regresa un numérico entre 0 y 999 del objeto `ISODate`. |
+| $minute         | Reegresa un numérico entre 0 y 59 del objeto `ISODate`. |
+| $month          | Regresa un numérico entre 1 (Enero) y 12 (Diciembre) del objeto `ISODate`. |
+| $second         | Regresa un numérico entre 0 y 60 (cuando es _leap second_) del objeto `ISODate`. |
+| $year           | Regresa el valor del año del objeto `ISODate`|
+
+Posterior a armar los grupos con esas 2 únicas fechas, cada `item` será agregado a un array:
+
+```javascript
+{ "_id" : { "day" : 46, "year" : 2014 }, "itemsSold" : [ "xyz", "abc" ] }
+{ "_id" : { "day" : 34, "year" : 2014 }, "itemsSold" : [ "xyz", "jkl" ] }
+{ "_id" : { "day" : 1, "year" : 2014 }, "itemsSold" : [ "abc" ] }
+```
+
+
+#### Ejemplo `$mergeObjects`
+
+Crearemos la sig colección en cualquier BD:
+
+```javascript
+db.sales.insert( [
+   { _id: 1, year: 2017, item: "A", quantity: { "2017Q1": 500, "2017Q2": 500 } },
+   { _id: 2, year: 2016, item: "A", quantity: { "2016Q1": 400, "2016Q2": 300, "2016Q3": 0, "2016Q4": 0 } } ,
+   { _id: 3, year: 2017, item: "B", quantity: { "2017Q1": 300 } },
+   { _id: 4, year: 2016, item: "B", quantity: { "2016Q3": 100, "2016Q4": 250 } }
+])
+```
+
+Vamos a agrupar por `item` y vamos a crear un diccionario con todos los `quantity` en un atributo llamado `mergedSales`:
+
+```javascript
+{ "_id" : "B", "mergedSales" : { "2017Q1" : 300, "2016Q3" : 100, "2016Q4" : 250 } }
+{ "_id" : "A", "mergedSales" : { "2017Q1" : 500, "2017Q2" : 500, "2016Q1" : 400, "2016Q2" : 300, "2016Q3" : 0, "2016Q4" : 0 } }
 ```
 
 ### Stage `$sort`
