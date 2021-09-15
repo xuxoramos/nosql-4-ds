@@ -1713,8 +1713,8 @@ O acumular los alumnos de cada año:
 db.universities.aggregate([
 	{ $unwind: '$students' },
 	{ $project: { _id: 0, "name": 1, 'students.year': 1, 'students.number': 1 } },
-	{ $group: { _id: "$name", totalAlumnos: { $sum: "$students.number" } } },
-	{$project:{_id:0,"uni":"$_id",totalAlumnos:1}}
+	{ $group: { _id: "$students.year", totalAlumnos: { $sum: "$students.number" } } },
+	{$project:{_id:0,"ano":"$_id",totalAlumnos:1}}
 ])
 ```
 
@@ -1831,13 +1831,116 @@ El sort y el limit puede usarse como stage de un pipeline de agregación, o pued
 
 ### Stage `$addFields`
 
-### Stage `$count`
+Crea campos nuevos basados en las agregaciones, como una suma concentrada final, o un promedio concentrado final.
 
-### Stage `$lookup`
+⚠️No confundir con el `$group`, el `$addFields` NO AGREGA NI AGRUPA.⚠️
+
+Regresemos a nuestra BD de reviews de restaurantes con `use reviews`
+
+La estructura de cada review es:
+
+```javscript
+{
+  _id: ObjectId("612d222983a7f8a60c193d14"),
+  address: {
+    building: '351',
+    coord: [ -73.98513559999999, 40.7676919 ],
+    street: 'West   57 Street',
+    zipcode: '10019'
+  },
+  borough: 'Manhattan',
+  cuisine: 'Irish',
+  grades: [
+    { date: ISODate("2014-09-06T00:00:00.000Z"), grade: 'A', score: 2 },
+    {
+      date: ISODate("2013-07-22T00:00:00.000Z"),
+      grade: 'A',
+      score: 11
+    },
+    {
+      date: ISODate("2012-07-31T00:00:00.000Z"),
+      grade: 'A',
+      score: 12
+    },
+    {
+      date: ISODate("2011-12-29T00:00:00.000Z"),
+      grade: 'A',
+      score: 12
+    }
+  ],
+  name: 'Dj Reynolds Pub And Restaurant',
+  restaurant_id: '30191841'
+}
+```
+
+Cómo podemos agregar un atributo a cada restaurante para tener su score total agregado de todos sus reviews y su promedio?
+
+```javascript
+db.restaurants.aggregate([
+	{$unwind:"$grades"},
+	{$project:{"grades.score":1, "name":1}},
+	{$group:{_id:"$name", "gradeArray":{$push:"$grades.score"}}},
+	{$project:{"name":"$_id",_id:0,"gradeArray":1}},
+	{$addFields:{"totalScore":{$sum:"$gradeArray"},"avgScore":{$avg:"$gradeArray"}}}
+])
+```
+
+Desmenucemos este query para entenderlo:
+
+1. "desenrollo" el array `grades` y le clavo cada elemento a una copia del _enclosing object_.
+2. quito toda la paja y me quedo con los scores y el nombre del restaurante
+3. agrupo por nombre de restaurante - esto en SQL es una mala práctica, PERO en MongoDB y en general en bases de datos de documentos, se vale. Esto nos sirve para poder ejecutar el operador `$push`, que clava un array a un objeto. En esta línea lo que estamos haciendo es efectivamente **CONVERTIR** el diccionario que tiene los scores en un arreglo normalito.
+4. Ya con el arreglo, renombramos el `_id` del grupo
+5. Y sumamos horizontalmente los scores del array, así como su promedio.
 
 ### Stage `$sortByCount`
 
-### Stage `$facet`
+Es un operador que funge como si tuviéramos:
+
+```javascript
+db.collection.aggregate([
+	{ $group: { _id: <expression>, count: { $sum: 1 } } },
+	{ $sort: { count: -1 } }
+])
+```
+
+Insertemos esta base de datos de obras de arte:
+
+```javascript
+db.artwork.insertMany([
+	{ "_id" : 1, "title" : "The Pillars of Society", "artist" : "Grosz", "year" : 1926, "tags" : [ "painting", "satire", "Expressionism", "caricature" ] },
+	{ "_id" : 2, "title" : "Melancholy III", "artist" : "Munch", "year" : 1902, "tags" : [ "woodcut", "Expressionism" ] },
+	{ "_id" : 3, "title" : "Dancer", "artist" : "Miro", "year" : 1925, "tags" : [ "oil", "Surrealism", "painting" ] },
+	{ "_id" : 4, "title" : "The Great Wave off Kanagawa", "artist" : "Hokusai", "tags" : [ "woodblock", "ukiyo-e" ] },
+	{ "_id" : 5, "title" : "The Persistence of Memory", "artist" : "Dali", "year" : 1931, "tags" : [ "Surrealism", "painting", "oil" ] },
+	{ "_id" : 6, "title" : "Composition VII", "artist" : "Kandinsky", "year" : 1913, "tags" : [ "oil", "painting", "abstract" ] },
+	{ "_id" : 7, "title" : "The Scream", "artist" : "Munch", "year" : 1893, "tags" : [ "Expressionism", "painting", "oil" ] },
+	{ "_id" : 8, "title" : "Blue Flower", "artist" : "O'Keefe", "year" : 1918, "tags" : [ "abstract", "painting" ] },
+])
+```
+
+Si ejecutamos la siguiente agregación:
+
+```javascript
+db.exhibits.aggregate( [ { $unwind: "$tags" },  { $sortByCount: "$tags" } ] )
+```
+
+Tendremos la salida:
+
+```javascript
+{ "_id" : "painting", "count" : 6 }
+{ "_id" : "oil", "count" : 4 }
+{ "_id" : "Expressionism", "count" : 3 }
+{ "_id" : "Surrealism", "count" : 2 }
+{ "_id" : "abstract", "count" : 2 }
+{ "_id" : "woodblock", "count" : 1 }
+{ "_id" : "woodcut", "count" : 1 }
+{ "_id" : "ukiyo-e", "count" : 1 }
+{ "_id" : "satire", "count" : 1 }
+{ "_id" : "caricature", "count" : 1 }
+```
+
+Esto es, cuenta los elementos comunes y los ordena por el num de ocurrencias.
 
 ### Queries analíticos avanzados
 
@@ -1948,7 +2051,9 @@ Ahora vamos a tratar de armar el query para dar respuesta a la pregunta inicial:
 TBD por mis estimados alumnos
 ```
 
+### Stage `$lookup`
 
+Prox clase!
 
 
 
