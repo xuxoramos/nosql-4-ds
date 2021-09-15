@@ -1825,11 +1825,9 @@ Vamos a agrupar por `item` y vamos a crear un diccionario con todos los `quantit
 { "_id" : "A", "mergedSales" : { "2017Q1" : 500, "2017Q2" : 500, "2016Q1" : 400, "2016Q2" : 300, "2016Q3" : 0, "2016Q4" : 0 } }
 ```
 
-### Stage `$sort`
+### Stages `$sort` y `$limit` 
 
-El sort puede usarse como stage de un pipeline de agregación, o puede usarse _standalone_ como lo hemos hecho antes para ordenar resulsets individuales.
-
-### Stage `$limit`
+El sort y el limit puede usarse como stage de un pipeline de agregación, o puede usarse _standalone_ como lo hemos hecho antes para ordenar resulsets individuales.
 
 ### Stage `$addFields`
 
@@ -1840,6 +1838,119 @@ El sort puede usarse como stage de un pipeline de agregación, o puede usarse _s
 ### Stage `$sortByCount`
 
 ### Stage `$facet`
+
+### Queries analíticos avanzados
+
+1. Cuál es el promedio de `score` por `type` de evaluación y por `class_id` en la BD `sample_training` en la colección `grades`?
+
+Para esto debemos descargar [esta BD de calificaciones](https://github.com/xuxoramos/nosql-4-ds/blob/gh-pages/grades.zip) e insertarla con `mongoimport`:
+
+```
+mongoimport --db=sample_training --collection=grades
+```
+
+Primero debemos enterarnos de qué va la BD. Vamos a sacar los primeros 3 registros para ver de qué tratan:
+
+```javascript
+use sample_training
+db.grades.find().limit(3)
+
+[
+  {
+    _id: ObjectId("56d5f7eb604eb380b0d8d8ce"),
+    student_id: 0,
+    scores: [
+      { type: 'exam', score: 78.40446309504266 },
+      { type: 'quiz', score: 73.36224783231339 },
+      { type: 'homework', score: 46.980982486720535 },
+      { type: 'homework', score: 76.67556138656222 }
+    ],
+    class_id: 339
+  },
+  {
+    _id: ObjectId("56d5f7eb604eb380b0d8d8d6"),
+    student_id: 0,
+    scores: [
+      { type: 'exam', score: 25.926204502143857 },
+      { type: 'quiz', score: 37.23668404170315 },
+      { type: 'homework', score: 19.609679551976487 },
+      { type: 'homework', score: 98.7923690220697 }
+    ],
+    class_id: 108
+  },
+  {
+    _id: ObjectId("56d5f7eb604eb380b0d8d8da"),
+    student_id: 1,
+    scores: [
+      { type: 'exam', score: 95.4702770345805 },
+      { type: 'quiz', score: 59.14125426136129 },
+      { type: 'homework', score: 34.32836889016887 },
+      { type: 'homework', score: 84.07534235774499 }
+    ],
+    class_id: 237
+  }
+]
+```
+
+Parece que son calificaciones de un alumno, de una clase, para diferentes mecanismos de evaluación: examen, quiz, y tareas.
+
+Qué tipo de relación hay entre `student_id` y `class_id`? Cuál es el punto de vista de esta estructura? "Una clase tiene N alumnos?", o "un alumno tiene N clases?".
+
+Primero, veamos cuantos registros tenemos:
+
+```javascript
+db.grades.find().count()
+
+1000000
+```
+
+Si la perspectiva está anclada en `class_id`, entonces deberíamos tener 1000000 clases, o 1000000 estudiantes si la perspectiva está en `student_id`.
+
+```javascript
+db.grades.distinct("class_id")
+
+[
+   0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11,
+  12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
+  24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35,
+  36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
+  48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59,
+  60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71,
+  72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83,
+  84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95,
+  96, 97, 98, 99,
+  ... 401 more items
+]
+```
+
+De acuerdo a esto, el universo de clases es mucho menor, por lo que probablemente esta colección esté armada desde la perspectiva del estudiante.
+
+```javascript
+db.grades.distinct("student_id")
+
+[
+   0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11,
+  12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
+  24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35,
+  36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
+  48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59,
+  60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71,
+  72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83,
+  84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95,
+  96, 97, 98, 99,
+  ... 9900 more items
+]
+```
+
+Ahora vamos a tratar de armar el query para dar respuesta a la pregunta inicial:
+
+```javascript
+TBD por mis estimados alumnos
+```
+
+
+
+
 
 
 
