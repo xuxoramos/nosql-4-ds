@@ -2186,3 +2186,280 @@ db.orders.aggregate([
 ])
 ```
 
+### Ejercicio Integrador
+
+Usando la colección de `tweets` en la BD `trainingsessions` vamos a responder las siguientes preguntas, ayudándonos de las siguientes colecciones adicionales.
+
+```javascript
+db.primarydialects.insertMany([
+	{"lang":"af", "locale":"af-ZA"},
+	{"lang":"ar", "locale":"ar"},
+	{"lang":"bg", "locale":"bg-BG"},
+	{"lang":"ca", "locale":"ca-AD"},
+	{"lang":"cs", "locale":"cs-CZ"},
+	{"lang":"cy", "locale":"cy-GB"},
+	{"lang":"da", "locale":"da-DK"},
+	{"lang":"de", "locale":"de-DE"},
+	{"lang":"el", "locale":"el-GR"},
+	{"lang":"en", "locale":"en-US"},
+	{"lang":"es", "locale":"es-ES"},
+	{"lang":"et", "locale":"et-EE"},
+	{"lang":"eu", "locale":"eu"},
+	{"lang":"fa", "locale":"fa-IR"},
+	{"lang":"fi", "locale":"fi-FI"},
+	{"lang":"fr", "locale":"fr-FR"},
+	{"lang":"he", "locale":"he-IL"},
+	{"lang":"hi", "locale":"hi-IN"},
+	{"lang":"hr", "locale":"hr-HR"},
+	{"lang":"hu", "locale":"hu-HU"},
+	{"lang":"id", "locale":"id-ID"},
+	{"lang":"is", "locale":"is-IS"},
+	{"lang":"it", "locale":"it-IT"},
+	{"lang":"ja", "locale":"ja-JP"},
+	{"lang":"km", "locale":"km-KH"},
+	{"lang":"ko", "locale":"ko-KR"},
+	{"lang":"la", "locale":"la"},
+	{"lang":"lt", "locale":"lt-LT"},
+	{"lang":"lv", "locale":"lv-LV"},
+	{"lang":"mn", "locale":"mn-MN"},
+	{"lang":"nb", "locale":"nb-NO"},
+	{"lang":"nl", "locale":"nl-NL"},
+	{"lang":"nn", "locale":"nn-NO"},
+	{"lang":"pl", "locale":"pl-PL"},
+	{"lang":"pt", "locale":"pt-PT"},
+	{"lang":"ro", "locale":"ro-RO"},
+	{"lang":"ru", "locale":"ru-RU"},
+	{"lang":"sk", "locale":"sk-SK"},
+	{"lang":"sl", "locale":"sl-SI"},
+	{"lang":"sr", "locale":"sr-RS"},
+	{"lang":"sv", "locale":"sv-SE"},
+	{"lang":"th", "locale":"th-TH"},
+	{"lang":"tr", "locale":"tr-TR"},
+	{"lang":"uk", "locale":"uk-UA"},
+	{"lang":"vi", "locale":"vi-VN"},
+	{"lang":"zh", "locale":"zh-CN"}
+])
+
+db.languagenames.insertMany([{"locale":"af-ZA", "languages":[
+            "Afrikaans",
+            "Afrikaans"
+]},
+{"locale":"ar", "languages":[
+            "العربية",
+            "Arabic"
+]},
+{"locale":"bg-BG", "languages":[
+            "Български",
+            "Bulgarian"
+]},
+{"locale":"ca-AD", "languages":[
+            "Català",
+            "Catalan"
+]},
+{"locale":"cs-CZ", "languages":[
+            "Čeština",
+            "Czech"
+]},
+{"locale":"cy-GB", "languages":[
+            "Cymraeg",
+            "Welsh"
+]},
+{"locale":"da-DK", "languages":[
+            "Dansk",
+            "Danish"
+]},
+{"locale":"de-AT", "languages":[
+            "Deutsch (Österreich)",
+            "German (Austria)"
+]},
+{"locale":"de-CH", "languages":[
+            "Deutsch (Schweiz)",
+            "German (Switzerland)"
+]},
+{"locale":"de-DE", "languages":[
+            "Deutsch (Deutschland)",
+            "German (Germany)"
+]},
+{"locale":"el-GR", "languages":[
+            "Ελληνικά",
+            "Greek"
+]},
+{"locale":"en-GB", "languages":[
+            "English (UK)",
+            "English (UK)"
+]},
+{"locale":"en-US", "languages":[
+            "English (US)",
+            "English (US)"
+]},
+{"locale":"es-CL", "languages":[
+            "Español (Chile)",
+            "Spanish (Chile)"
+]},
+{"locale":"es-ES", "languages":[
+            "Español (España)",
+            "Spanish (Spain)"
+]},
+{"locale":"es-MX", "languages":[
+            "Español (México)",
+            "Spanish (Mexico)"
+]},
+{"locale":"et-EE", "languages":[
+            "Eesti keel",
+            "Estonian"
+]},
+{"locale":"eu", "languages":[
+            "Euskara",
+            "Basque"
+]},
+{"locale":"fa-IR", "languages":[
+            "فارسی",
+            "Persian"
+]},
+{"locale":"fi-FI", "languages":[
+            "Suomi",
+            "Finnish"
+]},
+{"locale":"fr-CA", "languages":[
+            "Français (Canada)",
+            "French (Canada)"
+]},
+{"locale":"fr-FR", "languages":[
+            "Français (France)",
+            "French (France)"
+]},
+{"locale":"he-IL", "languages":[
+            "עברית",
+            "Hebrew"
+]},
+{"locale":"hi-IN", "languages":[
+            "हिंदी",
+            "Hindi"
+]},
+{"locale":"hr-HR", "languages":[
+            "Hrvatski",
+            "Croatian"
+]},
+{"locale":"hu-HU", "languages":[
+            "Magyar",
+            "Hungarian"
+]},
+{"locale":"id-ID", "languages":[
+            "Bahasa Indonesia",
+            "Indonesian"    
+]},
+{"locale":"is-IS", "languages":[
+            "Íslenska",
+            "Icelandic"
+]},
+{"locale":"it-IT", "languages":[
+            "Italiano",
+            "Italian"
+]},
+{"locale":"ja-JP", "languages":[
+            "日本語",
+            "Japanese"
+]},
+{"locale":"km-KH", "languages":[
+            "ភាសាខ្មែរ",
+            "Khmer"
+]},
+{"locale":"ko-KR", "languages":[
+            "한국어",
+            "Korean"
+]},
+{"locale":"la", "languages":[
+            "Latina",
+            "Latin"
+]},
+{"locale":"lt-LT", "languages":[
+            "Lietuvių kalba",
+            "Lithuanian"
+]},
+{"locale":"lv-LV", "languages":[
+            "Latviešu",
+            "Latvian"
+]},
+{"locale":"mn-MN", "languages":[
+            "Монгол",
+            "Mongolian"
+]},
+{"locale":"nb-NO", "languages":[
+            "Norsk bokmål",
+            "Norwegian (Bokmål)"
+]},
+{"locale":"nl-NL", "languages":[
+            "Nederlands",
+            "Dutch"
+]},
+{"locale":"nn-NO", "languages":[
+            "Norsk nynorsk",
+            "Norwegian (Nynorsk)"
+]},
+{"locale":"pl-PL", "languages":[
+            "Polski",
+            "Polish"
+]},
+{"locale":"pt-BR", "languages":[
+            "Português (Brasil)",
+            "Portuguese (Brazil)"
+]},
+{"locale":"pt-PT", "languages":[
+            "Português (Portugal)",
+            "Portuguese (Portugal)"
+]},
+{"locale":"ro-RO", "languages":[
+            "Română",
+            "Romanian"
+]},
+{"locale":"ru-RU", "languages":[
+            "Русский",
+            "Russian"
+]},
+{"locale":"sk-SK", "languages":[
+            "Slovenčina",
+            "Slovak"
+]},
+{"locale":"sl-SI", "languages":[
+            "Slovenščina",
+            "Slovenian"
+]},
+{"locale":"sr-RS", "languages":[
+            "Српски / Srpski",
+            "Serbian"
+]},
+{"locale":"sv-SE", "languages":[
+            "Svenska",
+            "Swedish"
+]},
+{"locale":"th-TH", "languages":[
+            "ไทย",
+            "Thai"
+]},
+{"locale":"tr-TR", "languages":[
+            "Türkçe",
+            "Turkish"
+]},
+{"locale":"uk-UA", "languages":[
+            "Українська",
+            "Ukrainian"
+]},
+{"locale":"vi-VN", "languages":[
+            "Tiếng Việt",
+            "Vietnamese"
+]},
+{"locale":"zh-CN", "languages":[
+            "中文 (中国大陆)",
+            "Chinese (PRC)"
+]},
+{"locale":"zh-TW", "languages":[
+            "中文 (台灣)",
+            "Chinese (Taiwan)"
+        ]}]);
+```
+
+1. Qué idiomas base son los que más tuitean con hashtags? Cuál con URLs? Y con @?
+2. Cómo podemos saber si los tuiteros hispanohablantes interactúan más en las noches?
+3. Cómo podemos saber de dónde son los tuiteros que más tiempo tienen en la plataforma?
+4. En intervalos de 7:00:00pm a 6:59:59am y de 7:00:00am a 6:59:59pm, de qué paises la mayoría de los tuits?
+5. De qué país son los tuiteros más famosos de nuestra colección?
