@@ -1821,6 +1821,14 @@ db.sales.insert( [
 Vamos a agrupar por `item` y vamos a crear un diccionario con todos los `quantity` en un atributo llamado `mergedSales`:
 
 ```javascript
+db.sales.aggregate( [
+   { $group: { _id: "$item", mergedSales: { $mergeObjects: "$quantity" } } }
+])
+```
+
+El resultado debe ser:
+
+```javascript
 { "_id" : "B", "mergedSales" : { "2017Q1" : 300, "2016Q3" : 100, "2016Q4" : 250 } }
 { "_id" : "A", "mergedSales" : { "2017Q1" : 500, "2017Q2" : 500, "2016Q1" : 400, "2016Q2" : 300, "2016Q3" : 0, "2016Q4" : 0 } }
 ```
@@ -2048,20 +2056,133 @@ db.grades.distinct("student_id")
 Ahora vamos a tratar de armar el query para dar respuesta a la pregunta inicial:
 
 ```javascript
-TBD por mis estimados alumnos
+db.grades.aggregate([
+	{$unwind:"$scores"},{$project:{"student_id":0}},
+	{$group:{_id:{"clase":"$class_id","eval":"$scores.type"}, "promedio":{$avg:"$scores.score"}}},
+	{$sort:{"_id.clase":1,"_id.eval":1}}])
+])
+```
+
+Nuestro resultado es:
+
+```javascript
+[
+  { _id: { clase: 0, eval: 'exam' }, promedio: 46.224870203904395 },
+  { _id: { clase: 0, eval: 'homework' }, promedio: 49.6592370300883 },
+  { _id: { clase: 0, eval: 'quiz' }, promedio: 49.38124259163944 },
+  { _id: { clase: 1, eval: 'exam' }, promedio: 50.78357850094616 },
+  { _id: { clase: 1, eval: 'homework' }, promedio: 49.18339520790678 },
+  { _id: { clase: 1, eval: 'quiz' }, promedio: 51.68365158823541 },
+  { _id: { clase: 2, eval: 'exam' }, promedio: 51.212269415215715 },
+  { _id: { clase: 2, eval: 'homework' }, promedio: 48.635517471345494 },
+  { _id: { clase: 2, eval: 'quiz' }, promedio: 49.22183768413837 },
+  { _id: { clase: 3, eval: 'exam' }, promedio: 49.24088016851434 },
+  { _id: { clase: 3, eval: 'homework' }, promedio: 49.32958980280401 },
+  { _id: { clase: 3, eval: 'quiz' }, promedio: 49.70705542324686 },
+  { _id: { clase: 4, eval: 'exam' }, promedio: 48.45214274611575 },
+  { _id: { clase: 4, eval: 'homework' }, promedio: 51.336198599567986 },
+  { _id: { clase: 4, eval: 'quiz' }, promedio: 52.186677392814204 },
+  { _id: { clase: 5, eval: 'exam' }, promedio: 51.91626171544547 },
+  { _id: { clase: 5, eval: 'homework' }, promedio: 49.71133512774075 },
+  { _id: { clase: 5, eval: 'quiz' }, promedio: 48.17571458478485 },
+  { _id: { clase: 6, eval: 'exam' }, promedio: 54.20236080762028 },
+  { _id: { clase: 6, eval: 'homework' }, promedio: 49.441178234623834 },
+  ...,
+  ...,
+  ...,
+]
 ```
 
 ### Stage `$lookup`
 
-Prox clase!
+Este stage nos permite hacer un **join** entre la colección sobre la que estamos operando y una colección de **lookup**.
 
+Se recomienda que ambas colecciones estén **en la misma BD**.
 
+Al igual que las operaciones join en SQL, necesitamos que ambas colecciones tengan al menos 1 atributo idéntico cada uno **los cuales podamos asociar con una condición de igualdad**. Recordemos que en MongoDB los `ObjectID` no siguen (ni tienen por qué seguir) las mejores prácticas de identificadores que en SQL.
 
+Para este ejercicio vamos a importar 2 colecciones a la BD `lookup`:
 
+```javascript
+use lookup
 
+db.orders.insert([
+   { "_id" : 1, "item" : "almonds", "price" : 12, "quantity" : 2 },
+   { "_id" : 2, "item" : "pecans", "price" : 20, "quantity" : 1 },
+   { "_id" : 3  }
+])
 
+db.inventory.insert([
+   { "_id" : 1, "sku" : "almonds", "description": "product 1", "instock" : 120 },
+   { "_id" : 2, "sku" : "bread", "description": "product 2", "instock" : 80 },
+   { "_id" : 3, "sku" : "cashews", "description": "product 3", "instock" : 60 },
+   { "_id" : 4, "sku" : "pecans", "description": "product 4", "instock" : 70 },
+   { "_id" : 5, "sku": null, "description": "Incomplete" },
+   { "_id" : 6 }
+])
+```
 
+Y luego corremos el operador `$lookup` como parte de un pipeline de la función `.aggregate()`
 
+```javascript
+db.orders.aggregate([
+   {
+     $lookup:
+       {
+         from: "inventory",
+         localField: "item",
+         foreignField: "sku",
+         as: "inventory_docs"
+       }
+  }
+])
+``` 
 
+El resultado es:
 
+```javascript
+{
+   "_id" : 1,
+   "item" : "almonds",
+   "price" : 12,
+   "quantity" : 2,
+   "inventory_docs" : [
+      { "_id" : 1, "sku" : "almonds", "description" : "product 1", "instock" : 120 }
+   ]
+}
+{
+   "_id" : 2,
+   "item" : "pecans",
+   "price" : 20,
+   "quantity" : 1,
+   "inventory_docs" : [
+      { "_id" : 4, "sku" : "pecans", "description" : "product 4", "instock" : 70 }
+   ]
+}
+{
+   "_id" : 3,
+   "inventory_docs" : [
+      { "_id" : 5, "sku" : null, "description" : "Incomplete" },
+      { "_id" : 6 }
+   ]
+}
+```
+
+Posterior a esto podríamos continuar el pipeline, por ejemplo, para contar los `inventory_docs` por diccionario:
+
+```javascript
+db.orders.aggregate([
+   {
+     $lookup:
+       {
+         from: "inventory",
+         localField: "item",
+         foreignField: "sku",
+         as: "inventory_docs"
+       }
+  },
+  {$unwind:"$inventory_docs"},
+  {$group: {_id:"$_id", numDocs:{$count:{}}}}
+])
+```
 
