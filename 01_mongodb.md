@@ -2498,10 +2498,11 @@ Vamos ahora a conectarnos al APILegslativo a través de un cliente externo para 
 2. Seguir las instrucciones para login o registro.
 3. Asegurarnos de que estamos guardando el token en algún lado para no perderlo.
 4. Bajar de aquí el [Postman](https://www.postman.com/downloads/)
-5. Entrar el URL [https://backend.apilegislativo.com:5000/iniciativa/aprobada](https://backend.apilegislativo.com:5000/iniciativa/aprobada)
-6. Crear un _header HTTP_ que se llame _Authorization_.
-7. Asignarle el valor del `id_token`.
-8. Invocar el API
+5. Checar los _endpoints_ que podemos consultar con el API en [https://backend.apilegislativo.com:5000/doc/](https://backend.apilegislativo.com:5000/doc/)
+6. Entrar el URL [https://backend.apilegislativo.com:5000/iniciativa/aprobada](https://backend.apilegislativo.com:5000/iniciativa/aprobada)
+7. Crear un _header HTTP_ que se llame _Authorization_.
+8. Asignarle el valor del `id_token`.
+9. Invocar el API
 
 Ya que comprobamos que si se puede conectar, entonces hagamos lo mismo pero con un pequeño script de Python:
 
