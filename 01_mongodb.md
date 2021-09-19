@@ -2463,3 +2463,81 @@ db.languagenames.insertMany([{"locale":"af-ZA", "languages":[
 3. Cómo podemos saber de dónde son los tuiteros que más tiempo tienen en la plataforma?
 4. En intervalos de 7:00:00pm a 6:59:59am y de 7:00:00am a 6:59:59pm, de qué paises la mayoría de los tuits?
 5. De qué país son los tuiteros más famosos de nuestra colección?
+
+### Extracción de Datos de APIs con MongoDB
+
+Las APIs son programitas que corren en servidores y que generalmente ejecutan las 4 operaciones básicas sobre BD:
+1. CREATE
+2. RETRIEVE
+3. UPDATE
+4. DELETE
+
+En conjunto estas operaciones las llamamos CRUD.
+
+En el 2000 a Roy Felding se le ocurrió que estos "verbos" se parecían un buen a los "verbos" del protocolo HTML:
+1. CREATE
+2. GET
+3. POST
+4. DELETE
+
+Y desarrolló un protocolo encima de HTTP para poder desarrollar servicios web que "hablaran HTTP de forma nativa".
+
+Y como suele pasar, un chico de licenciatura le puso en la torre a DECADAS de estándares y desarrollos empresariales, de revisiones, estándares, working groups y otras formas de no hacer las cosas en la búsqueda de INTEROPERABILIDAD DE SISTEMAS.
+
+Cómo funciona? Así:
+
+![image](https://user-images.githubusercontent.com/1316464/133912160-821ec83f-e292-4660-8003-502f59f8710f.png)
+
+Y usando los verbos HTTP así:
+
+![image](https://user-images.githubusercontent.com/1316464/133912179-61e60d4b-5a05-4884-bbe6-fc8bc08559b5.png)
+
+Vamos ahora a conectarnos al APILegslativo a través de un cliente externo para probar:
+
+1. Entrar a [APILegislativo](https://backend.apilegislativo.com:5000/).
+2. Seguir las instrucciones para login o registro.
+3. Asegurarnos de que estamos guardando el token en algún lado para no perderlo.
+4. Bajar de aquí el [Postman](https://www.postman.com/downloads/)
+5. Entrar el URL [https://backend.apilegislativo.com:5000/iniciativa/aprobada](https://backend.apilegislativo.com:5000/iniciativa/aprobada)
+6. Crear un _header HTTP_ que se llame _Authorization_.
+7. Asignarle el valor del `id_token`.
+8. Invocar el API
+
+Ya que comprobamos que si se puede conectar, entonces hagamos lo mismo pero con un pequeño script de Python:
+
+```python
+import requests
+import pymongo
+
+url = "https://api.apilegislativo.com/iniciativa/aprobada/"
+
+payload={}
+headers = {
+  'Authorization' : 'eyJraWQiOiIwbVhrbzR4bDBtOTFUOUMxaFNHbCtsZmJCY3VMdVVFQjFmQWxacUtMMFVNPSIsImFsZyI6IlJTMjU2In0.eyJhdF9oYXNoIjoiUHYyOTFZVU5rQTkxMlBuLWVDYVlVQSIsInN1YiI6IjhjMjFjMjc2LTk5NGEtNGI3ZC05NTYxLTgxYjU1YmY3MDNkMiIsImF1ZCI6IjUxMWN1YTRsdTRrYW9zdW9qZmo5NDhmOTB0IiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImV2ZW50X2lkIjoiZDA3ZGJkYzgtYTVhMS00YTJmLTgwZWMtNDNkNmM1YjlhMDNjIiwidG9rZW5fdXNlIjoiaWQiLCJhdXRoX3RpbWUiOjE2MzE5Mjc1NjAsImlzcyI6Imh0dHBzOlwvXC9jb2duaXRvLWlkcC51cy1lYXN0LTEuYW1hem9uYXdzLmNvbVwvdXMtZWFzdC0xX2RSM0FaOE8ybyIsImNvZ25pdG86dXNlcm5hbWUiOiI4YzIxYzI3Ni05OTRhLTRiN2QtOTU2MS04MWI1NWJmNzAzZDIiLCJleHAiOjE2MzE5NDE5NjAsImlhdCI6MTYzMTkyNzU2MCwiZW1haWwiOiJqZXN1c0Bzb2NpZWRhdC5vcmcifQ.fF61wGHpUd8x4ev8X1u6PpacCawajILIUMEjGHNsSP7oGRWcawCbAKpyKGKqWNTpFbRkRLNz7TtP_bZoRzfy95E2UK08-_vBrFBw4f8NKhKIHJCIYAfcVVmflHM0rtOR-CE2CjBKHtdG7POJXHEaT6miuUyWRyOM5lK9bfQhLFn5m4O1swzxpsEciNmNtR_7uVnfP_7TfqfrmsSoEf0BLh-yZ6t3NzsEqK4HxZfEh9Zg6us4t0BVu5kt7L-kyiggXEjNZ9MLQFBlItwwI-rvF5PmylzQizGhZ5LKqB3S42u1GiBaW3bxhJtC4QZOCMz4mNZiinFAn3U7wN0e9l8okQ'
+}
+
+response = requests.request("GET", url, headers=headers, data=payload)
+
+myclient = pymongo.MongoClient("mongodb://192.168.68.112:27017/")
+mydb = myclient["apilegislativo"]
+mycol = mydb["iniciativasaprobadas"]
+iniciativas = response.json()
+x = mycol.insert_many(iniciativas["iniciativas"])
+```
+
+Expliquemos línea por línea:
+
+1. importamos librerías que vamos a usar
+2. Creamos una variable con el URL del _endpoint_ del API al cual vamos a lanzar la petición
+3. Creamos un _dict_ con el payload (que va vacío porque este _endpoint_ no admite parámetros)
+4. Creamos otro _dict_ con los headers. Aquí solo va 1 header llamado _Authorization_ y cuyo valor es el `id_token` que extrajimos del proceso de login arriba
+5. mandamos llamar el API con el método `requests.request`, y asignando el "verbo" **`GET`**. Al terminar de ejecutarse esta línea ya tenemos la respuesta del API dentro del objeto `response`
+6. Creamos un _client_ de MongoDB, es decir, un objetito que nos permitirá conectarnos a la BD local. Uds pongan obviamente su IP address o su localhost.
+7. `mydb = myclient["apilegislativo"]` es exactamente lo mismo que `use apilegislativo`
+8. `mycol = mydb["iniciativasaprobadas"]` es exactamente lo mismo que `db.iniciativasaprobadas`
+9. convertimos el contenido de `response` en formato JSON con el método `json()` y lo guardamos en la var `iniciativas`.
+10. insertamos el arreglo de iniciativas en la colección `iniciativasaprobadas`
+   - NO SIN ANTES EXTRAER el elemento que nos interesa insertar.
+   - Es IMPORTANTÍSIMO primero explorar como nos regresa el objeto el API porque puede ser un solo objeto sin ningún atributo mas que un arreglo de documentos, y entonces el `insert_many()` va a fallar porque espera un arreglo cuando le estamos mandando 1 solo elemento
+
+
