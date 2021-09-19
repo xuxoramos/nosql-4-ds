@@ -2499,7 +2499,7 @@ Vamos ahora a conectarnos al APILegslativo a través de un cliente externo para 
 3. Asegurarnos de que estamos guardando el token en algún lado para no perderlo.
 4. Bajar de aquí el [Postman](https://www.postman.com/downloads/)
 5. Checar los _endpoints_ que podemos consultar con el API en [https://backend.apilegislativo.com:5000/doc/](https://backend.apilegislativo.com:5000/doc/)
-6. Entrar el URL [https://backend.apilegislativo.com:5000/iniciativa/aprobada](https://backend.apilegislativo.com:5000/iniciativa/aprobada)
+6. Entrar el URL [https://api.apilegislativo.com/iniciativa/aprobada](https://backend.apilegislativo.com:5000/iniciativa/aprobada) EN EL CAMPO `URL` DENTRO DE POSTMAN.
 7. Crear un _header HTTP_ que se llame _Authorization_.
 8. Asignarle el valor del `id_token`.
 9. Invocar el API
@@ -2514,16 +2514,16 @@ url = "https://api.apilegislativo.com/iniciativa/aprobada/"
 
 payload={}
 headers = {
-  'Authorization' : 'eyJraWQiOiIwbVhrbzR4bDBtOTFUOUMxaFNHbCtsZmJCY3VMdVVFQjFmQWxacUtMMFVNPSIsImFsZyI6IlJTMjU2In0.eyJhdF9oYXNoIjoiUHYyOTFZVU5rQTkxMlBuLWVDYVlVQSIsInN1YiI6IjhjMjFjMjc2LTk5NGEtNGI3ZC05NTYxLTgxYjU1YmY3MDNkMiIsImF1ZCI6IjUxMWN1YTRsdTRrYW9zdW9qZmo5NDhmOTB0IiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImV2ZW50X2lkIjoiZDA3ZGJkYzgtYTVhMS00YTJmLTgwZWMtNDNkNmM1YjlhMDNjIiwidG9rZW5fdXNlIjoiaWQiLCJhdXRoX3RpbWUiOjE2MzE5Mjc1NjAsImlzcyI6Imh0dHBzOlwvXC9jb2duaXRvLWlkcC51cy1lYXN0LTEuYW1hem9uYXdzLmNvbVwvdXMtZWFzdC0xX2RSM0FaOE8ybyIsImNvZ25pdG86dXNlcm5hbWUiOiI4YzIxYzI3Ni05OTRhLTRiN2QtOTU2MS04MWI1NWJmNzAzZDIiLCJleHAiOjE2MzE5NDE5NjAsImlhdCI6MTYzMTkyNzU2MCwiZW1haWwiOiJqZXN1c0Bzb2NpZWRhdC5vcmcifQ.fF61wGHpUd8x4ev8X1u6PpacCawajILIUMEjGHNsSP7oGRWcawCbAKpyKGKqWNTpFbRkRLNz7TtP_bZoRzfy95E2UK08-_vBrFBw4f8NKhKIHJCIYAfcVVmflHM0rtOR-CE2CjBKHtdG7POJXHEaT6miuUyWRyOM5lK9bfQhLFn5m4O1swzxpsEciNmNtR_7uVnfP_7TfqfrmsSoEf0BLh-yZ6t3NzsEqK4HxZfEh9Zg6us4t0BVu5kt7L-kyiggXEjNZ9MLQFBlItwwI-rvF5PmylzQizGhZ5LKqB3S42u1GiBaW3bxhJtC4QZOCMz4mNZiinFAn3U7wN0e9l8okQ'
+  'Authorization': 'eyJraWQiOiIwbVhrbzR4bDBtOTFUOUMxaFNHbCtsZmJCY3VMdVVFQjFmQWxacUtMMFVNPSIsImFsZyI6IlJTMjU2In0.eyJhdF9oYXNoIjoiQW1Gb1E5TUY4a0xpUFQzWklnUmJOQSIsInN1YiI6IjhjMjFjMjc2LTk5NGEtNGI3ZC05NTYxLTgxYjU1YmY3MDNkMiIsImF1ZCI6IjUxMWN1YTRsdTRrYW9zdW9qZmo5NDhmOTB0IiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImV2ZW50X2lkIjoiYjlhMWQ3OTYtZTAyMy00ZDk1LTlkZDktOGNhMjFjMDdhNTUxIiwidG9rZW5fdXNlIjoiaWQiLCJhdXRoX3RpbWUiOjE2MzIwMTU5OTEsImlzcyI6Imh0dHBzOlwvXC9jb2duaXRvLWlkcC51cy1lYXN0LTEuYW1hem9uYXdzLmNvbVwvdXMtZWFzdC0xX2RSM0FaOE8ybyIsImNvZ25pdG86dXNlcm5hbWUiOiI4YzIxYzI3Ni05OTRhLTRiN2QtOTU2MS04MWI1NWJmNzAzZDIiLCJleHAiOjE2MzIwMzAzOTEsImlhdCI6MTYzMjAxNTk5MSwiZW1haWwiOiJqZXN1c0Bzb2NpZWRhdC5vcmcifQ.TRF68Wkhtsr5Bs0ByS91aKBLWLeLob8NO4DjSnLZkiKyVTGa5NS-cVfolPcvUqNpaanuJ6s3CbXZjFoc6lKPNrMB40KrZtA4TlZompYnAstuSNGzaoTMtV4lgyZUQE3AyZ_or76EzBowJyOynUmQDVDwP-FxKE-hKgl92A1C-0aqW8YrunGjvw_zaAD1SypfslxFL21mLcAMzM7ADiHUEp9BaZ5uTdsRxqzSa56FC2Txs0S1anhm_h2uIN2WDQCtZpm6QS8ta1yQ0OtIVMpwJuNQTriTLW2RX8Mo80d8pUIGQhKcZi81oyt2uy5kMCD6WYIw-w9f-6RLQTskyowC_w'
 }
 
 response = requests.request("GET", url, headers=headers, data=payload)
 
-myclient = pymongo.MongoClient("mongodb://192.168.68.112:27017/")
-mydb = myclient["apilegislativo"]
-mycol = mydb["iniciativasaprobadas"]
+myclient = pymongo.MongoClient("mongodb://192.168.68.112:27017/") # similar a ejecutar mongosh
+mydb = myclient["apilegislativo"] # == use apilegislativo
+mycol = mydb["iniciativasaprobadas"] # == db.iniciativasaprobadas...
 iniciativas = response.json()
-x = mycol.insert_many(iniciativas["iniciativas"])
+x = mycol.insert_many(iniciativas["iniciativas"]) # find({"iniciativas:{$exists:true}"})
 ```
 
 Expliquemos línea por línea:
