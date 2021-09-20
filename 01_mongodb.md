@@ -2459,10 +2459,84 @@ db.languagenames.insertMany([{"locale":"af-ZA", "languages":[
 ```
 
 1. Qué idiomas base son los que más tuitean con hashtags? Cuál con URLs? Y con @?
-2. Cómo podemos saber si los tuiteros hispanohablantes interactúan más en las noches?
-3. Cómo podemos saber de dónde son los tuiteros que más tiempo tienen en la plataforma?
-4. En intervalos de 7:00:00pm a 6:59:59am y de 7:00:00am a 6:59:59pm, de qué paises la mayoría de los tuits?
-5. De qué país son los tuiteros más famosos de nuestra colección?
+
+```javascript
+# Con Hashtags
+db.tweets.aggregate([
+	{$lookup: {from:"primarydialects","localField":"user.lang","foreignField":"lang","as":"language"}},
+	{$lookup: {from:"languagenames","localField":"language.locale","foreignField":"locale","as":"fulllocale"}},
+	{$match:{"entities.hashtags":{$not:{$size:0}}}},
+	{$group: {_id:"$fulllocale.languages", "conteo": {$count:{}}}}
+])
+
+# Con URLs
+db.tweets.aggregate([
+	{$lookup: {from:"primarydialects","localField":"user.lang","foreignField":"lang","as":"language"}},
+	{$lookup: {from:"languagenames","localField":"language.locale","foreignField":"locale","as":"fulllocale"}},
+	{$match:{"entities.urls":{$not:{$size:0}}}},
+	{$group: {_id:"$fulllocale.languages", "conteo": {$count:{}}}}
+])
+
+# Con User Mentions
+db.tweets.aggregate([
+	{$lookup: {from:"primarydialects","localField":"user.lang","foreignField":"lang","as":"language"}},
+	{$lookup: {from:"languagenames","localField":"language.locale","foreignField":"locale","as":"fulllocale"}},
+	{$match:{"entities.user_mentions":{$not:{$size:0}}}},
+	{$group: {_id:"$fulllocale.languages", "conteo": {$count:{}}}}
+])
+```
+
+➡️ _OFERTA!! Puntos extra por jalar los 3 resultados en 1 solo query!_ ➡️
+
+➡️ _EFICIENCIA?_ ➡️
+
+```javasript
+db.tweets.aggregate([
+	{$lookup: {from:"primarydialects","localField":"user.lang","foreignField":"lang","as":"language"}},
+	{$lookup: {from:"languagenames","localField":"language.locale","foreignField":"locale","as":"fulllocale"}},
+	{$match:{"entities.user_mentions":{$not:{$size:0}}}},
+	{$group: {_id:"$fulllocale.languages", "conteo": {$count:{}}}}
+]).explain()
+
+# 4413 ms
+```
+
+_**VERSUS**_
+
+```javasript
+db.tweets.aggregate([
+	{$match:{"entities.user_mentions":{$not:{$size:0}}}},
+	{$group: {_id:"$user.lang", "conteo": {$count:{}}}},
+	{$lookup: {from:"primarydialects","localField":"_id","foreignField":"lang","as":"language"}},
+	{$lookup: {from:"languagenames","localField":"language.locale","foreignField":"locale","as":"fulllocale"}},
+]).explain()
+
+# 4 ms 😲
+```
+
+2. Qué idioma base es el que más hashtags usa en sus tuits?
+
+Planteamiento: "sum del size de los arrays previo filtrado"
+
+```javasript
+db.tweets.aggregate([
+	{$group: {_id:"$user.lang", "totalHashtags": {$sum:{$size:"$entities.hashtags"}}}},
+	{$lookup: {from:"primarydialects","localField":"_id","foreignField":"lang","as":"language"}},
+	{$lookup: {from:"languagenames","localField":"language.locale","foreignField":"locale","as":"fulllocale"}},
+	{$project:{"language":0}},
+	{$sort:{"totalHashtags":-1}}
+])
+```
+
+4. Cómo podemos saber si los tuiteros hispanohablantes interactúan más en las noches?
+5. Cómo podemos saber de dónde son los tuiteros que más tiempo tienen en la plataforma?
+6. En intervalos de 7:00:00pm a 6:59:59am y de 7:00:00am a 6:59:59pm, de qué paises la mayoría de los tuits?
+7. De qué país son los tuiteros más famosos de nuestra colección?
+
+** Tarea **
+1. Valor: TBD
+2. Deadline: Jueves 23, 23:59:59
+3. Método de entrega: Archivo MD o JS en repo de Github
 
 ### Extracción de Datos de APIs con MongoDB
 
