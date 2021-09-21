@@ -2490,7 +2490,7 @@ db.tweets.aggregate([
 
 ➡️ _EFICIENCIA?_ ➡️
 
-```javasript
+```javascript
 db.tweets.aggregate([
 	{$lookup: {from:"primarydialects","localField":"user.lang","foreignField":"lang","as":"language"}},
 	{$lookup: {from:"languagenames","localField":"language.locale","foreignField":"locale","as":"fulllocale"}},
@@ -2503,7 +2503,7 @@ db.tweets.aggregate([
 
 _**VERSUS**_
 
-```javasript
+```javascript
 db.tweets.aggregate([
 	{$match:{"entities.user_mentions":{$not:{$size:0}}}},
 	{$group: {_id:"$user.lang", "conteo": {$count:{}}}},
@@ -2518,7 +2518,7 @@ db.tweets.aggregate([
 
 Planteamiento: "sum del size de los arrays previo filtrado"
 
-```javasript
+```javascript
 db.tweets.aggregate([
 	{$group: {_id:"$user.lang", "totalHashtags": {$sum:{$size:"$entities.hashtags"}}}},
 	{$lookup: {from:"primarydialects","localField":"_id","foreignField":"lang","as":"language"}},
