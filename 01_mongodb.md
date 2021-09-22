@@ -2486,9 +2486,9 @@ db.tweets.aggregate([
 ])
 ```
 
-➡️ _OFERTA!! Puntos extra por jalar los 3 resultados en 1 solo query!_ ➡️
+⚠️ _OFERTA!! Puntos extra por jalar los 3 resultados en 1 solo query!_ ⚠️
 
-➡️ _EFICIENCIA?_ ➡️
+➡️ _Podemos hacer este query más eficiente?_ ➡️
 
 ```javascript
 db.tweets.aggregate([
@@ -2501,7 +2501,7 @@ db.tweets.aggregate([
 # 4413 ms
 ```
 
-_**VERSUS**_
+⚔️ _**VERSUS**_ ⚔️
 
 ```javascript
 db.tweets.aggregate([
@@ -2533,10 +2533,11 @@ db.tweets.aggregate([
 6. En intervalos de 7:00:00pm a 6:59:59am y de 7:00:00am a 6:59:59pm, de qué paises la mayoría de los tuits?
 7. De qué país son los tuiteros más famosos de nuestra colección?
 
-_**Tarea**_
-1. Valor: 8/20 (i.e. 5 puntos del total de 20 que valen todas las tareas - la tarea anterior valía 5)
-2. Deadline: Jueves 23, 23:59:59
-3. Método de entrega: Archivo MD o JS en repo de Github
+🧰 _**Tarea**_ 🧰
+1. Ejercicios 4 al 6 arriba
+2. Valor: 8/20 (i.e. 5 puntos del total de 20 que valen todas las tareas - la tarea anterior valía 5)
+3. Deadline: Jueves 23, 23:59:59
+4. Método de entrega: Archivo MD o JS en repo de Github
 
 ### Extracción de Datos de APIs con MongoDB
 
