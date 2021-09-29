@@ -2529,9 +2529,25 @@ db.tweets.aggregate([
 ```
 
 4. Cómo podemos saber si los tuiteros hispanohablantes interactúan más en las noches?
-5. Cómo podemos saber de dónde son los tuiteros que más tiempo tienen en la plataforma?
-6. En intervalos de 7:00:00pm a 6:59:59am y de 7:00:00am a 6:59:59pm, de qué paises la mayoría de los tuits?
-7. De qué país son los tuiteros más famosos de nuestra colección?
+
+- Breakdown por lenguaje y cerrando la búsqueda a las 20h
+- Usando regexp y con ellas hacer match de horas [19h, 20h y en adelante]
+- Crear variable artificial para dividir horas y a través de la cual agrupar
+- Agrupar por lang y por substring de hora
+
+6. Cómo podemos saber de dónde son los tuiteros que más tiempo tienen en la plataforma?
+
+- Sobreescribir el campo created_at SOLO DURANTE EL PIPELINE, y ordenar
+- Armar la fecha con extracción de partes individuales, join con una BD externa de meses, reensamblar fecha con componentes individuales y ordernar
+
+7. En intervalos de 7:00:00pm a 6:59:59am y de 7:00:00am a 6:59:59pm, de qué paises la mayoría de los tuits?
+
+- $lookup de colecciones de lenguajes/idiomas, match con regexp de created at, agrupación por timezone, y conteo
+
+8. De qué país son los tuiteros más famosos de nuestra colección?
+
+- Seleccionar con project, ordenar por friends_count (cuestionable porque está el campo followers_count) y mostrar el top N - planteamiento cuestionable porque hay N tuits de 1 usuario y cada tuit en tiempo T tiene variables de usuario que otro tuit del mismo usuario en tiempo T+10
+- Nadie lo hizo así...ni yo :lol:
 
 🧰 _**Tarea**_ 🧰
 1. Ejercicios 4 al 6 arriba
