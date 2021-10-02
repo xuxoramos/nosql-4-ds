@@ -104,5 +104,8 @@ A continuación el temario, fecha por fecha:
 | 11             | 2021/09/08      | **CLASE A REPONER**
 | 12             | 2021/09/13      | [Aggregations, pipelines, grouping](https://xuxoramos.github.io/nosql-4-ds/01_mongodb) / [video](https://drive.google.com/file/d/1mpZTq96WXuJV47VJ8OPHKczbrzrUIddd/view?usp=sharing)
 | 13             | 2021/09/15      | [Grouping, funciones de fecha, agregadores (count, avg, stdev, sum)](https://xuxoramos.github.io/nosql-4-ds/01_mongodb) / [video](https://drive.google.com/file/d/1wq3iDtXWOkXy1pDBP-ZV2Lyx65rQBjUe/view?usp=sharing)
-| 14             | **Sesión de reposición del 2021/08/18**      | [API Legislativo,  MongoDB y nuestro 1er ETL](https://xuxoramos.github.io/nosql-4-ds/01_mongodb) / [video](https://drive.google.com/file/d/1gVCyjQOJ1mHX7_yykdLRI8mhRA_cC8Lx/view?usp=sharing)
+| 5             | **Sesión de reposición del 2021/08/18**      | [API Legislativo,  MongoDB y nuestro 1er ETL](https://xuxoramos.github.io/nosql-4-ds/01_mongodb) / [video](https://drive.google.com/file/d/1gVCyjQOJ1mHX7_yykdLRI8mhRA_cC8Lx/view?usp=sharing)
 | 15             |   2021/09/20    | [Stages `$mergeObjects` y `$lookup`. Ejercicios integradores. Tarea 2](https://xuxoramos.github.io/nosql-4-ds/01_mongodb) / [video](https://drive.google.com/file/d/1kIU8YQlX5SqxfdN2JP0d34q_e8ExIYel/view?usp=sharing)
+| 16             |   2021/09/22    | [Presentación del APILegislativo](https://drive.google.com/file/d/19sXSr-qu9qqpIpM7Kr8DNoCvAUcn9GFP/view?usp=sharing) / [video](https://drive.google.com/file/d/1-syp_3A1cD-kOOAUhP1Bl_Cox6m9QxxU/view?usp=sharing)
+| 17             |   2021/09/27    | **CLASE A REPONER**
+| 18             |   2021/09/29    | [Ejercicios](https://xuxoramos.github.io/nosql-4-ds/01_mongodb) / [video](https://drive.google.com/file/d/16_L00-V1JQLs1T0o2wnbKHxxU4GPfwu9/view?usp=sharing)
