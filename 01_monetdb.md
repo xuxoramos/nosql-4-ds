@@ -228,6 +228,8 @@ join rental r using (inventory_id)
 join payment p using (rental_id);
 ```
 
+Este query está haciendo join en 7 tablas, y forzosamente, al hacer join, dadas las cardinalidades de las relaciones, tendremos datos repetidos, y por tanto se vuelve candidato perfecto para formar un esquema _Big Table_ y por tanto, se volverá bastante eficiente guardarlo en una BD columnar.
+
 ```
 rental_id|inventory_id|film_id|category_id|actor_id|first_name |last_name   |last_update        |last_update        |title                 |description                                                                                                         |release_year|language_id|original_language_id|rental_duration|rental_rate|length|replacement_cost|rating|last_update        |special_features                                        |fulltext                                                                                                                                                                            |last_update        |name       |last_update        |store_id|last_update        |rental_date        |customer_id|return_date        |staff_id|last_update        |payment_id|customer_id|staff_id|amount|payment_date       |
 ---------+------------+-------+-----------+--------+-----------+------------+-------------------+-------------------+----------------------+--------------------------------------------------------------------------------------------------------------------+------------+-----------+--------------------+---------------+-----------+------+----------------+------+-------------------+--------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------+-----------+-------------------+--------+-------------------+-------------------+-----------+-------------------+--------+-------------------+----------+-----------+--------+------+-------------------+
@@ -259,5 +261,7 @@ rental_id|inventory_id|film_id|category_id|actor_id|first_name |last_name   |las
      2363|        3497|    766|          7|      67|JESSICA    |BAILEY      |2006-02-15 04:34:33|2006-02-15 05:05:03|SAVANNAH TOWN         |A Awe-Inspiring Tale of a Astronaut And a Database Administrator who must Chase a Secret Agent in The Gulf of Mexico|        2006|          1|                    |              5|       0.99|    84|           25.99|PG-13 |2006-02-15 05:03:42|{Commentaries,Deleted Scenes,Behind the Scenes}         |'administr':14 'agent':20 'astronaut':10 'awe':5 'awe-inspir':4 'chase':17 'databas':13 'gulf':23 'inspir':6 'mexico':25 'must':16 'savannah':1 'secret':19 'tale':7 'town':2       |2006-02-15 05:07:09|Drama      |2006-02-15 04:46:27|       1|2006-02-15 05:09:17|2005-06-18 13:33:59|          1|2005-06-19 17:40:59|       1|2006-02-15 21:30:53|         8|          1|       2|  0.99|2005-06-18 13:33:59|
 ```
 
+## Instalando MonetDB
 
+_Ver la documentación e instalar el MonetDB para el Miércoles_
 
