@@ -279,7 +279,7 @@ Y poner el contenido del 2o codeblockde abajo. 👀OJO👀 deben reemplazar la p
 lsb_release -cs
 ```
 
-Para los que tienen Ubuntu 20.04, la salida será `focal`. 
+Para los que tienen Ubuntu 20.04, la salida será `focal`. PAra los que tienen Ubuntu 18.04 será `bionic`. **No olviden quitar los corchetes!**
 
 El contenido del archivo debe ser:
 
@@ -301,6 +301,12 @@ sudo apt-key finger
 ```
 
 La llave para el entry `/etc/apt/trusted.gpg.d/monetdb.gpg` deberá ser `8289 A5F5 75C4 9F50 22F8 EE20 F654 63E2 DF0E 54F3`.
+
+En Ubuntu 18.04 es posible que tengamos que instalar un paquete de certificados:
+
+```console
+sudo apt install ca-certificates
+```
 
 Después de esto ya se puede instalar el MonetDB:
 
@@ -430,8 +436,3 @@ Vamos ahora a importar la BD que descargamos:
 ```console
 mclient -u voc -d voc < voc_dump.sql
 ```
-
-
-
-
-
