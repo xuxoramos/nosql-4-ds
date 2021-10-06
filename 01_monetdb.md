@@ -309,3 +309,8 @@ sudo apt update
 
 sudo apt install monetdb5-sql monetdb-client
 ```
+
+Contrario a PostgreSQL, los Ubuntu que corren dentro de Windows no soportan que los usuarios definan servicios, osea, que haya programas que arranquen junto con el sistema operativo, porque pues este Ubuntu no "arranca" en realidad.
+
+Por eso tenemos que iniciar el MonetDB a pata 🐾.
+
