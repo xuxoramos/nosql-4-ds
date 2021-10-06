@@ -269,13 +269,13 @@ Deben tener instalado el Ubuntu 18.04 o 20.04 desde la Microsoft Store, o bien u
 
 Crear el siguiente archivo con el comando `nano`:
 
-```bash
+```console
 sudo nano /etc/apt/sources.list.d/monetdb.list
 ```
 
 Y poner el contenido del 2o codeblockde abajo. 👀OJO👀 deben reemplazar la palabra `suite` con el **nombre del release de ubuntu**. Eso lo pueden saber con la salida del comando
 
-```bash
+```console
 lsb_release -cs
 ```
 
@@ -283,20 +283,20 @@ Para los que tienen Ubuntu 20.04, la salida será `focal`.
 
 El contenido del archivo debe ser:
 
-```bash
+```console
 deb https://dev.monetdb.org/downloads/deb/ [suite] monetdb
 deb-src https://dev.monetdb.org/downloads/deb/ [suite] monetdb
 ```
 
 El siguiente comando instalará la llave pública del monetdb. Esto es para comprobar que la instalación es válida.
 
-```bash
+```console
 sudo wget --output-document=/etc/apt/trusted.gpg.d/monetdb.gpg https://www.monetdb.org/downloads/MonetDB-GPG-KEY.gpg
 ```
 
 Ahora vamos a validar la instalación de la llave con:
 
-```bash
+```console
 sudo apt-key finger
 ```
 
@@ -304,7 +304,7 @@ La llave para el entry `/etc/apt/trusted.gpg.d/monetdb.gpg` deberá ser `8289 A5
 
 Después de esto ya se puede instalar el MonetDB:
 
-```bash
+```console
 sudo apt update
 
 sudo apt install monetdb5-sql monetdb-client
@@ -314,3 +314,63 @@ Contrario a PostgreSQL, los Ubuntu que corren dentro de Windows no soportan que 
 
 Por eso tenemos que iniciar el MonetDB a pata 🐾.
 
+## Cómo funcionan las BDs columnares?
+
+Funcionan en cluster, básicamente.
+
+Idóneamente debemos tener 1 nodo maestro y 1 o más nodos `worker`.
+
+![image](https://user-images.githubusercontent.com/1316464/136245765-818307c7-746f-4c41-987a-bacf6663877f.png)
+
+Cada nodo worker puede ser de **réplica**, o de _**sharding**_.
+
+En la réplica, 2 nodos tienen la mismita información, en uno se escribe y en otro se lee.
+
+Esta arquitectura en bases de datos relacionales sirve para distribuir la carga entre los sistemas transaccionales y los sistemas de información, es decir, en la fuente de la réplica conectamos nuestros puntos de venta, sistemas de inventario, de marketing, etc, y las herramientas de BI las conectamos a la réplica para que un query mal planeado de cientos de miles de registros no roben recursos a la BD transaccional y nos detengan la operación.
+
+![image](https://user-images.githubusercontent.com/1316464/136246389-4590c16c-da88-4889-957b-cdbad617f82d.png)
+
+Por otro lado, en el _sharding_ tenemos cierto cacho de la BD en un nodo, y otros cacho en otro, de modo que si un nodo falla, seguimos teniendo disponibilidad de cierta cantidad de registros o datos:
+
+![image](https://user-images.githubusercontent.com/1316464/136246648-1a65159e-8c0a-478c-a92e-926c30b46271.png)
+
+
+▶️ Pero como todo lo vamos a correr en local, entonces tanto el proceso `master` y los procesos `worker` en la misma máquina.
+
+
+En MonetDB, los nodos `worker` los llamamos _farm_.
+
+Vamos a arrancar el MonetDB con los siguientes comandos:
+
+```console
+cd ~
+mkdir monetdb
+mkdir monetdb/farm
+monetdbd create monetdb/farm
+monetdbd start monetdb/farm
+```
+Con estos comandos creamos un directorio monetdb/myfarm donde va a vivir nuestra BD.
+
+Luego usamos el comando `monetdbd` para crear y arrancar el servidor de MonetDB con 1 nodo en su farm.
+
+Cuando vean comandos de Unix que terminen con una `d`, seguro son _daemon_. Si, viene de la palabra _demon_, pero con este significado:
+
+> The term was coined by the programmers at MIT's Project MAC. According to Fernando J. Corbató, who worked on Project MAC in 1963, his team was the first to use the term daemon, inspired by Maxwell's demon, an imaginary agent in physics and thermodynamics that helped to sort molecules, stating, "We fancifully began to use the word daemon to describe background processes that worked tirelessly to perform system chores". Unix systems inherited this terminology. Maxwell's demon is consistent with Greek mythology's interpretation of a daemon as a supernatural being working in the background. However, BSD and some of its derivatives have adopted a Christian demon as their mascot rather than a Greek daemon.
+
+Todos los _daemon_ ayudan a correr procesos background en sistemas Unix.
+
+Por ende, TODOS los servidores son ejecutados por _daemons_.
+
+Una vez arrancado el _daemon_ o el server, podemos crear bases de datos.
+
+Vamos a crear la base de datos VOC. Esta base de datos es el registro naviero de la _Vereenigde geoctrooieerde Oostindische Compagnie_, o _Dutch East India Company_ para los siglos XVII y XVIII. Si, la misma de "Piratas del Caribe".
+
+![image](https://user-images.githubusercontent.com/1316464/136251974-0e608ce1-8079-4dfb-aed1-6a727219cbb2.png)
+
+
+```console
+monetdb create voc
+monetdb release voc
+```
+
+El comando `monetdb` sirve para interactuar administrativamente con la BD, para crear objetos y estructuras. ⚠️**NO CONFUNDIR CON EL COMANDO `monetdbd`**⚠️, que es el `daemon` que vimos arriba.
