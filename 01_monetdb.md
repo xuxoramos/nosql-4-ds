@@ -375,4 +375,63 @@ monetdb release voc
 
 El comando `monetdb` sirve para interactuar administrativamente con la BD, para crear objetos y estructuras. **⚠️NO CONFUNDIR CON EL COMANDO `monetdbd`⚠️**, que es el `daemon` que vimos arriba.
 
+El operador `create` crea una BD en modo _maintenance_, es decir, en un área de staging que no es producción, y por tanto no está disponible para conexiones desde fuera, por ejemplo, desde DBeaver.
+
+El operador `release` libera a producción la BD y ahora si podemos interactuar con ella desde afuera.
+
+Vamos a [descargar el ZIP](https://www.monetdb.org/sites/default/files/voc_dump.zip) con la BD, crear usuarios y cargar datos a nuestra BD `voc`. Vamos a hacer esto con el cliente `mclient`, que nos permite interactuar con MonetDB desde la command line:
+
+```console
+mclient -u monetdb -d voc
+    password: "monetdb"
+CREATE USER "voc" WITH PASSWORD 'voc' NAME 'VOC Explorer' SCHEMA "sys";
+CREATE SCHEMA "voc" AUTHORIZATION "voc";
+ALTER USER "voc" SET SCHEMA "voc";
+\q
+```
+
+Lo que estamos haciendo aquí es:
+1. conectándonos con `mclient` con el usuario `monetdb` a la BD `voc`. El password es igual `monetdb`.
+2. creando un usuario con clave `voc` con passwd `voc` con nombre "VOC Explorer" en el esquema `sys`, que es el de default, como el `public` en PostgreSQL. En MonetDB es necesario especificar el esquema donde queremos que se alojen los objetos que estamos creando.
+3. creando el esquema `voc` y dando autorización al usuario `voc` para conectarse.
+4. cambiando el usuario del esquema de default `sys` al esquema `voc`.
+5. saliendo del `mclient` con el meta-comando `\q`.
+
+Ahora vamos a reconectarnos con la BD `voc` con el usuario `voc` en lugar del usuario administrador `monetdb` y crear unas tablas de muestra:
+
+```console
+mclient -u voc -d voc
+    password: "voc"
+start transaction;
+
+CREATE TABLE test (id int, data varchar(30));
+
+\d
+
+\d test
+
+rollback;
+
+\d
+``` 
+
+Qué estamos haciendo aquí?
+
+1. Nos estamos conectando a la BD `voc` con el usuario `voc`.
+2. Estamos iniciando una transacción. 👀OJO👀, en MonetDB y en la mayoría de las BDs columnares, los comandos para la creación de objetos **SI FORMAN PARTE DE LAS TRANSACCIONES Y POR TANTO PUEDEN REVERSARSE**.
+3. Estamos creando la tabla `test` que tiene solo los campos `id` y `data`.
+4. El _metacommand_  `\d` significa _describe_, y si no recibe argumentos, nos describe la BD e, términos de las tablas que contiene porque ahí estamos parados en este momento.
+5. `\d test` nos describe la tabla `test` que acabamos de crear, y lo que nos muestra es el DDL que usamos para crear la tabla.
+6. Reversamos la transacción con `rollback;`.
+7. Vemos con `\d` que la tabla desapareció. En PostgreSQL y la mayoría de las relacionales, un rollback no afecta los comandos estructurales con los que creamos tablas, índices, secuencias, etc.
+
+Vamos ahora a importar la BD que descargamos:
+
+```console
+mclient -u voc -d voc < voc_dump.sql
+```
+
+
+
+
 
