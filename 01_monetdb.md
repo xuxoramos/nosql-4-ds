@@ -263,5 +263,49 @@ rental_id|inventory_id|film_id|category_id|actor_id|first_name |last_name   |las
 
 ## Instalando MonetDB
 
-_Ver la documentación e instalar el MonetDB para el Miércoles_
+Estas instrucciones de instalación son para Ubuntu 18.04 o superior, o Debian.
 
+Deben tener instalado el Ubuntu 18.04 o 20.04 desde la Microsoft Store, o bien una máquina virtual con VirtualBox.
+
+Crear el siguiente archivo con el comando `nano`:
+
+```bash
+sudo nano /etc/apt/sources.list.d/monetdb.list
+```
+
+Y poner el contenido del 2o codeblockde abajo. 👀OJO👀 deben reemplazar la palabra `suite` con el **nombre del release de ubuntu**. Eso lo pueden saber con la salida del comando
+
+```bash
+lsb_release -cs
+```
+
+Para los que tienen Ubuntu 20.04, la salida será `focal`. 
+
+El contenido del archivo debe ser:
+
+```bash
+deb https://dev.monetdb.org/downloads/deb/ [suite] monetdb
+deb-src https://dev.monetdb.org/downloads/deb/ [suite] monetdb
+```
+
+El siguiente comando instalará la llave pública del monetdb. Esto es para comprobar que la instalación es válida.
+
+```bash
+sudo wget --output-document=/etc/apt/trusted.gpg.d/monetdb.gpg https://www.monetdb.org/downloads/MonetDB-GPG-KEY.gpg
+```
+
+Ahora vamos a validar la instalación de la llave con:
+
+```bash
+sudo apt-key finger
+```
+
+La llave para el entry `/etc/apt/trusted.gpg.d/monetdb.gpg` deberá ser `8289 A5F5 75C4 9F50 22F8 EE20 F654 63E2 DF0E 54F3`.
+
+Después de esto ya se puede instalar el MonetDB:
+
+```bash
+sudo apt update
+
+sudo apt install monetdb5-sql monetdb-client
+```
