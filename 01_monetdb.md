@@ -373,4 +373,6 @@ monetdb create voc
 monetdb release voc
 ```
 
-El comando `monetdb` sirve para interactuar administrativamente con la BD, para crear objetos y estructuras. ⚠️**NO CONFUNDIR CON EL COMANDO `monetdbd`**⚠️, que es el `daemon` que vimos arriba.
+El comando `monetdb` sirve para interactuar administrativamente con la BD, para crear objetos y estructuras. **⚠️NO CONFUNDIR CON EL COMANDO `monetdbd`⚠️**, que es el `daemon` que vimos arriba.
+
+
