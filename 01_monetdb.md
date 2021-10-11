@@ -436,3 +436,125 @@ Vamos ahora a importar la BD que descargamos:
 ```console
 mclient -u voc -d voc < voc_dump.sql
 ```
+
+Si queremos cambiarle el password al usuario `monetdb` podemos usar:
+
+```sql
+ALTER USER SET UNENCRYPTED PASSWORD 'xxxxxx' USING OLD PASSWORD 'monetdb';
+```
+
+## Ejercicio de carga PostgreSQL VS MonetDB
+
+Vamos a poner a MonetDB a jugar carreras VS PostgreSQL para inserción de datos.
+
+Va a ser necesario descargar [este archivote de datos de ecobici](https://www.dropbox.com/s/5qpxl2ls0w7ggxt/ecobici_2010_2017-final.csv?dl=0). 
+
+**⚠️Son más de 45 millones de registros, osea alrededor de 18GB, así que sean pacientes.⚠️**
+
+Para PostgreSQL vamos a usar una utilería de carga masiva de DBeaver, mientras que para MonetDB usaremos el comando COPY, que también sirve para carga masiva.
+
+Primero debemos crear tanto en MonetDB como en PostgreSQL la siguiente tabla:
+
+Primero en MonetDB:
+
+```sql
+create table ecobici_historico (
+  id serial,
+  genero_usuario  VARCHAR(80),
+  edad_usuario  VARCHAR(80),
+  bici  VARCHAR(80),
+  fecha_retiro  VARCHAR(80),
+  hora_retiro_copy  VARCHAR(80),
+  fecha_retiro_completa  VARCHAR(80),
+  anio_retiro  VARCHAR(80),
+  mes_retiro  VARCHAR(80),
+  dia_semana_retiro  VARCHAR(80),
+  hora_retiro  VARCHAR(80),
+  minuto_retiro  VARCHAR(80),
+  segundo_retiro  VARCHAR(80),
+  ciclo_estacion_retiro  VARCHAR(80),
+  nombre_estacion_retiro  VARCHAR(80),
+  direccion_estacion_retiro  VARCHAR(80),
+  cp_retiro  VARCHAR(80),
+  colonia_retiro  VARCHAR(80),
+  codigo_colonia_retiro  VARCHAR(80),
+  delegacion_retiro  VARCHAR(80),
+  delegacion_retiro_num  VARCHAR(80),
+  fecha_arribo  VARCHAR(80),
+  hora_arribo_copy  VARCHAR(80),
+  fecha_arribo_completa  VARCHAR(80),
+  anio_arribo  VARCHAR(80),
+  mes_arribo  VARCHAR(80),
+  dia_semana_arribo  VARCHAR(80),
+  hora_arribo  VARCHAR(80),
+  minuto_arribo  VARCHAR(80),
+  segundo_arribo  VARCHAR(80),
+  ciclo_estacion_arribo  VARCHAR(80),
+  nombre_estacion_arribo  VARCHAR(80),
+  direccion_estacion_arribo  VARCHAR(80),
+  cp_arribo  VARCHAR(80),
+  colonia_arribo  VARCHAR(80),
+  codigo_colonia_arribo  VARCHAR(80),
+  delegacion_arribo  VARCHAR(80),
+  delegacion_arribo_num  VARCHAR(80),
+  duracion_viaje  VARCHAR(80),
+  duracion_viaje_horas  VARCHAR(80),
+  duracion_viaje_minutos  VARCHAR(80)  
+);
+```
+
+Luego en PostgreSQL:
+```sql
+create table ecobici_historico (
+  id serial primary key,
+  genero_usuario  VARCHAR(80),
+  edad_usuario  VARCHAR(80),
+  bici  VARCHAR(80),
+  fecha_retiro  VARCHAR(80),
+  hora_retiro_copy  VARCHAR(80),
+  fecha_retiro_completa  VARCHAR(80),
+  anio_retiro  VARCHAR(80),
+  mes_retiro  VARCHAR(80),
+  dia_semana_retiro  VARCHAR(80),
+  hora_retiro  VARCHAR(80),
+  minuto_retiro  VARCHAR(80),
+  segundo_retiro  VARCHAR(80),
+  ciclo_estacion_retiro  VARCHAR(80),
+  nombre_estacion_retiro  VARCHAR(80),
+  direccion_estacion_retiro  VARCHAR(80),
+  cp_retiro  VARCHAR(80),
+  colonia_retiro  VARCHAR(80),
+  codigo_colonia_retiro  VARCHAR(80),
+  delegacion_retiro  VARCHAR(80),
+  delegacion_retiro_num  VARCHAR(80),
+  fecha_arribo  VARCHAR(80),
+  hora_arribo_copy  VARCHAR(80),
+  fecha_arribo_completa  VARCHAR(80),
+  anio_arribo  VARCHAR(80),
+  mes_arribo  VARCHAR(80),
+  dia_semana_arribo  VARCHAR(80),
+  hora_arribo  VARCHAR(80),
+  minuto_arribo  VARCHAR(80),
+  segundo_arribo  VARCHAR(80),
+  ciclo_estacion_arribo  VARCHAR(80),
+  nombre_estacion_arribo  VARCHAR(80),
+  direccion_estacion_arribo  VARCHAR(80),
+  cp_arribo  VARCHAR(80),
+  colonia_arribo  VARCHAR(80),
+  codigo_colonia_arribo  VARCHAR(80),
+  delegacion_arribo  VARCHAR(80),
+  delegacion_arribo_num  VARCHAR(80),
+  duracion_viaje  VARCHAR(80),
+  duracion_viaje_horas  VARCHAR(80),
+  duracion_viaje_minutos  VARCHAR(80)  
+);
+```
+
+Para PostgreSQL vamos a importarlo con DBeaver. Aquí un videito de como hacer esto:
+
+![](https://user-images.githubusercontent.com/1316464/136847688-68b1c368-7e29-46a8-ad5a-237d4063a944.mp4)
+
+Para MonetDB aquí está otro videito:
+
+
+
