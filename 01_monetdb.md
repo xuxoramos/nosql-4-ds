@@ -553,7 +553,7 @@ create table ecobici_historico (
 Para PostgreSQL vamos a importarlo con DBeaver. Aquí un videito de como hacer esto:
 
 
-<video src='https://youtu.be/N5HHDLaxD5s'/>
+[![video](https://img.youtube.com/vi/N5HHDLaxD5s/0.jpg)](https://www.youtube.com/watch?v=N5HHDLaxD5s)
 
 Para MonetDB aquí está otro videito:
 
