@@ -502,9 +502,9 @@ Luego en MonetDB:
 
 En la consola:
 ```console
-monetdb create voc
-monetdb release voc
-mclient -u monetdb -d voc
+monetdb create ecobici
+monetdb release ecobici
+mclient -u monetdb -d ecobici
     password: "monetdb"
 ```
 
