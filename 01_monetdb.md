@@ -77,47 +77,44 @@ group by c."name";
 
 Si representáramos en JSON estos viajes, terminaríamos con un documento bastante complejo, y dado que no tenemos `where`, tendríamos que recorrer tabla por tabla, renglón por renglón, _matcheando_ tanto la condición del `join` como las otras condiciones que tuviéramos, alrededor de _O(N)*M tablas_.
 
-Ahora imaginemos en JSON, **en formato columnar**, las tablas 
+Ahora imaginemos en JSON, **en formato columnar**, las mismas tablas:
 
 ```javascript
-film_ids:[
-  1,2,3,4,5,6,7,8,9,10
-]
 film_titles:[
-  "ACADEMY DINOSAUR",
-  "ACE GOLDFINGER",
-  "ADAPTATION HOLES",
-  "AFFAIR PREJUDICE",
-  "AFRICAN EGG",
-  "AGENT TRUMAN",
-  "AIRPLANE SIERRA",
-  "AIRPORT POLLOCK",
-  "ALABAMA DEVIL",
-  "ALADDIN CALENDAR"
+  1:"ACADEMY DINOSAUR",
+  2:"ACE GOLDFINGER",
+  3:"ADAPTATION HOLES",
+  4:"AFFAIR PREJUDICE",
+  5:"AFRICAN EGG",
+  6:"AGENT TRUMAN",
+  7:"AIRPLANE SIERRA",
+  8:"AIRPORT POLLOCK",
+  9:"ALABAMA DEVIL",
+  10:"ALADDIN CALENDAR"
 ]
 film_lengths:[
-  86,
-  48,
-  50,
-  117,
-  130,
-  169,
-  62,
-  54,
-  114,
-  63
+  1:86,
+  2:48,
+  3:50,
+  4:117,
+  5:130,
+  6:169,
+  7:62,
+  8:54,
+  9:114,
+  10:63
 ]
 film_rental_rate:[
-  0.99,
-  4.99,
-  2.99,
-  2.99,
-  2.99,
-  2.99,
-  4.99,
-  4.99,
-  2.99,
-  4.99
+  1:0.99,
+  2:4.99,
+  3:2.99,
+  4:2.99,
+  5:2.99,
+  6:2.99,
+  7:4.99,
+  8:4.99,
+  9:2.99,
+  10:4.99
 ]
 ```
 
@@ -125,38 +122,32 @@ PERO luego las BDs columnares implementan unos **algoritmos de compresión** par
 
 ```javascript
 film_lengths_values:[
-  86,
-  48,
-  50,
-  117,
-  130,
-  169,
-  62,
-  54,
-  114,
-  63
+  1:86,
+  2:48,
+  3:50,
+  4:117,
+  5:130,
+  6:169,
+  7:62,
+  8:54,
+  9:114,
+  10:63
 ]
-film_lengths_keys:[
-  1,2,3,4,5,6,7,8,9,10
-]
-film_rental_keys:[
-  1,
-  2,
-  3,
-  3,
-  3,
-  3,
-  2,
-  2,
-  3,
-  2
-]
-film_rental_values:[
-  0.99,
-  4.99,
-  2.99
+film_rental_rate:[
+  1:0.99,
+  2:4.99,
+  3:2.99,
+  4:->2,
+  5:->2,
+  6:->3,
+  7:->2,
+  8:->2,
+  9:->3,
+  10:->2
 ]
 ```
+
+En la columna `film_rental` estamos reemplazando valores repetidos por apuntadores, que ocupan menos espacio que un valor y nos permite justo esta compresión.
 
 Teniendo este tipo de estructuras, entonces los queries analíticos como el de abajo, aunque deben hacer igual un _full table scan_, el running time es _O(N)*M_, donde la _N_ es un num de registros muchísimo más reducido que en una BD relacional, y el num de tablas involucradas _M_ también podemos mantenerla reducida.
 
@@ -455,56 +446,12 @@ Para PostgreSQL vamos a usar una utilería de carga masiva de DBeaver, mientras 
 
 Primero debemos crear tanto en MonetDB como en PostgreSQL la siguiente tabla:
 
-Primero en MonetDB:
-
+Primero en PostgreSQL:
 ```sql
-create table ecobici_historico (
-  id serial,
-  genero_usuario  VARCHAR(80),
-  edad_usuario  VARCHAR(80),
-  bici  VARCHAR(80),
-  fecha_retiro  VARCHAR(80),
-  hora_retiro_copy  VARCHAR(80),
-  fecha_retiro_completa  VARCHAR(80),
-  anio_retiro  VARCHAR(80),
-  mes_retiro  VARCHAR(80),
-  dia_semana_retiro  VARCHAR(80),
-  hora_retiro  VARCHAR(80),
-  minuto_retiro  VARCHAR(80),
-  segundo_retiro  VARCHAR(80),
-  ciclo_estacion_retiro  VARCHAR(80),
-  nombre_estacion_retiro  VARCHAR(80),
-  direccion_estacion_retiro  VARCHAR(80),
-  cp_retiro  VARCHAR(80),
-  colonia_retiro  VARCHAR(80),
-  codigo_colonia_retiro  VARCHAR(80),
-  delegacion_retiro  VARCHAR(80),
-  delegacion_retiro_num  VARCHAR(80),
-  fecha_arribo  VARCHAR(80),
-  hora_arribo_copy  VARCHAR(80),
-  fecha_arribo_completa  VARCHAR(80),
-  anio_arribo  VARCHAR(80),
-  mes_arribo  VARCHAR(80),
-  dia_semana_arribo  VARCHAR(80),
-  hora_arribo  VARCHAR(80),
-  minuto_arribo  VARCHAR(80),
-  segundo_arribo  VARCHAR(80),
-  ciclo_estacion_arribo  VARCHAR(80),
-  nombre_estacion_arribo  VARCHAR(80),
-  direccion_estacion_arribo  VARCHAR(80),
-  cp_arribo  VARCHAR(80),
-  colonia_arribo  VARCHAR(80),
-  codigo_colonia_arribo  VARCHAR(80),
-  delegacion_arribo  VARCHAR(80),
-  delegacion_arribo_num  VARCHAR(80),
-  duracion_viaje  VARCHAR(80),
-  duracion_viaje_horas  VARCHAR(80),
-  duracion_viaje_minutos  VARCHAR(80)  
-);
-```
+create schema ecobici;
 
-Luego en PostgreSQL:
-```sql
+set search_path to ecobici;
+
 create table ecobici_historico (
   id serial primary key,
   genero_usuario  VARCHAR(80),
@@ -550,12 +497,103 @@ create table ecobici_historico (
 );
 ```
 
-Para PostgreSQL vamos a importarlo con DBeaver. Aquí un videito de como hacer esto:
+
+Luego en MonetDB:
+
+En la consola:
+```console
+monetdb create voc
+monetdb release voc
+mclient -u monetdb -d voc
+    password: "monetdb"
+```
+
+Luego dentro del cliente de MonetDB `mclient` creamos el usuario y el esquema `ecobici`:
+
+```sql
+CREATE USER "ecobici" WITH PASSWORD 'ecobici' NAME 'EcoBici Explorer' SCHEMA "sys";
+CREATE SCHEMA "ecobici" AUTHORIZATION "ecobici";
+ALTER USER "ecobici" SET SCHEMA "ecobici";
+\q
+```
+
+Y finalmente entramos con el usuario `ecobici` que acabamos de crear y creamos la tabla `ecobici_historico`:
+
+```console
+mclient -u ecobici -d ecobici
+    password: "ecobici"
+```
+
+Ya dentro de `mclient`, ejecutamos:
+
+```sql
+create table ecobici_historico (
+  id serial,
+  genero_usuario  VARCHAR(80),
+  edad_usuario  VARCHAR(80),
+  bici  VARCHAR(80),
+  fecha_retiro  VARCHAR(80),
+  hora_retiro_copy  VARCHAR(80),
+  fecha_retiro_completa  VARCHAR(80),
+  anio_retiro  VARCHAR(80),
+  mes_retiro  VARCHAR(80),
+  dia_semana_retiro  VARCHAR(80),
+  hora_retiro  VARCHAR(80),
+  minuto_retiro  VARCHAR(80),
+  segundo_retiro  VARCHAR(80),
+  ciclo_estacion_retiro  VARCHAR(80),
+  nombre_estacion_retiro  VARCHAR(80),
+  direccion_estacion_retiro  VARCHAR(80),
+  cp_retiro  VARCHAR(80),
+  colonia_retiro  VARCHAR(80),
+  codigo_colonia_retiro  VARCHAR(80),
+  delegacion_retiro  VARCHAR(80),
+  delegacion_retiro_num  VARCHAR(80),
+  fecha_arribo  VARCHAR(80),
+  hora_arribo_copy  VARCHAR(80),
+  fecha_arribo_completa  VARCHAR(80),
+  anio_arribo  VARCHAR(80),
+  mes_arribo  VARCHAR(80),
+  dia_semana_arribo  VARCHAR(80),
+  hora_arribo  VARCHAR(80),
+  minuto_arribo  VARCHAR(80),
+  segundo_arribo  VARCHAR(80),
+  ciclo_estacion_arribo  VARCHAR(80),
+  nombre_estacion_arribo  VARCHAR(80),
+  direccion_estacion_arribo  VARCHAR(80),
+  cp_arribo  VARCHAR(80),
+  colonia_arribo  VARCHAR(80),
+  codigo_colonia_arribo  VARCHAR(80),
+  delegacion_arribo  VARCHAR(80),
+  delegacion_arribo_num  VARCHAR(80),
+  duracion_viaje  VARCHAR(80),
+  duracion_viaje_horas  VARCHAR(80),
+  duracion_viaje_minutos  VARCHAR(80)  
+);
+
+copy 45334687 records 
+offset 2
+into ecobici_historico
+from '/home/xuxoramos/ecobici_2010_2017-final.csv'
+on client
+using delimiters ','
+null as ' '
+best effort;
+```
+
+Qué estamos haciendo aquí en MonetDB?
+
+1. Estamos creando la tabla `ecobici_historico` con 40 columnas y 1 columna de tipo `serial`, la cual MonetDB **automágicamente** la considera como llave primaria secuencial. Todos los campos serán `VARCHAR` solo para facilidad de inserción.
+2. Configuramos el compando `COPY INTO`:
+   - Primero especificamos que serán 45M de registros: cómo lo supimos? ejecutando en Unix `wc -l ecobici_2010_2017-final.csv`, que hace un _line count_ del archivo. El que le digamos a MonetDB el num de registros de antemano le permite optimizar transacciones, conexiones y uso de recursos.
+   - `offset 2` es decirle que comience la lectura del archivo a partir de la 2a línea, dado que nuestro CSV tiene en su 1a un header con los nombres de los campos.
+   - `into ecobici_historico` es decirle la tabla donde se realizará la inserción. En este caso, el mapeo de columnas de la BD VS columnas del CSV es 1 a 1 y en orden.
+   - `from '/home/xuxoramos/ecobici_2010_2017-final.csv'` es decirle qué archivo vamos a procesar.
+   - `on client` realiza esta operación como si fuera cliente de la BD, evitando forzosamente el uso de credenciales de administrador.
+   - `using delimiters ','` es decirle explícitamente que use la coma como separador de campos y columnas en el CSV.
+   - `null as ''` es decirle que cuando encuentre strings o cadenas vacías, que tome ese como null.
+   - `best effort` es forzar al MonetDB a que inserte registros sin importar que haya malformaciones en el archivo que de otro modo pudieran causar datos corruptos (como temas de encoding de datos o formatos de fechas).
 
 
-[![video](https://img.youtube.com/vi/N5HHDLaxD5s/0.jpg)](https://www.youtube.com/watch?v=N5HHDLaxD5s)
-
-Para MonetDB aquí está otro videito:
-
-
-
+   - 
+4. 
