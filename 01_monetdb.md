@@ -453,7 +453,6 @@ create schema ecobici;
 set search_path to ecobici;
 
 create table ecobici_historico (
-  id serial primary key,
   genero_usuario  VARCHAR(80),
   edad_usuario  VARCHAR(80),
   bici  VARCHAR(80),
@@ -527,7 +526,6 @@ Ya dentro de `mclient`, ejecutamos:
 
 ```sql
 create table ecobici_historico (
-  id serial,
   genero_usuario  VARCHAR(80),
   edad_usuario  VARCHAR(80),
   bici  VARCHAR(80),
