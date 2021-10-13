@@ -613,3 +613,27 @@ Desde el Lunes en la tarde he intentado echar a andar los COPY del lado de Monet
     - `\r\n` para Windows 10
     - `\r` para Windows 8 para atrás
 5. Estamos hablando de un archivo de 45M de líneas, así que cualquier intento de arreglar los problemas descritos arriba con `sed` o `awk` resultará en un tiempo de espera bastante largo.
+
+Afortunadamente, en mi otra máquina si funcionó, pero igual con los siguientes caveats:
+
+**En PostgreSQL**
+1. Tuve que instalar PostgreSQL en Ubuntu 20.04 sobre Windows
+2. Para que Windows corra Ubuntu se necesita un Windows Subsystem for Linux, que es una capa de virtualización de hardware
+3. Esta capa de virtualización tiene 2 versiones, mi laptop tiene la versión 1, mientras que mi máquina grande tiene la v2. La v2 es la que trae la función viejísima del sistema operativo.
+4. Este postgresql en Ubuntu se instala sin interfaz gráfica, por lo que hay que:
+   - Asignarle password al usuario postgres que el instalador crea **para Ubuntu**
+   - Asignarle password al usuario postgres que el instalador crea **para la base de datos**
+5. Correr el comando `psql -U postgres -h localhost -p 5435 -c "\copy ecobici.ecobici_historico from '/home/xuxoramos/ecobici_2010_2017-final.csv' with csv header;"`
+   - `psql -U postgres -h localhost -p 5435` significa "abre una línea de comando conectándonos a la BD `postgres` con el usr `postgres` a la máquina `localhost` en el puerto `5435`
+   - `-c "\copy...` significa "una vez abierto el command-line, manda el resto del comando.
+6. 👀OJO👀: es importante recordar que estas operaciones requieren mucho espacio, al menos 3x lo  que mide el archivo que vamos a pasar por `copy`.
+
+Mientras que la utilería de carga masiva de DBeaver tardó alrededor de 18h, la carga masiva con `copy` tardó:
+
+![image](https://user-images.githubusercontent.com/1316464/137080311-469f0e77-89e8-411e-b78d-8c59a8f774b7.png)
+
+**🔥8 MINUTOS!🔥**
+
+**En MonetDB**
+
+
