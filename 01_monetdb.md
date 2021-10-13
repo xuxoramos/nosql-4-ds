@@ -574,7 +574,42 @@ create table ecobici_historico (
 
 Aquí el videito donde utilizamos la utilería de DBeaver para cargar las tablas:
 
-
-
 https://user-images.githubusercontent.com/1316464/137060932-9b24eca6-dbd3-442f-bb61-26d463d6fe36.mp4
 
+## ⚠️ ESTA NO ES LA SOLUCIÓN MÁS ÓPTIMA!
+
+La herramienta que nos da DBeaver **NO ES** la forma más óptima de hacer cargas masivas a BDs, ni columnares ni relacionales.
+
+La forma más óptima es el comando `COPY`.
+
+El `COPY` realiza bastantes optimizaciones tanto del lado de la BD como del sistema operativo para poder realizar estas cargas.
+
+Lamentablemente, son herramientas SÚPER PICKY!
+
+Desde el Lunes en la tarde he intentado echar a andar los COPY del lado de MonetDB y PostgreSQL, sin éxito, pero con los siguientes findings:
+
+**En PostgreSQL con Windows 10**
+1. El `COPY` puede ser invocado desde una herramienta SQL como una ventana de DBeaver, o desde la línea de comandos.
+2. Cuando se invoca desde la línea de comandos, se hace en conjunto con el comando `psql`, que es el command-line de PostgreSQL, y entonces el `copy` se vuelve el _metacomando_ `\copy`.
+3. La sintaxis general para este caso de ecobici es `copy ecobici_historico from '/ruta/al/archivo/ecobici_2010_2017-final.csv' with csv header`. Si esto lo corremos desde `psql`, entonces debemos de anteponer el `\` al `copy`
+   - la parte de `with csv header` le dice al copy que la entrada es un archivo CSV y que además la 1a línea tiene los nombres de las columnas.
+4. Lo invoquemos por donde lo invoquemos, el PostgreSQL hace uso de una función **VIEJÍSIMA** del sistema operativo llamada `fstat()` que sirve para saber si un argumento es archivo o es directorio.
+    - Esta función existe desde los sistemas operativos antecesores del Windows y nunca se ha actualizado porque ya todos los lenguajes de programación tienen sus propias funciones para obtener esta respuesta.
+5. Esta función, vieja como es, no admite como argumento archvivos gigantes de más de 4GB.
+6. Este es un bug conocido desde PostgreSQL 10 y [no se ha atendido](https://www.postgresql.org/message-id/20180912034731.GF25160%40paquier.xyz).
+7. Al tratar de ejecutar ese copy, el resultado es `ERROR: could not stat file "'D:/XXX.csv'  value too large`.
+8. A falta de esto, debimos usar la utilería de DBeaver.
+
+**En MonetDB**
+1. La sintaxis del `copy` en MonetDB es similar. En general es `copy offset 2 into ecobici_historico from '/home/xuxoramos/ecobici_2010_2017-final.csv' on client using delimiters ',',E'\r' null as ' ';`
+   - el `offset 2` es para indicar que el 1er renglón no lo debemos procesar porque son los encabezados de las columnas.
+   - el `on client` está delegando autorizaciones y permisos al server en lugar de directo al comando `copy`.
+   - `using delimiters ',',E'\r'` es para indicarle que los separadores de los campos son comas, y los separadores de línea es el caracter `\r`, que significa _carriage return_.
+   - `null as ' '` es para indicar que los strings vacíos deben ser considerados nulos.
+2. Estos comandos son muy picky, y dentro de nuestro archivo, los caracteres especiales como vocales acentuadas, están representadas con la clave _unicode_ `<U+XXXX>`, donde `XXXX` es una clave en hexadecimal indicando el caracter. Por ejemplo, la delegación "Álvaro Obregón" está dada como `<U+00C1>lvaro Obreg<U+00F3>n`.
+3. Esta notación confunde al comando `copy` de MonetDB, y lo vuelve inoperante, a veces reportando que no existen valores en la columna 41 y línea 1, y a veces en la columna 2 y línea 1.
+4. Encima de esto, el encoding de archivos puede ser un problema. Los archivos de texto, sean CSV o TXT, están llenos de caracteres escondidos que le dan forma. Los caracteres escondidos más comunes son los que representan _new line_, desafortunadamente son diferentes dependiendo del sistema operativo, y esto también contribuye a que el `copy` no procese bien archivos de entrada:
+    - `\n` para Linux y Mac
+    - `\r\n` para Windows 10
+    - `\r` para Windows 8 para atrás
+5. Estamos hablando de un archivo de 45M de líneas, así que cualquier intento de arreglar los problemas descritos arriba con `sed` o `awk` resultará en un tiempo de espera bastante largo.
