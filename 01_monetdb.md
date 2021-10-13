@@ -637,3 +637,17 @@ Mientras que la utilería de carga masiva de DBeaver tardó alrededor de 18h, la
 **En MonetDB**
 
 
+### Las carreritas
+
+Vamos a ejecutar el siguiente query en ambas BDs:
+
+```sql
+explain analyze select avg(eh.fecha_arribo_completa::timestamp - eh.fecha_retiro_completa::timestamp)::interval
+from ecobici_historico eh 
+group by eh.colonia_retiro , eh.colonia_arribo;
+```
+
+Es un query analítico típico, pero correrá sobre 45M de registros. Agregaremos las cláusulas `explain analyze` para medir los tiempos de ejecución.
+
+
+
