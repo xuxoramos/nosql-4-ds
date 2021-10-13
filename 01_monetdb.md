@@ -442,7 +442,7 @@ Va a ser necesario descargar [este archivote de datos de ecobici](https://www.dr
 
 **⚠️Son más de 45 millones de registros, osea alrededor de 18GB, así que sean pacientes.⚠️**
 
-Para PostgreSQL vamos a usar una utilería de carga masiva de DBeaver, mientras que para MonetDB usaremos el comando COPY, que también sirve para carga masiva.
+Para ambos vamos a usar una utilería de carga masiva de DBeaver, mientras que para MonetDB usaremos el comando COPY, que también sirve para carga masiva.
 
 Primero debemos crear tanto en MonetDB como en PostgreSQL la siguiente tabla:
 
@@ -496,7 +496,6 @@ create table ecobici_historico (
   duracion_viaje_minutos  VARCHAR(80)  
 );
 ```
-
 
 Luego en MonetDB:
 
@@ -570,30 +569,12 @@ create table ecobici_historico (
   duracion_viaje_horas  VARCHAR(80),
   duracion_viaje_minutos  VARCHAR(80)  
 );
-
-copy 45334687 records 
-offset 2
-into ecobici_historico
-from '/home/xuxoramos/ecobici_2010_2017-final.csv'
-on client
-using delimiters ','
-null as ' '
-best effort;
 ```
+👀OJO👀: estamos creando la tabla `ecobici_historico` con 40 columnas y 1 columna de tipo `serial`, la cual MonetDB **automágicamente** la considera como llave primaria secuencial. Todos los campos serán `VARCHAR` solo para facilidad de inserción.
 
-Qué estamos haciendo aquí en MonetDB?
-
-1. Estamos creando la tabla `ecobici_historico` con 40 columnas y 1 columna de tipo `serial`, la cual MonetDB **automágicamente** la considera como llave primaria secuencial. Todos los campos serán `VARCHAR` solo para facilidad de inserción.
-2. Configuramos el compando `COPY INTO`:
-   - Primero especificamos que serán 45M de registros: cómo lo supimos? ejecutando en Unix `wc -l ecobici_2010_2017-final.csv`, que hace un _line count_ del archivo. El que le digamos a MonetDB el num de registros de antemano le permite optimizar transacciones, conexiones y uso de recursos.
-   - `offset 2` es decirle que comience la lectura del archivo a partir de la 2a línea, dado que nuestro CSV tiene en su 1a un header con los nombres de los campos.
-   - `into ecobici_historico` es decirle la tabla donde se realizará la inserción. En este caso, el mapeo de columnas de la BD VS columnas del CSV es 1 a 1 y en orden.
-   - `from '/home/xuxoramos/ecobici_2010_2017-final.csv'` es decirle qué archivo vamos a procesar.
-   - `on client` realiza esta operación como si fuera cliente de la BD, evitando forzosamente el uso de credenciales de administrador.
-   - `using delimiters ','` es decirle explícitamente que use la coma como separador de campos y columnas en el CSV.
-   - `null as ''` es decirle que cuando encuentre strings o cadenas vacías, que tome ese como null.
-   - `best effort` es forzar al MonetDB a que inserte registros sin importar que haya malformaciones en el archivo que de otro modo pudieran causar datos corruptos (como temas de encoding de datos o formatos de fechas).
+Aquí el videito donde utilizamos la utilería de DBeaver para cargar las tablas:
 
 
-   - 
-4. 
+
+https://user-images.githubusercontent.com/1316464/137060932-9b24eca6-dbd3-442f-bb61-26d463d6fe36.mp4
+
