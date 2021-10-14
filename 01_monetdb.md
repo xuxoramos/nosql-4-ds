@@ -438,9 +438,7 @@ ALTER USER SET UNENCRYPTED PASSWORD 'xxxxxx' USING OLD PASSWORD 'monetdb';
 
 Vamos a poner a MonetDB a jugar carreras VS PostgreSQL para inserción de datos.
 
-Va a ser necesario descargar [este archivote de datos de ecobici](https://www.dropbox.com/s/5qpxl2ls0w7ggxt/ecobici_2010_2017-final.csv?dl=0). 
-
-**⚠️Son más de 45 millones de registros, osea alrededor de 18GB, así que sean pacientes.⚠️**
+Tengo una BD de viajes de Ecobici de 2010 a 2017. **⚠️ Son más de 45 millones de registros, osea alrededor de 18GB ⚠️**, entonces para efectos didácticos no conviene que manejen ni intenten cargar esta base completa, por lo que les voy a compartir [un subset de 10M de registros](https://drive.google.com/file/d/12spo_4cZjNH0GubitDrLvc-8RBgroICW/view?usp=sharing). 
 
 Para ambos vamos a usar una utilería de carga masiva de DBeaver, mientras que para MonetDB usaremos el comando COPY, que también sirve para carga masiva.
 
@@ -594,7 +592,7 @@ Desde el Lunes en la tarde he intentado echar a andar los COPY del lado de Monet
 4. Lo invoquemos por donde lo invoquemos, el PostgreSQL hace uso de una función **VIEJÍSIMA** del sistema operativo llamada `fstat()` que sirve para saber si un argumento es archivo o es directorio.
     - Esta función existe desde los sistemas operativos antecesores del Windows y nunca se ha actualizado porque ya todos los lenguajes de programación tienen sus propias funciones para obtener esta respuesta.
 5. Esta función, vieja como es, no admite como argumento archvivos gigantes de más de 4GB.
-6. Este es un bug conocido desde PostgreSQL 10 y [no se ha atendido](https://www.postgresql.org/message-id/20180912034731.GF25160%40paquier.xyz).
+6. Este es un bug conocido desde PostgreSQL 10 y [apenas se corrigió en PostgreSQL 14](https://www.postgresql.org/message-id/20180912034731.GF25160%40paquier.xyz).
 7. Al tratar de ejecutar ese copy, el resultado es `ERROR: could not stat file "'D:/XXX.csv'  value too large`.
 8. A falta de esto, debimos usar la utilería de DBeaver.
 
@@ -615,16 +613,14 @@ Desde el Lunes en la tarde he intentado echar a andar los COPY del lado de Monet
 Afortunadamente, en mi otra máquina si funcionó, pero igual con los siguientes caveats:
 
 **En PostgreSQL**
-1. Tuve que instalar PostgreSQL en Ubuntu 20.04 sobre Windows
-2. Para que Windows corra Ubuntu se necesita un Windows Subsystem for Linux, que es una capa de virtualización de hardware
-3. Esta capa de virtualización tiene 2 versiones, mi laptop tiene la versión 1, mientras que mi máquina grande tiene la v2. La v2 es la que trae la función viejísima del sistema operativo.
-4. Este postgresql en Ubuntu se instala sin interfaz gráfica, por lo que hay que:
+1. Tuve que instalar PostgreSQL 14 en Ubuntu 20.04 sobre Windows
+2. Este postgresql en Ubuntu se instala sin interfaz gráfica, por lo que hay que:
    - Asignarle password al usuario postgres que el instalador crea **para Ubuntu**
    - Asignarle password al usuario postgres que el instalador crea **para la base de datos**
-5. Correr el comando `psql -U postgres -h localhost -p 5435 -c "\copy ecobici.ecobici_historico from '/home/xuxoramos/ecobici_2010_2017-final.csv' with csv header;"`
+3. Correr el comando `psql -U postgres -h localhost -p 5435 -c "\copy ecobici.ecobici_historico from '/home/xuxoramos/ecobici_2010_2017-final.csv' with csv header;"`
    - `psql -U postgres -h localhost -p 5435` significa "abre una línea de comando conectándonos a la BD `postgres` con el usr `postgres` a la máquina `localhost` en el puerto `5435`
    - `-c "\copy...` significa "una vez abierto el command-line, manda el resto del comando.
-6. 👀OJO👀: es importante recordar que estas operaciones requieren mucho espacio, al menos 3x lo  que mide el archivo que vamos a pasar por `copy`.
+4. 👀OJO👀: es importante recordar que estas operaciones requieren mucho espacio, al menos 3x lo  que mide el archivo que vamos a pasar por `copy`.
 
 Mientras que la utilería de carga masiva de DBeaver tardó alrededor de 18h, la carga masiva con `copy` tardó:
 
@@ -632,12 +628,11 @@ Mientras que la utilería de carga masiva de DBeaver tardó alrededor de 18h, la
 
 **🔥8 MINUTOS!🔥**
 
-**En MonetDB**
-
-
 ### Las carreritas
 
-Vamos a ejecutar el siguiente query en ambas BDs:
+Vamos a ejecutar un query analítico que obtenga el promedio de duración de viajes entre todos los pares de colonias.
+
+**En PostgreSQL 🐘**
 
 ```sql
 explain analyze select avg(eh.fecha_arribo_completa::timestamp - eh.fecha_retiro_completa::timestamp)::interval
@@ -645,7 +640,59 @@ from ecobici_historico eh
 group by eh.colonia_retiro , eh.colonia_arribo;
 ```
 
-Es un query analítico típico, pero correrá sobre 45M de registros. Agregaremos las cláusulas `explain analyze` para medir los tiempos de ejecución.
+Lo comencé a ejecutar alrededor de las 10 de la mañana. Para las 2h transcurridas aún no terminaba:
+
+![image](https://user-images.githubusercontent.com/1316464/137216540-3382b11b-9372-44db-9669-ec0e99160d34.png)
+
+Decidí interrumpirlo para intentar reducirlo en carga agregándole un `WHERE`:
+
+```sql
+explain analyze select avg(eh.fecha_arribo_completa::timestamp - eh.fecha_retiro_completa::timestamp)::interval
+from ecobici_historico eh 
+where eh.colonia_retiro = 'Cuauhtemoc'
+group by eh.colonia_retiro , eh.colonia_arribo;
+```
+
+Con este cambio tardó **1 min 51 seg**:
+
+![image](https://user-images.githubusercontent.com/1316464/137219799-43a86642-0a39-482d-9a2e-995c819208a1.png)
+
+Vamos a ver si le ganamos tantito con un índice sobre `colonia_retiro` dado que tenemos una condición `where`:
+
+```sql
+create index big_data_ecobici_colonia_retiro on ecobici.ecobici_historico_import (
+	colonia_retiro
+);
+```
+
+La creación de índices igual es costosa en una tabla con millones de registros. Esta creación se tardó **2m 18s**.
+
+![image](https://user-images.githubusercontent.com/1316464/137228472-de686b4c-0898-4491-9e95-35b6c6000557.png)
 
 
+Esta ejecución tardó **1m 50s** con un índice en el campo del `WHERE`.
+
+Le ganamos 1 seg 🤡🤡🤡
+
+La razón de esto es que el query en particular está agrupando por 2 campos, y esto provoca un _sequential scan_, que es donde está el grueso del tiempo de la consulta.
+
+En general, no es muy efectivo el índice.
+
+**En MonetDB 🖼️**
+
+El query en MonetDB tiene algunos cambios en sintaxis y no estamos agregando cláusula `WHERE` porque precisamente deseamos "presumir" las capacidades de las BDs columnares:
+
+```sql
+select eh.colonia_retiro , eh.colonia_arribo ,
+avg(cast(fecha_arribo_completa as timestamp) - cast(eh.fecha_retiro_completa as timestamp))/60 as promedio_duracion
+from ecobici_historico eh 
+group by eh.colonia_retiro , eh.colonia_arribo
+order by promedio_duracion desc;
+```
+
+![image](https://user-images.githubusercontent.com/1316464/137229329-7457a150-859a-4343-9dbe-4b8ffb09a9ba.png)
+
+🔥 **2.13 seg** 🔥
+
+![image](https://user-images.githubusercontent.com/1316464/137229418-7a7c0dc4-e1e6-485c-b773-cf9a9e01bd15.png)
 
