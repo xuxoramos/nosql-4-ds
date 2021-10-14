@@ -109,3 +109,7 @@ A continuación el temario, fecha por fecha:
 | 16             |   2021/09/22    | [Presentación del APILegislativo](https://drive.google.com/file/d/19sXSr-qu9qqpIpM7Kr8DNoCvAUcn9GFP/view?usp=sharing) / [video](https://drive.google.com/file/d/1-syp_3A1cD-kOOAUhP1Bl_Cox6m9QxxU/view?usp=sharing)
 | 17             |   2021/09/27    | **CLASE A REPONER**
 | 18             |   2021/09/29    | [Ejercicios](https://xuxoramos.github.io/nosql-4-ds/01_mongodb) / [video](https://drive.google.com/file/d/16_L00-V1JQLs1T0o2wnbKHxxU4GPfwu9/view?usp=sharing)
+| 19             |   2021/10/04    | [Intro a BDs Columnares](https://xuxoramos.github.io/nosql-4-ds/01_monetdb) / [video](https://drive.google.com/file/d/1KioyeEsxjtJybviuhYFSvxV5EfUsOoit/view?usp=sharing)
+| 20             |   2021/10/06    | [Instalación de MonetDB](https://xuxoramos.github.io/nosql-4-ds/01_monetdb) / [video](https://drive.google.com/file/d/1TqoF-OfzUQpXSpKx3wS8AYHlKmIKI1rM/view?usp=sharing)
+| 21             |   2021/10/11    | **CLASE A REPONER**
+| 22             |   2021/10/13    | [Comparativa de desempeño EN VIVO entre PostgreSQL y MonetDB con base de datos de Ecobici](https://xuxoramos.github.io/nosql-4-ds/01_monetdb) / [video](https://drive.google.com/file/d/1nVO7-nZKtSkp6oz2TvW-OLV_XcUX1q5v/view?usp=sharing)
