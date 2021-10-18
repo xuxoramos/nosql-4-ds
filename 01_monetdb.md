@@ -696,3 +696,164 @@ order by promedio_duracion desc;
 
 ![image](https://user-images.githubusercontent.com/1316464/137229418-7a7c0dc4-e1e6-485c-b773-cf9a9e01bd15.png)
 
+## Cómo usamos MonetDB como Data Warehouse?
+
+El uso principal de las BDs columnares es como Data Warehouse.
+
+El Data Warehousing es precisamente jalar de una relacional/transaccional y guardar en una columnar/analítica para formar histórico profundo.
+
+Las características principales del Data Warehousing moderno son:
+1. Los datos a cargar están en forma de Big Table
+2. La llave primaria de dicha Big Table es una columna que describe el paso del tiempo (aún cuando no tengamos datos en cierto timeslot)
+
+Allá afuera se van a encontrar aún con gente que usa esquemas de _snowflake_ o _star_ para modelar data warehouses.
+
+Ambos esquemas usan un diseño donde al centro está una tabla de _facts_ junto con las fechas, y decenas de llaves foráneas, y alrededor, exportándoles su llave, decenas de tablas llamadas _dimensiones_, que son básicamente los objetos de negocio.
+
+![image](https://user-images.githubusercontent.com/1316464/137668657-61adab94-359c-4dcb-96fc-cda9d106cfc4.png)
+
+👀OJO👀 Fíjense como este esquema se parece un buen a los esquemas relacionales que usualmente tenemos en las BDs relacionales/transaccionales.
+
+Las _"dimensiones"_ son los **objetos de negocio**.
+
+Los _"facts"_ son los **eventos de negocio** que combinan uno o más objetos de negocio para describirse.
+
+Y como tal, los _"facts"_ tienen como llave la _"dimensión"_ 🕰️**TIEMPO**🕰️.
+
+Estos esquemas de _dimensional modeling_ fueron creados por [Ralph Kimball en el 96](https://en.wikipedia.org/wiki/Dimensional_modeling), PERO en ese momento la realidad era muy, muy diferente.
+
+Algunos supuestos de esos años, que ya no son vigentes, son:
+
+1. Databases are slow and expensive
+2. SQL language is limited
+3. You can never join fact tables because of one to many or many to one joins
+4. Businesses are slow to change
+
+Entonces, dado que:
+
+1. Las bases de datos ya son rápidas y el storage baratísimo
+2. Y que el SQL ha evolucionado a un lenguaje rico en features y expresiones que, aunque no forman parte del estándar, nos simplifican la vida
+3. Y que estas restricciones quedan acotadas en las bases de datos relacionales y que ya tenemos otras tantas formas de organizar data
+4. Y que el mundo startupero ha redefinido la velocidad con la que se operan los negocios
+
+Entonces podemos decir que el trabajo de Kimball es ya poco relevante.
+
+Aunque cientos de ingenieros viejitos en el sector público (y uno que otro del sector privado) les digan que no.
+
+Lo único rescatable que podemos sacar del trabajo de Kimball es el manejo de la **dimensión tiempo**, que podemos combinar con esquemas modernos de _Big Table_ o _One Big Table_.
+
+Vamos a utilizar la BD de Northwind para emular la creación de un DWH con la dimensión tiempo:
+
+### 1. Definir granularidad
+
+Vamos a explorar las tablas centrales de la BD de Northwind para tratar de obtener la **frecuencia mínima** con la que se crean nuevos registros en ellas.
+
+- Las tablas centrales para el negocio de Northwind, **y que además tienen algún campo tipo `date`** son:
+   - `orders`
+   - `employees`
+
+- En la tabla `orders` tenemos que hay un nuevo registro cada **.8 días**
+```sql
+select avg(timediff) from 
+(SELECT order_date - lag(order_date) OVER (ORDER BY order_date) as timediff
+FROM orders o 
+ORDER BY order_date) as t;
+```
+- En la tabla `employees` tenemos que hay un nuevo hire cada **150 días**
+```sql
+select avg(abs(timediff)) from 
+(SELECT hire_date - lag(hire_date) OVER (ORDER BY e.employee_id) as timediff
+FROM employees e 
+ORDER BY e.employee_id) as t;
+```
+
+Con esto podemos decir que la mínima frecuencia de inserción es de 1 día.
+
+Por tanto, la dimensión _time_ de nuestra BD histórica será **diaria**:
+
+### 2. Crear tabla con _dimensión tiempo_
+
+Del lado de la BD fuente vamos a crear la tabla que representará nuestra dimensión de tiempo.
+
+Vamos a ir a la fecha mínima y máxima de las 2 tablas de arriba:
+
+- En `orders` la mínima de `order_date` es **1996-07-04** y el máximo es **1998-05-06**
+- En `employees` el mínimo de `hire_date` es **1992-04-01** y el máximo es **1994-11-15**
+
+Por tanto, nuestra tabla con la dimensión de tiempo va a ir **diario** desde **1992-04-01** hasta  **1998-05-06**.
+
+Esta tabla la vamos a crear del lado de PostgreSQL:
+
+```sql
+create table time_dimension ( 
+	date_axis date primary key,
+	seq_num serial unique not null
+);
+
+insert into time_dimension(date_axis) -- recordemos que para insertar desde un select, omitimos el keyword values
+select t.day::date
+from generate_series(timestamp '1992-04-01',
+		     timestamp '1998-05-06',
+		     interval '1 day') as t(day);
+```
+
+### 3. Extraer y hacer `join` con dimensión de tiempo
+
+Ya con la tabla que nos da el eje de tiempo, podemos hacer las extracciones de toda la BD y hacer un `left join` con la tabla de tiempo para indicar cuando no hay evento en esa fecha para X o Y objeto de negocio:
+
+```sql
+select *
+from time_dimension td 
+left outer join orders o on (td.date_axis = o.order_date)
+left outer join employees e on (td.date_axis = e.hire_date)
+left outer join order_details od using (order_id)
+left outer join products p using (product_id)
+left outer join categories cat using (category_id)
+left outer join suppliers s using (supplier_id)
+left outer join shippers sh on (o.ship_via = sh.shipper_id)
+left outer join customers cus using (customer_id)
+order by td.date_axis;
+```
+
+Algunas notas:
+
+1. Por legibilidad, primero hacer el `join` entre la tabla de dimensión de tiempo y las tablas a las que vamos a sujetar a este eje común.
+2. Usar `left outer join` para permitir nulos, y con esto, saber cuando en una fecha no tenemos ni _facts_ o **eventos** de `employees` u `orders`.
+3. Siempre ordenar (de forma `asc` o `desc`) el query.
+
+Pareciera que podemos insertar ya esta tabla de PostgreSQL a MonetDB, pero forzar un mismo eje o dimensión de tiempo en esta _big table_ nos pone demasiados nulos, que además están localizados en un período en específico, y donde además hay poco empalme entre ambos períodos.
+
+Cuando los resultados son así de confusos, es recomendable entonces crear 2 tablas de _facts_ en nuestro DWH. En este caso, vamos a crear una tabla de _facts_ para `orders` y otra tabla de _facts_ para `employees`:
+
+```sql
+select *
+from time_dimension td 
+left outer join orders o on (td.date_axis = o.order_date)
+left outer join order_details od using (order_id)
+left outer join products p using (product_id)
+left outer join categories cat using (category_id)
+left outer join suppliers s using (supplier_id)
+left outer join shippers sh on (o.ship_via = sh.shipper_id)
+left outer join customers cus using (customer_id)
+left outer join employees e using (employee_id)
+left outer join employee_territories et using (employee_id)
+left outer join territories t using (territory_id)
+order by td.date_axis;
+
+select *
+from time_dimension td
+left outer join employees e on (td.date_axis = e.hire_date)
+left outer join employee_territories et using (employee_id)
+left outer join territories t using (territory_id)
+order by td.date_axis; 
+```
+
+👀OJO👀 en ambas tablas de _facts_ tenemos info repetida sobre los empleados. Esto es perfectamente normal en el diseño de _Big Table_, dado que las 2 tablas sirven propósitos analíticos diferentes: mientras que los `employees` dentro de la 1a tabla son **dependientes** de `order`, en la otra tabla de _facts_ los `employees` son la entidad central y solo los tenemos a ellos.
+
+### 4. Copiar dichas tablas a MonetDB
+
+Primero debemos crear las tablas para luego escribir estos datos:
+
+```sql
+
+```
