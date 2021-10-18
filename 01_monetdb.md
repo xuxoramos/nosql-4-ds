@@ -1036,4 +1036,148 @@ CREATE TABLE fact_orders (
 );
 ```
 
+Para este efecto he creado un MonetDB en AWS con los siguientes datos de conexión:
+
+- URL: `jdbc:monetdb://44.194.45.250:50000/northwind`
+- user: `northwind`
+- passwd: `northwind`
+- database / schema: `northwind`
+
+👀OJO👀: MonetDB arranca por default con algunas propiedades, entre ellas una que se llama `listenaddr`, que especifica al daemon `monetdbd` de dónde puede escuchar conexiones. Esta propiedad solo acepta 2 valores: `0.0.0.0` para abrir el servidor al mundo, o `localhost` para limitarlo a conexiones locales.
+
+Cómo sabemos esto? corriendo el comando:
+
+```console
+$ monetdbd get all monetdb/myfarm/
+
+   property            value
+hostname         ip-172-31-1-128
+dbfarm           monetdb/myfarm/
+status           monetdbd[2048] 11.41.11 (Jul2021-SP1) is serving this dbfarm
+mserver          /usr/bin/mserver5
+logfile          monetdb/myfarm//merovingian.log
+pidfile          monetdb/myfarm//merovingian.pid
+sockdir          /tmp
+listenaddr       localhost
+port             50000
+exittimeout      60
+forward          proxy
+discovery        true
+discoveryttl     600
+control          no
+passphrase       <unknown>
+snapshotdir      <unknown>
+snapshotcompression  .tar
+mapisock         /tmp/.s.monetdb.50000
+controlsock      /tmp/.s.merovingian.50000
+```
+
+Para que mi MonetDB acepte conexiones del mundo entero debemos hacer:
+
+```console
+$ monetdbd set listenaddr=0.0.0.0 monetdb/myfarm/
+
+$ monetdbd stop monetdb/myfarm/
+
+$ monetdbd start monetdb/myfarm/
+```
+
+Ahora si vamos a crear la tabla, con algunos cambios:
+
+- La columna `"extension"` que complementa el `phone_number` está entrecomillada porque en PostgreSQL esto es palabra reservada, pero en MonetDB no, por lo que vamos a quitar las comillas.
+- los tipos `int2` e `int4` no existen, por lo que vamos a cambiarlos por `int` a secas. 
+- el tipo `bpchar` que indica texto largo igual no existe en MonetDB, por lo que vamos a cambiarlo por `varchar(250)`.
+- el tipo `float4` lo cambiaremos por `float`.
+- el tipo `bytea` es para guardar binarios. En MonetDB este tipo se llama `CLOB` (Character Large Object). La columna de este tipo está pensada para guardar la foto del `employee`, pero afortunadamente no tenemos ninguna, por lo que vamos a cambiarla solo para consistencia.
+
+El `create table` queda así:
+
+```sql
+CREATE TABLE fact_orders (
+	territory_id varchar(20) NULL,
+	employee_id int NULL,
+	customer_id varchar(250) NULL,
+	supplier_id int NULL,
+	category_id int NULL,
+	product_id int NULL,
+	order_id int NULL,
+	date_axis date NULL,
+	seq_num int NULL,
+	order_date date NULL,
+	required_date date NULL,
+	shipped_date date NULL,
+	ship_via int NULL,
+	freight float NULL,
+	ship_name varchar(40) NULL,
+	ship_address varchar(60) NULL,
+	ship_city varchar(15) NULL,
+	ship_region varchar(15) NULL,
+	ship_postal_code varchar(10) NULL,
+	ship_country varchar(15) NULL,
+	unit_price_in_product float NULL,
+	quantity int NULL,
+	discount float NULL,
+	product_name varchar(40) NULL,
+	quantity_per_unit varchar(20) NULL,
+	unit_price_in_order float NULL,
+	units_in_stock int NULL,
+	units_on_order int NULL,
+	reorder_level int NULL,
+	discontinued int NULL,
+	category_name varchar(15) NULL,
+	description text NULL,
+	picture clob NULL,
+	supplier_company_name varchar(40) NULL,
+	contact_name varchar(30) NULL,
+	contact_title varchar(30) NULL,
+	supplier_address varchar(60) NULL,
+	supplier_city varchar(15) NULL,
+	supplier_region varchar(15) NULL,
+	postal_code varchar(10) NULL,
+	supplier_country varchar(15) NULL,
+	supplier_phone varchar(24) NULL,
+	supplier_fax varchar(24) NULL,
+	homepage text NULL,
+	shipper_id int NULL,
+	shipper_company_name varchar(40) NULL,
+	phone varchar(24) NULL,
+	company_name varchar(40) NULL,
+	customer_company_name varchar(30) NULL,
+	customer_contact_title varchar(30) NULL,
+	customer_address varchar(60) NULL,
+	customer_city varchar(15) NULL,
+	customer_region varchar(15) NULL,
+	customer_postal_code varchar(10) NULL,
+	customer_country varchar(15) NULL,
+	customer_phone varchar(24) NULL,
+	customer_fax varchar(24) NULL,
+	last_name varchar(20) NULL,
+	first_name varchar(10) NULL,
+	title varchar(30) NULL,
+	title_of_courtesy varchar(25) NULL,
+	birth_date date NULL,
+	hire_date date NULL,
+	employee_address varchar(60) NULL,
+	employee_city varchar(15) NULL,
+	employee_region varchar(15) NULL,
+	employee_postal_code varchar(10) NULL,
+	employee_country varchar(15) NULL,
+	home_phone varchar(24) NULL,
+	extension varchar(4) NULL,
+	photo clob NULL,
+	notes text NULL,
+	reports_to int NULL,
+	photo_path varchar(255) NULL,
+	territory_description varchar(250) NULL,
+	region_id int NULL
+);
+```
+
+Ya creada la tabla vamos a hacer un ETL donde extraeremos del PostgreSQL a un CSV, y luego de ese CSV, insertaremos al MonetDB:
+
+1. La extracción del PostgreSQL:
+
+```sql
+```
+
 
