@@ -852,8 +852,188 @@ order by td.date_axis;
 
 ### 4. Copiar dichas tablas a MonetDB
 
-Primero debemos crear las tablas para luego escribir estos datos:
+Primero debemos crear las tablas para luego escribir estos datos.
+
+Para esto vamos a usar una versión del comando `create table` que toma como entrada un `as select...`.
 
 ```sql
-
+create table fact_orders as
+select 
+territory_id,
+employee_id,
+customer_id,
+supplier_id,
+category_id,
+product_id,
+order_id,
+date_axis,
+seq_num,
+order_date,
+required_date,
+shipped_date,
+ship_via,
+freight,
+ship_name,
+ship_address,
+ship_city,
+ship_region,
+ship_postal_code,
+ship_country,
+p.unit_price as unit_price_in_product,
+quantity,
+discount,
+product_name,
+quantity_per_unit,
+od.unit_price as unit_price_in_order,
+units_in_stock,
+units_on_order,
+reorder_level,
+discontinued,
+category_name,
+description,
+picture,
+s.company_name as supplier_company_name,
+s.contact_name,
+s.contact_title,
+s.address as supplier_address,
+s.city as supplier_city,
+s.region as supplier_region,
+s.postal_code,
+s.country as supplier_country,
+s.phone as supplier_phone,
+s.fax as supplier_fax,
+s.homepage,
+shipper_id,
+sh.company_name as shipper_company_name,
+sh.phone,
+cus.company_name,
+cus.contact_name as customer_company_name,
+cus.contact_title as customer_contact_title,
+cus.address as customer_address,
+cus.city as customer_city,
+cus.region as customer_region,
+cus.postal_code as customer_postal_code,
+cus.country as customer_country,
+cus.phone as customer_phone,
+cus.fax as customer_fax,
+e.last_name,
+e.first_name,
+e.title,
+e.title_of_courtesy,
+e.birth_date,
+e.hire_date,
+e.address as employee_address,
+e.city as employee_city,
+e.region as employee_region,
+e.postal_code as employee_postal_code,
+e.country as employee_country,
+e.home_phone,
+e.extension,
+e.photo,
+e.notes,
+e.reports_to,
+e.photo_path,
+t.territory_description,
+t.region_id
+from time_dimension td 
+left outer join orders o on (td.date_axis = o.order_date)
+left outer join order_details od using (order_id)
+left outer join products p using (product_id)
+left outer join categories cat using (category_id)
+left outer join suppliers s using (supplier_id)
+left outer join shippers sh on (o.ship_via = sh.shipper_id)
+left outer join customers cus using (customer_id)
+left outer join employees e using (employee_id)
+left outer join employee_territories et using (employee_id)
+left outer join territories t using (territory_id)
+order by td.date_axis;
 ```
+
+👀OJO👀 que, atendiendo al dicho "el flojo y el mezquino andan 2 veces el camino", tuve que quitar el `*` y hacer la talacha de desambiguar las columnas que se llamaban igual, pero estaban en diferentes tablas, usando alias.
+
+Esto nos crea la tabla `facts_orders` en PostgreSQL que luego podemos mover a MonetDB.
+
+Noten que la tabla no tiene primary key, y esto está correcto. Ya cuando vamos a mover a MonetDB, podemos generar otra llave, o usar el campo `seq_num` que viene desde la tabla de dimensión de tiempo.
+
+```sql
+CREATE TABLE fact_orders (
+	territory_id varchar(20) NULL,
+	employee_id int2 NULL,
+	customer_id bpchar NULL,
+	supplier_id int2 NULL,
+	category_id int2 NULL,
+	product_id int2 NULL,
+	order_id int2 NULL,
+	date_axis date NULL,
+	seq_num int4 NULL,
+	order_date date NULL,
+	required_date date NULL,
+	shipped_date date NULL,
+	ship_via int2 NULL,
+	freight float4 NULL,
+	ship_name varchar(40) NULL,
+	ship_address varchar(60) NULL,
+	ship_city varchar(15) NULL,
+	ship_region varchar(15) NULL,
+	ship_postal_code varchar(10) NULL,
+	ship_country varchar(15) NULL,
+	unit_price_in_product float4 NULL,
+	quantity int2 NULL,
+	discount float4 NULL,
+	product_name varchar(40) NULL,
+	quantity_per_unit varchar(20) NULL,
+	unit_price_in_order float4 NULL,
+	units_in_stock int2 NULL,
+	units_on_order int2 NULL,
+	reorder_level int2 NULL,
+	discontinued int4 NULL,
+	category_name varchar(15) NULL,
+	description text NULL,
+	picture bytea NULL,
+	supplier_company_name varchar(40) NULL,
+	contact_name varchar(30) NULL,
+	contact_title varchar(30) NULL,
+	supplier_address varchar(60) NULL,
+	supplier_city varchar(15) NULL,
+	supplier_region varchar(15) NULL,
+	postal_code varchar(10) NULL,
+	supplier_country varchar(15) NULL,
+	supplier_phone varchar(24) NULL,
+	supplier_fax varchar(24) NULL,
+	homepage text NULL,
+	shipper_id int2 NULL,
+	shipper_company_name varchar(40) NULL,
+	phone varchar(24) NULL,
+	company_name varchar(40) NULL,
+	customer_company_name varchar(30) NULL,
+	customer_contact_title varchar(30) NULL,
+	customer_address varchar(60) NULL,
+	customer_city varchar(15) NULL,
+	customer_region varchar(15) NULL,
+	customer_postal_code varchar(10) NULL,
+	customer_country varchar(15) NULL,
+	customer_phone varchar(24) NULL,
+	customer_fax varchar(24) NULL,
+	last_name varchar(20) NULL,
+	first_name varchar(10) NULL,
+	title varchar(30) NULL,
+	title_of_courtesy varchar(25) NULL,
+	birth_date date NULL,
+	hire_date date NULL,
+	employee_address varchar(60) NULL,
+	employee_city varchar(15) NULL,
+	employee_region varchar(15) NULL,
+	employee_postal_code varchar(10) NULL,
+	employee_country varchar(15) NULL,
+	home_phone varchar(24) NULL,
+	"extension" varchar(4) NULL,
+	photo bytea NULL,
+	notes text NULL,
+	reports_to int2 NULL,
+	photo_path varchar(255) NULL,
+	territory_description bpchar NULL,
+	region_id int2 NULL
+);
+```
+
+
