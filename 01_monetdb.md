@@ -1177,7 +1177,46 @@ Ya creada la tabla vamos a hacer un ETL donde extraeremos del PostgreSQL a un CS
 
 1. La extracción del PostgreSQL:
 
-```sql
+Como tengo varias instalaciones de PostgreSQL, debo especificar el puerto donde está mi BD de Northwind:
+
+```console
+set PGOPTIONS="--search_path=northwind"
+psql -U postgres -p 5433 -c "\copy (select  territory_id, employee_id, customer_id, supplier_id, category_id, product_id, order_id, date_axis, seq_num, order_date, required_date, shipped_date, ship_via, freight, ship_name, ship_address, ship_city, ship_region, ship_postal_code, ship_country, p.unit_price as unit_price_in_product, quantity, discount, product_name, quantity_per_unit, od.unit_price as unit_price_in_order, units_in_stock, units_on_order, reorder_level, discontinued, category_name, description, picture, s.company_name as supplier_company_name, s.contact_name, s.contact_title, s.address as supplier_address, s.city as supplier_city, s.region as supplier_region, s.postal_code, s.country as supplier_country, s.phone as supplier_phone, s.fax as supplier_fax, s.homepage, shipper_id, sh.company_name as shipper_company_name, sh.phone, cus.company_name, cus.contact_name as customer_company_name, cus.contact_title as customer_contact_title, cus.address as customer_address, cus.city as customer_city,cus.region as customer_region, cus.postal_code as customer_postal_code, cus.country as customer_country, cus.phone as customer_phone, cus.fax as customer_fax, e.last_name, e.first_name, e.title, e.title_of_courtesy, e.birth_date, e.hire_date, e.address as employee_address, e.city as employee_city, e.region as employee_region, e.postal_code as employee_postal_code, e.country as employee_country, e.home_phone, e.extension, e.photo, e.notes, e.reports_to, e.photo_path,t.territory_description, t.region_id from time_dimension td  left outer join orders o on (td.date_axis = o.order_date) left outer join order_details od using (order_id) left outer join products p using (product_id) left outer join categories cat using (category_id) left outer join suppliers s using (supplier_id) left outer join shippers sh on (o.ship_via = sh.shipper_id) left outer join customers cus using (customer_id) left outer join employees e using (employee_id) left outer join employee_territories et using (employee_id) left outer join territories t using (territory_id)  order by td.date_axis) to 'C:\Users\ramos\Downloads\northwind.csv' with csv"
 ```
+
+Se exportaron `11876` registros.
+
+2. El import hacia MonetDB:
+
+Dado que sacamos la `big table` desde nuestras máquinas locales, y mi MonetDB está remoto en AWS, vamos a tener que copiar el CSV generado a esa máquina en la nube. Esta copia la estoy haciendo con el comando de Linux `scp` (secure copy) porque de manera nativa en Windows, esto requeriría descargar un programita y demás.
+
+```console
+scp -i "monetdb-key.pem" /mnt/c/Users/ramos/Downloads/northwind.csv ubuntu@ec2-44-194-45-250.compute-1.amazonaws.com:/home/ubuntu
+```
+
+Esto mueve nuestro CSV al home de mi máquina en AWS donde tengo el MonetDB.
+
+Ahora entremos a la terminal de la máquina remota para importar el archivo a MonetDB. Estamos entrando con una llave privada, no con password.
+
+```console
+ssh -i "monetdb-key.pem" ubuntu@ec2-44-194-45-250.compute-1.amazonaws.com
+```
+
+Convertiremos el archivo de formato Windows a formato UTF:
+
+```console
+iconv -f cp1252 -t utf-8 < northwind.csv > northwind-formatted.csv
+```
+
+Ahora entraremos a MonetDB para importar el CSV:
+
+```console
+mclient -i -u northwind -d northwind -s "copy offset 2 into fact_orders from '/home/ubuntu/northwind-formatted.csv' on client using delimiters ',' null as '';"
+``` 
+
+
+
+
+
 
 
