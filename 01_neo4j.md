@@ -24,22 +24,27 @@ Cómo podemos representar esto?
 1. **Nodos**
 <details><summary>Ustedes primero</summary>
 
-  ![image](https://user-images.githubusercontent.com/1316464/138634808-32710f1a-9ea2-4e74-9061-4671b6709793.png)
+  ![image](https://user-images.githubusercontent.com/1316464/138636550-a2a764fb-9aaf-426a-9971-eb0b6bf0ca84.png)
 
 </details>
 
 2. **Vértices**
 <details><summary>Ustedes primero</summary>
 
-  ![image](https://user-images.githubusercontent.com/1316464/138635128-b8893eb1-2601-4fb8-9010-fa2c09c53f7b.png)
+  ![image](https://user-images.githubusercontent.com/1316464/138636703-d4d27127-a699-476e-ad70-2b4c11514c41.png)
 
 </details>
 
 3. **Labels**
 <details><summary>Ustedes primero</summary>
 
-  ![image](https://user-images.githubusercontent.com/1316464/138635128-b8893eb1-2601-4fb8-9010-fa2c09c53f7b.png)
+  ![image](https://user-images.githubusercontent.com/1316464/138636927-632cbd4c-40db-458d-95c5-762b85e53da0.png)
 
-  👀OJO👀: Este modelo en realidad no es del todo correcto si queremos expresar grafos. Para ser precisos, en lugar de _Person_ deberíamos ser específicos en cuanto a _cual Person_ deseamos especificar en el diagrama, así como para _Location_ deberíamos especificar una en particular.
-  
+</details>
+
+
+4. **Propiedades**
+
+<details><summary>Ustedes primero</summary>
+  ![image](https://user-images.githubusercontent.com/1316464/138636864-c540e915-5266-4104-8969-8ad46e899312.png)
 </details>
