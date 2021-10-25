@@ -23,11 +23,15 @@ Cómo podemos representar esto?
 
 1. **Nodos**
 <details><summary>CLICK ME</summary>
-![image](https://user-images.githubusercontent.com/1316464/138634808-32710f1a-9ea2-4e74-9061-4671b6709793.png)
+
+  ![image](https://user-images.githubusercontent.com/1316464/138634808-32710f1a-9ea2-4e74-9061-4671b6709793.png)
+
 </details>
 
 2. **Vértices**
 <details><summary>CLICK ME</summary>
-![image](https://user-images.githubusercontent.com/1316464/138635128-b8893eb1-2601-4fb8-9010-fa2c09c53f7b.png)
+
+  ![image](https://user-images.githubusercontent.com/1316464/138635128-b8893eb1-2601-4fb8-9010-fa2c09c53f7b.png)
+
 </details>
 
