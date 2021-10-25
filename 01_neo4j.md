@@ -231,6 +231,78 @@ https://user-images.githubusercontent.com/1316464/138751707-edbb6931-c056-45b9-8
 
 ### Instalar Neo4j
 
+Ejecutamos los siguientes comandos en la terminal:
+
+```console
+$ sudo add-apt-repository -y ppa:openjdk-r/ppa
+$ sudo apt-get update
+$ wget -O - https://debian.neo4j.com/neotechnology.gpg.key | sudo apt-key add -
+$ echo 'deb https://debian.neo4j.com stable latest' | sudo tee -a /etc/apt/sources.list.d/neo4j.list
+$ sudo add-apt-repository universe
+$ sudo apt-get update
+```
+
+Qué estamos haciendo aquí?
+
+1. agregando un nuevo repo a la lista de fuentes autorizadas por Ubuntu para descargar paquetes
+2. actualizando para comprobar que llegamos a esa fuente nueva
+3. bajando la llave privada del repo de Neo4j
+4. comprobando que esta llave es válida para el nuevo repo de paquetes
+5. agregando el repo "universe" donde están paquetes de versiones anteriores de utilerías de linux
+6. actualizando accesos
+
+Una vez hecho esto, vamos validar si los paquetes de Neo4j están disponibles para Ubuntu:
+
+```console
+$ apt list -a neo4j
+```
+
+La salida debe ser:
+
+```console
+Listing... Done
+neo4j/stable 1:4.3.6 all
+neo4j/stable 1:4.3.5 all
+neo4j/stable 1:4.3.4 all
+neo4j/stable 1:4.3.3 all
+neo4j/stable 1:4.3.2 all
+neo4j/stable 1:4.3.1 all
+neo4j/stable 1:4.3.0 all
+```
+
+Finalmente, podemos instalar Neo4j:
+
+```console
+$ sudo apt-get install neo4j=1:4.3.6
+```
+
+Para arrancar el server de Neo4j debemos primero asignar un password a nuestro usuario `ubuntu`:
+
+```console
+sudo passwd
+
+Enter new UNIX password: XXXXX
+Retype new UNIX password: XXXXX
+passwd: password updated successfully
+```
+
+Y luego vamos a habilitar el servicio con los siguientes comandos:
+
+```console
+sudo systemctl enable neo4j
+
+Synchronizing state of neo4j.service with SysV service script with /lib/systemd/systemd-sysv-install.
+Executing: /lib/systemd/systemd-sysv-install enable neo4j
+```
+
+Y con esto ya podemos arrancar el server:
+
+```console
+$ sudo systemctl start neo4j
+```
+
+### Conectándonos a Neo4j
+
 
 
 
