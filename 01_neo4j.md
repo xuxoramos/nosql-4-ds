@@ -156,16 +156,28 @@ Vamos a comenzar por abrir la AWS console dando click aquí:
 
 ![image](https://user-images.githubusercontent.com/1316464/138733006-8e00636b-23c3-4110-a3ce-4220b117c318.png)
 
-
-Luego aquí:
-
-![image](https://user-images.githubusercontent.com/1316464/138733120-8cf4fc12-461e-4a8e-bc1f-efa716ab59ef.png)
-
-
 Aquí ya vemos nuestras restricciones dentro de AWS Academy:
 
 1. Tenemos un usuario de AWS ya creado: el usr `voclabs/userXXXXXXX=[Nombre] @ XXXX-XXXX-XXXX`. Esto no lo podemos cambiar, ni nos conviene hacerlo.
 2. Podemos ver que la región por default es `N. Virginia`. Esto tampoco nos conviene cambiarlo. AWS tiene varios data centers en bunkers debajo de los cerros o la tierra para mayor seguridad, porque saben que, literal, el internet corre sobre AWS. Uno de estos bunkers está en North Virginia, y es donde AWS Academy nos dejará levantar recursos y servicios. Fuera de esa región, los servicios de AWS para Academy no están disponibles.
 
 ![image](https://user-images.githubusercontent.com/1316464/138733716-56c61d7a-b8be-44ca-a089-e381c2c8c16b.png)
+
+Accedamos ahora a la consola de EC2 dando click aquí:
+
+![image](https://user-images.githubusercontent.com/1316464/138733120-8cf4fc12-461e-4a8e-bc1f-efa716ab59ef.png)
+
+
+Contrario a una cuenta normalita de AWS, para poder cumplir con las restricciones de AWS Academy, debemos crear la máquina virtual primero seleccionando una AMI (imagen o template) ya existente:
+
+![image](https://user-images.githubusercontent.com/1316464/138735330-166b2960-03c3-4e12-8431-d759f34030e5.png)
+
+Seleccionamos **Public Images**
+
+![image](https://user-images.githubusercontent.com/1316464/138735497-4123c796-5d3d-4e73-8058-b04e74cc3738.png)
+
+Vamos a filtrar las AMIs con los criterios: 1) que sean AMIs pertenecientes a Amazon, y 2) que se llamen "Cloud9":
+
+https://user-images.githubusercontent.com/1316464/138736396-89262074-792d-4e1b-ad3c-5c3062338496.mp4
+
 
