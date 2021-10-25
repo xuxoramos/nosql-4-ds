@@ -69,30 +69,103 @@ En contraste, las BDs relacionales al viajar de una tabla a otra con `JOIN`, est
 
 ## Cuándo SÍ debemos usar una BD de grafos?
 
-1. Cuando mis datos estén altamente conectados
+### 1. Cuando mis datos estén altamente conectados
 
 Esto es, cuando el elemento central para nuestro análisis sea la conexión o la relación entre entidades particulares, y por tanto nuestros datos **no sean transaccionales**, entonces probablemente nos conviene una BD de grafos. Frecuentemente solo es necesario guardar los datos y realizar análisis sofisticado después.
 
-2. Cuando la lectura sea más importante que la escritura
+### 2. Cuando la lectura sea más importante que la escritura
 
 Si mi problema es _transaccional_ en su naturaleza, y los analíticos que voy a ejecutar en estos datos con ayuda de `JOIN` no recorren la mayoría de las entidades, entonces quizá no requiera una BD de grafos.
 
-3. Cuando mi modelo de datos cambie constantemente
+### 3. Cuando mi modelo de datos cambie constantemente
 
 Dado que las BDs de grafos **no tienen esquema**, al igual que las [Document Databases](https://github.com/xuxoramos/nosql-4-ds/blob/gh-pages/01_mongodb.md), y por tanto para cada nodo o vértice podemos agregar atributos a como deseemos, serán adecuadas cuando tengamos alto nivel de incertidumbre sobre la definición de nuestros datos, y a la postre nos permitirán que no todos los nodos tengan forzosamente valores en todos los atributos, y los que tengan, que no sean consistentes en cuanto a los tipos (i.e. el nodo "Adam Smith" tendrá el atributo _tiene\_sentido\_del\_humor_ en **FALSE**, mientras que el nodo "Milton Friedmann" lo tendrá en **TRUE**, y finalmente, el nodo "Karl Marx" lo tendrá en **null**).
 
 ## Cuándo NO debemos usar una BD de grafos?
 
-1. Cuando mis analíticos hagan _table scan_ constantemente
+### 1. Cuando mis analíticos hagan _table scan_ constantemente
 
 Cuando los analíticos que vaya a correr sobre esos datos impliquen constantes _table scans_ sean parciales o _full_, o secuenciales o con índices, entonces una BD de grafos puede que no sea la mejor opción.
 
-2. Cuando mis búsquedas por ID sean constantes
+### 2. Cuando mis búsquedas por ID sean constantes
 
 Como vimos en [nuestra intro a BDs columnares](https://github.com/xuxoramos/nosql-4-ds/blob/gh-pages/01_monetdb.md), los queries propios de una solución transaccional siempre obtienen todo el renglón, no se centran en relaciones, y frecuentemente buscarán un ID en toda la tabla. Esto es porque este tipo de queries no aprovecha el performance que dan las BDs de grafos para recorrer varios nodos.
 
-3. Cuando debamos almacenar atributos de gran tamaño
+### 3. Cuando debamos almacenar atributos de gran tamaño
 
 Por ejemplo, si para un nodo hipotético "AMLO" debemos poner un atributo _mañanera_, y ahí debemos de colocar TODAS esas conferencias, resultará en un atributo de varios cientos de gigas. El precio de este almacenamiento es alto comparado con la capacidad de movernos y viajar a lo largo de nodos para recoger información.
 
+## ⚠️ Ya se dieron cuenta? ⚠️
+
+Ya se dieron cuenta que todas las BDs alternas a PostgreSQL están orientadas a analíticos?
+
+Entonces hace todo el sentido del mundo que tengamos al frente de nuestra administración de datos una BD relacional para capturar TODO LO TRANSACCIONAL, y luego, dependiendo del tipo de analíticos que deseemos hacer, mover estos datos a una BD que propicie dicha actividad.
+
+1. Alimentar dashboards o modelos de ML: MonetDB o BDs columnares
+2. Redes de corrupción/fraude o investigaciones judiciales: Neo4j o BDs de grafos
+3. Visualización de actividad web o de APIs: MongoDB o BDs de documentos
+
+Pero necesitamos un "buffer" intermedio para no cargarle la mano a ese PostgreSQL. Ese buffer intermedio es el Data Lake que veremos al rato 😉.
+
 ## Instalando MonetDB en AWS EC2
+
+Para esto usaremos sus cuentas de AWS Academy.
+
+### 1. Entrar al Lab
+
+Debió llegarles un correo de invitación a AWS Academy.
+
+Esto los va a llevar a algo similar a Canvas.
+
+⚠️ **ESTE CANVAS NO TIENE NADA QUE VER CON EL CANVAS DEL ITAM, ES OTRO CANVAS TOTALMENTE DIFERENTE** ⚠️
+
+Una vez dentro van a ver esta pantalla:
+
+![image](https://user-images.githubusercontent.com/1316464/138730354-816f01ec-1b2f-4d97-b566-957f80f84dba.png)
+
+Hay que dar click en **Modules**:
+
+![image](https://user-images.githubusercontent.com/1316464/138730574-e92d9a92-3d67-4201-a25a-2c40d5ad22f3.png)
+
+Y luego en **Learner Lab - Foundational Services**:
+
+![image](https://user-images.githubusercontent.com/1316464/138730772-98f20a63-c810-4d29-8da0-19eddc20a1ea.png)
+
+Y esperar a que cargue la terminal de nuestro ambiente.
+
+En esta pantalla debemos de verificar que nuestra "instancia" del AWS Lab esté abajo. Lo sabemos por el "foquito rojo" arriba de la terminal:
+
+![image](https://user-images.githubusercontent.com/1316464/138731704-e0c71604-dbdc-48e2-a06a-e4cdbbdf9808.png)
+
+Para arrancar nuestro lab, debemos dar click a **Start Lab**:
+
+![image](https://user-images.githubusercontent.com/1316464/138732001-ac08560f-255c-40a1-8b8a-fc5a8c9b43c6.png)
+
+
+Después de unos buenos mins, tendremos esto:
+
+![image](https://user-images.githubusercontent.com/1316464/138732078-f7c7ed89-7756-4cdc-8603-87a5fdd505b8.png)
+
+Y estamos listos para levantar nuestra 1a EC2.
+
+### 2. Levantar una EC2
+
+Elastic Compute Cloud (EC2) de AWS son máquinas virtuales de diferentes tipos, PERO para el caso de AWS Academy, tenemos algunas restricciones.
+
+Vamos a comenzar por abrir la AWS console dando click aquí:
+
+![image](https://user-images.githubusercontent.com/1316464/138733006-8e00636b-23c3-4110-a3ce-4220b117c318.png)
+
+
+Luego aquí:
+
+![image](https://user-images.githubusercontent.com/1316464/138733120-8cf4fc12-461e-4a8e-bc1f-efa716ab59ef.png)
+
+
+Aquí ya vemos nuestras restricciones dentro de AWS Academy:
+
+1. Tenemos un usuario de AWS ya creado: el usr `voclabs/userXXXXXXX=[Nombre] @ XXXX-XXXX-XXXX`. Esto no lo podemos cambiar, ni nos conviene hacerlo.
+2. Podemos ver que la región por default es `N. Virginia`. Esto tampoco nos conviene cambiarlo. AWS tiene varios data centers en bunkers debajo de los cerros o la tierra para mayor seguridad, porque saben que, literal, el internet corre sobre AWS. Uno de estos bunkers está en North Virginia, y es donde AWS Academy nos dejará levantar recursos y servicios. Fuera de esa región, los servicios de AWS para Academy no están disponibles.
+
+![image](https://user-images.githubusercontent.com/1316464/138733716-56c61d7a-b8be-44ca-a089-e381c2c8c16b.png)
+
