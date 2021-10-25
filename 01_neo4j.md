@@ -4,6 +4,12 @@ Mientras que para las BDs relacionales, cada registro es un ejemplo o instancia 
 
 Encima de esto, dado que cada nodo puede tener diferentes atributos, las bases de datos de grafos **no tienen esquema**, lo cual las vuelve un poco lentas para la escritura VS las BDs relacionales, sobre todo cuando llegamos al orden de millones de registros, debido a que cada nodo tendrá estructura diferente y no tenemos una estructura definida y fija como una tabla.
 
+## Otros ejemplos de BDs de grafos
+
+- Amazon Neptune
+- ArangoDB
+- TerminusDB
+
 ## El modelo de datos de una BD de grafos
 
 Los componentes principales de una BD de grafos es:
@@ -107,7 +113,7 @@ Entonces hace todo el sentido del mundo que tengamos al frente de nuestra admini
 
 Pero necesitamos un "buffer" intermedio para no cargarle la mano a ese PostgreSQL. Ese buffer intermedio es el Data Lake que veremos al rato 😉.
 
-## Instalando MonetDB en AWS EC2
+## Instalando Neo4j en AWS EC2
 
 Para esto usaremos sus cuentas de AWS Academy.
 
@@ -179,5 +185,54 @@ Seleccionamos **Public Images**
 Vamos a filtrar las AMIs con los criterios: 1) que sean AMIs pertenecientes a Amazon, y 2) que se llamen "Cloud9":
 
 https://user-images.githubusercontent.com/1316464/138736396-89262074-792d-4e1b-ad3c-5c3062338496.mp4
+
+Vamos a ordernar la lista de AMIs por nombre y de manera descendente para poder tomar la AMI más reciente:
+
+![image](https://user-images.githubusercontent.com/1316464/138736673-882958c3-da61-4698-98d2-ec43623f40f5.png)
+
+Y vamos a dar click en **Launch**:
+
+![image](https://user-images.githubusercontent.com/1316464/138736805-5aecf2ea-b502-45f2-8dd0-0269f4e66725.png)
+
+Vamos a definir la siguiente configuración con ayuda del otro video en donde [introdujimos cloud computing](https://drive.google.com/file/d/19hobazsdMgyCyrg_9Y3Hk7c8VIVMa607/view?usp=sharing):
+
+- Instancia tipo t2.micro
+- 10GB de storage de General Purpose SSD
+- **Security group:** Servicios SSH, HTTP, HTTPS. Puertos 50000, 5432, 5433, 7474, 7473, 7687, 27017
+
+Cuando lleguemos a la parte de llaves de acceso, vamos a seleccionar la llave que viene por default en nuestra cuenta de AWS administrada por Academy:
+
+![image](https://user-images.githubusercontent.com/1316464/138745290-ea33a8ea-c828-4265-920d-5af353c4771b.png)
+
+
+Y finalmente dar click en **Launch Instances**.
+
+Para acceder a la instancia, vamos a usar una terminal de Ubuntu. Primero necesitamos ver la ventana de detalles de AWS de regreso en nuestro Lab:
+
+![image](https://user-images.githubusercontent.com/1316464/138747053-55c4112f-1454-474b-988d-aa414677fb45.png)
+
+
+Luego dar click en **Download PEM**:
+
+![image](https://user-images.githubusercontent.com/1316464/138747119-19f57730-cc9d-4b33-a18e-f36e3fe55d12.png)
+
+Ya con la llave PEM descargada, tenemos que hacer lo siguiente para entrar a la instancia:
+
+```console
+$ cp /mnt/c/Users/ramos/Downloads/labsuser.pem .
+$ chmod 600 labsuser.pem
+$ ssh -i "labsuser.pem" ubuntu@3.86.144.108
+```
+
+La IP de la instancia la obtenemos así:
+
+
+https://user-images.githubusercontent.com/1316464/138751707-edbb6931-c056-45b9-807f-3481043b392f.mp4
+
+### Instalar Neo4j
+
+
+
+
 
 
