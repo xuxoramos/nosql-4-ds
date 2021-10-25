@@ -46,5 +46,7 @@ Cómo podemos representar esto?
 4. **Propiedades**
 
 <details><summary>Ustedes primero</summary>
+  
   ![image](https://user-images.githubusercontent.com/1316464/138636864-c540e915-5266-4104-8969-8ad46e899312.png)
+  
 </details>
