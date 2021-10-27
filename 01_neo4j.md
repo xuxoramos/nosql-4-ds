@@ -329,6 +329,36 @@ Los cuates de Neo4j hicieron una versión de grafos de Neo4j. No tiene todas las
 
 ![image](https://user-images.githubusercontent.com/1316464/139016561-f3307f1c-5a7f-4398-83fb-d88ba8b9399c.png)
 
+Vamos a establecer algunas similitudes con SQL antes de continuar:
+
+#### Similitudes con SQL
+
+1. Un registro es un _Node_
+2. El nombre de una tabla es un _Label_
+3. Un `join` o `foreign key` es un _edge_ o _relationship_
+
+En particular, al tratarse de la BD de Northwind:
+
+4. Cada registro de la tabla `orders` en la BD de Northwind se vuelve un _Node_ con _Label_ `Order` en nuestro modelo de grafos
+   - Y así sucesivamente con el resto de las tablas
+5. El `join` entre `suppliers` y `products` se convierte en un _edge_ o _relationship_ llamado `SUPPLIES` (un `supplier` `SUPPLIES` N `products`), y así sucesivamente con otras tablas, salvo los siguientes casos especiales:
+6. El `join` recursivo entre `employees` y `employees` se convierte en un _edge_ con el nombre `REPORTS_TO`.
+7. La tabla intermedia `order_details` que soporta la relación **N:M** entre `products` y `orders` desaparece y se convierte en un _edge_ o _relationship_ llamado `CONTAINS` y con atributos `unitPrice`, `quantity`, `discount`.
+
+Neo4j está construido casi en su totalidad en Java, por lo que ver este `camelCaseEnLosAtributos` no es extraño, como tampoco lo es que los nombres de los _Labels_ estén en mayúscula, porque su análogo en grafos son **Clases**, y sabemos que las clases en Java van con mayúscula inicial.
+
+De esta forma, tenemos el siguiente diagrama de grafos que representa nuestra BD de Northwind:
+
+![image](https://user-images.githubusercontent.com/1316464/139118689-133ecfc0-718d-47dd-931f-ff20e6a4c9d5.png)
+
+#### Diferencias con SQL
+
+1. No hay nulos! Un nulo, al ser la ausencia de algo, es simplemente la ausencia del atributo, o del _node_ o de un _edge_.
+2. Dada la "Index-free Adjacency", sabemos qué _nodes_ tienen particular _relationship_ con otro _node_, en lugar de hacer un `join` y realizar la búsqueda de overlap entre 1 llave primaria de una tabla y la llave foránea de otra tabla.
+3. Aunque puede haber normalización justo como en el modelo E-R, ésta no es forzosa ni rígida, y consiste principalmente en convertir _attributes_ en _nodes_, aunque al hacer esto debemos tener en mente que al convertir, los _nodes_ son instancias particulares, no clases ni _Labels_.
+
+
+
 Para cargarla vamos a utilizar el lenguaje **Cypher**, que es como el SQL para Neo4j.
 
 1. Products
