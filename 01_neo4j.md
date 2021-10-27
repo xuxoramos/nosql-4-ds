@@ -303,8 +303,51 @@ $ sudo systemctl start neo4j
 
 ### Conectándonos a Neo4j
 
+Antes de conectarnos debemos modificar el archivo `/etc/neo4j/neo4j.conf` para que Neo4j acepte conexiones de todo el mundo 🌐:
 
+```console
+nano /etc/neo4j/neo4j.conf
+```
 
+Hay que buscar la siguiente línea y descomentarla (quitarle el `#`):
+
+```console
+#dbms.default_listen_address=0.0.0.0
+```
+
+Y reiniciar el server
+
+```console
+sudo systemctl restart neo4j
+```
+
+Ahora vamos a abrir un browser y entrar a `https://[IP ADDRESS]:7474`. Nos va a pedir user y password. Los de default son `neo4j`/`neo4j`, pero en cuanto los usemos, Neo4j nos va a pedir que los cambiemos.
+
+### Cargando la versión de grafos de Northwind
+
+Los cuates de Neo4j hicieron una versión de grafos de Neo4j. No tiene todas las tablas, pero es suficiente para contrastar los paradigas relacionales y de grafos.
+
+![image](https://user-images.githubusercontent.com/1316464/139016561-f3307f1c-5a7f-4398-83fb-d88ba8b9399c.png)
+
+Para cargarla vamos a utilizar el lenguaje **Cypher**, que es como el SQL para Neo4j.
+
+1. Products
+
+```
+LOAD CSV WITH HEADERS FROM "http://data.neo4j.com/northwind/products.csv" AS row
+CREATE (n:Product)
+SET n = row,
+n.unitPrice = toFloat(row.unitPrice),
+n.unitsInStock = toInteger(row.unitsInStock), n.unitsOnOrder = toInteger(row.unitsOnOrder),
+n.reorderLevel = toInteger(row.reorderLevel), n.discontinued = (row.discontinued <> "0")
+```
+
+Qué estamos haciendo aquí?
+
+Al igual que SQL, Cypher es un _4th generation language_, que en simples términos significa que se parece muchísimo a como se estructuran órdenes y declaraciones en inglés. 
+
+1. `LOAD CSV`: el comando de Cypher `LOAD` es similar al `COPY` de PostgreSQL y MonetDB. La parte de `WITH HEADERS` indica que el CSV a cargar tiene los nombres de las columnas en el 1er renglón. El keyword `FROM` es para indicar la fuente, y afortunadamente para nosotros, Cypher acepta URLs como fuente, por lo que no es necesario descargar los CSVs a nuestro storage local, sino que solo con acceso a internet podemos llegar a ellas.
+2. 
 
 
 
