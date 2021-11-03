@@ -416,5 +416,131 @@ Fijémonos en la cajita de texto de arriba:
 
 En esta caja vamos a poder escribir queries en "Cypher". Qué está haciendo este query? `MATCH (n:Product) RETURN n LIMIT 25`.
 
+1. `MATCH` es igualito que el `SELECT`.
+2. La expresión `n:Product` va a buscar los _nodes_ que tengan el _label_ `Product`.
+3. `RETURN n` es como la parte del `SELECT` donde indicamos las columnas que queremos obtener; en este caso, queremos los nodos, pero bien pudieramos obtener `n.discontinuied`, o `n.reorderLevel`, es decir, atributos del (o los) nodo(s) que han hecho match.
+
+Vamos a cargar el resto de la BD:
+
+**Categories**
+
+```
+LOAD CSV WITH HEADERS FROM "http://data.neo4j.com/northwind/categories.csv" AS row
+CREATE (n:Category)
+SET n = row
+```
+
+**Suppliers**
+
+```
+LOAD CSV WITH HEADERS FROM "http://data.neo4j.com/northwind/suppliers.csv" AS row
+CREATE (n:Supplier)
+SET n = row
+```
+
+Una vez creados, nuestra BD se ve así:
+
+![graph](https://user-images.githubusercontent.com/1316464/140180834-4e92aca7-f68c-4acc-8ffe-7faf551917cb.png)
+
+Esto lo sacamos con `MATCH (n) RETURN n`, que es como un `SELECT *` pero recursivo a todas las tablas.
+
+⚠️ Faltan las relaciones! ⚠️
+
+Vamos a crear los _edges_ que van desde `Product` a `Category`:
+
+```
+MATCH (p:Product),(c:Category)
+WHERE p.categoryID = c.categoryID
+CREATE (p)-[:PART_OF]->(c)
+```
+
+Qué estamos haciendo aquì?
+
+1. Estamos buscando todos los nodos que tengan el _label_ `Product` y los que tengan el _label_ `Category`, y los estamos poniendo en las variables `p` y `c`, respectivamente.
+2. Estamos agregando una condición **que se parece muuuuuuucho** al `JOIN` de SQL. Esto es para poder ejecutar la siguiente parte:
+3. Estamos creando un _edge_ con _label_ `PART_OF` entre `p` y `c`.
+
+Ahora vamos a crear los _edges_ para relacionar `Product` y `Supplier`:
+
+```
+MATCH (p:Product),(s:Supplier)
+WHERE p.supplierID = s.supplierID
+CREATE (s)-[:SUPPLIES]->(p)
+```
+
+Misma estructura que el comando anterior.
+
+Después de todo esto, cómo se ve nuestra BD?
+
+![graph (3)](https://user-images.githubusercontent.com/1316464/140183130-b535b583-ea84-4101-b1f5-d17436ab737a.png)
 
 
+Vemos que se han formado 2 "comunidades": los productos lácteos, y los no-lácteos. De esto podemos deducir que los productos lácteos tienen un grupo de suppliers **que no suministran otro tipo de productos**, mientras que los no-lácteos son suministrados por el resto de los proveedores.
+
+Las **comunidades** son grupos de _nodes_ que están conectados por sus relaciones, pero que no están conectados a otro conjunto de _nodes_. Son importantes en el análisis de grafos para elaborar hipótesis o realizar investigaciones.
+
+Vamos a lanzar los siguientes queries:
+
+#### 1. Qué categorías nos vende cada proveedor?
+
+```
+MATCH (s:Supplier)-->(:Product)-->(c:Category)
+RETURN s.companyName as Company, collect(distinct c.categoryName) as Categories
+```
+
+Qué estamos haciendo aquí?
+
+1. `MATCH` - más formalmente, este comando busca un patrón dentro de nuestro grafo. En este caso, está buscando las rutas, de cualquier _label_, entre `Supplier`, `Product` y `Cateogory`.
+   - La ausencia de _label_ en los _edges_ indica que no nos importa la etiqueta de la relación, solo que exista.
+   - Estamos asignando los nodos de las etiquetas `Supplier` y `Category` a las variables `s` y `c`, respectivamente. Dado que para responder la pregunta, NO NOS INTERESAN los `Product`, no le estamos asignando variable, porque no nos vamos a referir a ellos, solo necesitamos sus relaciones.
+2. `RETURN s.companyName as Company` es self-explanatory, no?
+3. `collect(distinct c.categoryName) as Categories` es una función de agregación similar a `count()` o `avg()` en SQL. Esta función recolecta los resultados y los mete en una lista (entre `[]`).
+   - Qué pasa si no ponemos el `distinct`? Y si no usamos el `collect()`?
+
+#### 2. Qué proveedores nos venden frutas y verduras?
+
+```
+MATCH (c:Category {categoryName:"Produce"})<--(:Product)<--(s:Supplier)
+RETURN DISTINCT s.companyName as ProduceSuppliers
+```
+Qué estamos haciendo aquí?
+
+1. Estamos buscando los _nodes_ con _label_ `Category` cuyo _attribute_ `categoryName` sea "Produce" (noten las doble comillas), y sus relaciones con `Product` y `Supplier`, de nuevo sin importar el _label_ de dichas relaciones.
+2. `RETURN DISTINCT s.companyName as ProduceSuppliers` regresa el _attribute_ `companyName` de los nodos elegidos en el `MATCH`.
+
+### Cargar el resto de la BD:
+
+**Customers**
+
+```
+LOAD CSV WITH HEADERS FROM "http://data.neo4j.com/northwind/customers.csv" AS row
+CREATE (n:Customer)
+SET n = row
+```
+
+**Orders**
+```
+LOAD CSV WITH HEADERS FROM "http://data.neo4j.com/northwind/orders.csv" AS row
+CREATE (n:Order)
+SET n = row
+```
+
+**Relación Customers -> Orders**
+```
+MATCH (c:Customer),(o:Order)
+WHERE c.customerID = o.customerID
+CREATE (c)-[:PURCHASED]->(o)
+```
+
+**Relación Order -> Product**
+
+Esto era en PostgreSQL **la tabla intermedia `order_details`** pero en grafos NO NECESITAMOS tablas intermedias para expresar relaciones N a M!
+
+```
+LOAD CSV WITH HEADERS FROM "http://data.neo4j.com/northwind/order-details.csv" AS row
+MATCH (p:Product), (o:Order)
+WHERE p.productID = row.productID AND o.orderID = row.orderID
+CREATE (o)-[details:ORDERS]->(p)
+SET details = row,
+details.quantity = toInteger(row.quantity)
+```
