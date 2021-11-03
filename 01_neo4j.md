@@ -234,12 +234,12 @@ https://user-images.githubusercontent.com/1316464/138751707-edbb6931-c056-45b9-8
 Ejecutamos los siguientes comandos en la terminal:
 
 ```console
-$ sudo add-apt-repository -y ppa:openjdk-r/ppa
-$ sudo apt-get update
-$ wget -O - https://debian.neo4j.com/neotechnology.gpg.key | sudo apt-key add -
-$ echo 'deb https://debian.neo4j.com stable latest' | sudo tee -a /etc/apt/sources.list.d/neo4j.list
-$ sudo add-apt-repository universe
-$ sudo apt-get update
+sudo add-apt-repository -y ppa:openjdk-r/ppa
+sudo apt-get update
+wget -O - https://debian.neo4j.com/neotechnology.gpg.key | sudo apt-key add -
+echo 'deb https://debian.neo4j.com stable latest' | sudo tee -a /etc/apt/sources.list.d/neo4j.list
+sudo add-apt-repository universe
+sudo apt-get update
 ```
 
 Qué estamos haciendo aquí?
@@ -254,7 +254,7 @@ Qué estamos haciendo aquí?
 Una vez hecho esto, vamos validar si los paquetes de Neo4j están disponibles para Ubuntu:
 
 ```console
-$ apt list -a neo4j
+apt list -a neo4j
 ```
 
 La salida debe ser:
@@ -273,7 +273,7 @@ neo4j/stable 1:4.3.0 all
 Finalmente, podemos instalar Neo4j:
 
 ```console
-$ sudo apt-get install neo4j=1:4.3.6
+sudo apt-get install neo4j=1:4.3.6
 ```
 
 Para arrancar el server de Neo4j debemos primero asignar un password a nuestro usuario `ubuntu`:
@@ -321,7 +321,13 @@ Y reiniciar el server
 sudo systemctl restart neo4j
 ```
 
-Ahora vamos a abrir un browser y entrar a `https://[IP ADDRESS]:7474`. Nos va a pedir user y password. Los de default son `neo4j`/`neo4j`, pero en cuanto los usemos, Neo4j nos va a pedir que los cambiemos.
+Ahora si, conectémonos a Neo4j.
+
+Vamos a abrir un browser y entrar a `https://[IP ADDRESS]:7474`. Nos va a pedir user y password. Los de default son `neo4j`/`neo4j`, pero en cuanto los usemos, Neo4j nos va a pedir que los cambiemos.
+
+Lo que responde en el puerto `7474` es solamente un cliente ligero web hacia Neo4j, no el Neo4j como tal.
+
+Ese responde en el `7687`, a través de un servidorsito de conexiones llamado `Bolt`, con el URL `jdbc:neo4j:bolt://[IP ADDRESS]:7687/`.
 
 ### Cargando la versión de grafos de Northwind
 
@@ -357,7 +363,7 @@ De esta forma, tenemos el siguiente diagrama de grafos que representa nuestra BD
 2. Dada la "Index-free Adjacency", sabemos qué _nodes_ tienen particular _relationship_ con otro _node_, en lugar de hacer un `join` y realizar la búsqueda de overlap entre 1 llave primaria de una tabla y la llave foránea de otra tabla.
 3. Aunque puede haber normalización justo como en el modelo E-R, ésta no es forzosa ni rígida, y consiste principalmente en convertir _attributes_ en _nodes_, aunque al hacer esto debemos tener en mente que al convertir, los _nodes_ son instancias particulares, no clases ni _Labels_.
 
-
+### Ahora si, la carga.
 
 Para cargarla vamos a utilizar el lenguaje **Cypher**, que es como el SQL para Neo4j.
 
@@ -376,8 +382,12 @@ Qué estamos haciendo aquí?
 
 Al igual que SQL, Cypher es un _4th generation language_, que en simples términos significa que se parece muchísimo a como se estructuran órdenes y declaraciones en inglés. 
 
-1. `LOAD CSV`: el comando de Cypher `LOAD` es similar al `COPY` de PostgreSQL y MonetDB. La parte de `WITH HEADERS` indica que el CSV a cargar tiene los nombres de las columnas en el 1er renglón. El keyword `FROM` es para indicar la fuente, y afortunadamente para nosotros, Cypher acepta URLs como fuente, por lo que no es necesario descargar los CSVs a nuestro storage local, sino que solo con acceso a internet podemos llegar a ellas.
-2. 
+1. `LOAD CSV`: el comando de Cypher `LOAD` es similar al `COPY` de PostgreSQL y MonetDB. La parte de `WITH HEADERS`, al igual que el `COPY` en PostgreSQL indica que el CSV a cargar tiene los nombres de las columnas en el 1er renglón. El keyword `FROM` es para indicar la fuente, y afortunadamente para nosotros, Cypher acepta URLs aquí, por lo que no es necesario descargar los CSVs a nuestro storage local y solo jalarlos del internet.
+2. `CREATE (n:Product)` crea el _node_ `n` con el _label_ `Product`. Aquí vale la pena que cubramos unos aspectos de la sintaxis de Cypher:
+   - Un _node_ es representado por dos paréntesis, a manera de "bolita". El _node_ `n` lo representamos como `(n)`. Por ejemplo: `create (tonyStark:SUPERHERO {group:'Avengers'}`
+   - Un _edge_ es representado por una flechita como esta `-[:LABEL]->` y obviamente debe conectar 2 _nodes_. el `LABEL` es igualito a los labels que califican a los nodes, como sigue: `create (tonyStark)-[:MENTORS]->(peterParker)-[:WORKSFOR]->(jjJameson)`
+   - Las _properties_ de un _node_ se fijan con `{}` acompañando a los _nodes_, como sigue: `CREATE (tonyStark:SUPERHERO {group: 'Avengers'})`
+   - 
 
 
 
