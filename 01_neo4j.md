@@ -384,11 +384,11 @@ Al igual que SQL, Cypher es un _4th generation language_, que en simples términ
 
 1. `LOAD CSV`: el comando de Cypher `LOAD` es similar al `COPY` de PostgreSQL y MonetDB. La parte de `WITH HEADERS`, al igual que el `COPY` en PostgreSQL indica que el CSV a cargar tiene los nombres de las columnas en el 1er renglón. El keyword `FROM` es para indicar la fuente, y afortunadamente para nosotros, Cypher acepta URLs aquí, por lo que no es necesario descargar los CSVs a nuestro storage local y solo jalarlos del internet.
 2. `CREATE (n:Product)` crea el _node_ `n` con el _label_ `Product`. Aquí vale la pena que cubramos unos aspectos de la sintaxis de Cypher:
-   - Un _node_ es representado por dos paréntesis, a manera de "bolita". El _node_ `n` lo representamos como `(n)`. Por ejemplo: `create (tonyStark:SUPERHERO {group:'Avengers'}`
+   - Un _node_ es representado por dos paréntesis, a manera de "bolita". El _node_ `n` lo representamos como `(n)`. Por ejemplo: `create (tonyStark:SuperHero {group:'Avengers'}`
    - Un _edge_ es representado por una flechita como esta `-[:LABEL]->` y obviamente debe conectar 2 _nodes_. el `LABEL` es igualito a los labels que califican a los nodes, como sigue: `create (tonyStark)-[:MENTORS]->(peterParker)-[:WORKSFOR]->(jjJameson)`
-   - Las _properties_ de un _node_ se fijan con `{}` acompañando a los _nodes_, como sigue: `CREATE (tonyStark:SUPERHERO {group: 'Avengers'})`
+   - Las _properties_ de un _node_ se fijan con `{}` acompañando a los _nodes_, como sigue: `CREATE (tonyStark:SuperHero {group: 'Avengers'})`
    - Igual, las _properties_ de un _edge_ se fijan con `{}`, así: `create (tonyStark)-[:MENTORS {since:2017}]->(peterParker)-[:WORKSFOR {at:'Daily Bugle'}]->(jjJameson)`
-   - Las _properties_, sean de un _edge_ o de un _node_ pueden ser arrays: `(tonyStark:SUPERHERO {suits:['Mark IV', 'Mark V']})-[HOLDS {on:['Glove','Avengers Compound']}]->(soulStone:INFINITY_STONE)`
+   - Las _properties_, sean de un _edge_ o de un _node_ pueden ser arrays: `(tonyStark:SuperHero {suits:['Mark IV', 'Mark V']})-[HOLDS {on:['Glove','Avengers Compound']}]->(soulStone:INFINITY_STONE)`
    - Es buena práctica primero crear los _nodes_, luego los _edges_.
 3. `SET n = row` está indicando que al crear los nodos con la variable `n`, haga una equivalencia entre esa variable y el renglón del archivo CSV que estamos cargando.
 4. `n.unitPrice` y demás comandos están preprocesando los datos del archivo CSV para poder guardarlos de forma correcta. `toInteger` está transformando a entero, mientras que `n.discontinued` se está evaluando a la expresión `row.discontinued <> "0"`.
@@ -416,7 +416,7 @@ Fijémonos en la cajita de texto de arriba:
 
 En esta caja vamos a poder escribir queries en "Cypher". Qué está haciendo este query? `MATCH (n:Product) RETURN n LIMIT 25`.
 
-1. `MATCH` es igualito que el `SELECT`.
+1. `MATCH` es parecido que el `FROM`.
 2. La expresión `n:Product` va a buscar los _nodes_ que tengan el _label_ `Product`.
 3. `RETURN n` es como la parte del `SELECT` donde indicamos las columnas que queremos obtener; en este caso, queremos los nodos, pero bien pudieramos obtener `n.discontinuied`, o `n.reorderLevel`, es decir, atributos del (o los) nodo(s) que han hecho match.
 
