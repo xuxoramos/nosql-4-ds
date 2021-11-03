@@ -387,7 +387,34 @@ Al igual que SQL, Cypher es un _4th generation language_, que en simples términ
    - Un _node_ es representado por dos paréntesis, a manera de "bolita". El _node_ `n` lo representamos como `(n)`. Por ejemplo: `create (tonyStark:SUPERHERO {group:'Avengers'}`
    - Un _edge_ es representado por una flechita como esta `-[:LABEL]->` y obviamente debe conectar 2 _nodes_. el `LABEL` es igualito a los labels que califican a los nodes, como sigue: `create (tonyStark)-[:MENTORS]->(peterParker)-[:WORKSFOR]->(jjJameson)`
    - Las _properties_ de un _node_ se fijan con `{}` acompañando a los _nodes_, como sigue: `CREATE (tonyStark:SUPERHERO {group: 'Avengers'})`
-   - 
+   - Igual, las _properties_ de un _edge_ se fijan con `{}`, así: `create (tonyStark)-[:MENTORS {since:2017}]->(peterParker)-[:WORKSFOR {at:'Daily Bugle'}]->(jjJameson)`
+   - Las _properties_, sean de un _edge_ o de un _node_ pueden ser arrays: `(tonyStark:SUPERHERO {suits:['Mark IV', 'Mark V']})-[HOLDS {on:['Glove','Avengers Compound']}]->(soulStone:INFINITY_STONE)`
+   - Es buena práctica primero crear los _nodes_, luego los _edges_.
+3. `SET n = row` está indicando que al crear los nodos con la variable `n`, haga una equivalencia entre esa variable y el renglón del archivo CSV que estamos cargando.
+4. `n.unitPrice` y demás comandos están preprocesando los datos del archivo CSV para poder guardarlos de forma correcta. `toInteger` está transformando a entero, mientras que `n.discontinued` se está evaluando a la expresión `row.discontinued <> "0"`.
+   - 👀 OJO 👀: esto nos indica que durante la lectura la mayoría de los campos se están importando como strings.
+   - 👀 OJO #2 👀: la comparación `<> "0"` no es válida en Java, pero si lo es en Javascript. Neo4j está hecho en Java por debajo, pero tiene un preprocessor de LISP, que es la base de Javascript, que si entiende esta expresión.
+
+Vamos a ejecutar este import en DBeaver.
+
+![image](https://user-images.githubusercontent.com/1316464/140169392-0fd0b895-24ad-4397-9c13-f2704b55ad57.png)
+
+Y dónde están las tablas?!
+
+![image](https://user-images.githubusercontent.com/1316464/140170073-f45bd98f-c876-42cf-946b-46034dc5ac33.png)
+
+Vamos a abrir el cliente de Neo4J apuntando nuestro browser a `http://3.95.241.22:7474/`
+
+Veremos que ahí están nuestros 25 productos:
+
+![image](https://user-images.githubusercontent.com/1316464/140170423-1bdc05a0-3832-40ca-bb3f-63902c95603b.png)
+
+Fijémonos en la cajita de texto de arriba:
+
+![image](https://user-images.githubusercontent.com/1316464/140170519-3ca8f983-b189-4d52-a622-a2e1ec212a21.png)
+
+
+En esta caja vamos a poder escribir queries en "Cypher". Qué está haciendo este query? `MATCH (n:Product) RETURN n LIMIT 25`.
 
 
 
