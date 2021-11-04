@@ -116,4 +116,6 @@ A continuación el temario, fecha por fecha:
 | 23             |   2021/10/18    | [Construcción de un Data Warehouse Histórico en MonetDB y migración de datos desde PostgreSQL](https://xuxoramos.github.io/nosql-4-ds/01_monetdb) / [video](https://drive.google.com/file/d/1k-c_QXwZloKJReCVhsQ7AOPKHWiu0cYc/view?usp=sharing)
 | 24             |   2021/10/20    | [Intro a Cloud Computing y creación de una máquina virtual en AWS](https://xuxoramos.github.io/nosql-4-ds/01_neo4j) / [video](https://drive.google.com/file/d/19hobazsdMgyCyrg_9Y3Hk7c8VIVMa607/view?usp=sharing)
 | 25             |   2021/10/25    | [Uso de AWS Academy. Creación de máquinas virtuales en EC2 dentro de AWS Academy. Instalación de Neo4j.](https://itam.zoom.us/rec/share/2_X9Nli0AG9ZeMNCPpCbbHzAFCdHX9VxlfxvHd5cFkOThIQT17XcpOkMQKzLPAL2.N8jEbWiG68vG6n7D)
-
+| 26             |   2021/10/27    | **CLASE A REPONER**
+| 27             |   2021/11/01    | **ASUETO**
+| 28             |   2021/11/03    | [Conexión a Neo4j. Carga de BD Northwind a Neo4j. Similitudes y diferencias entre Neo4j y SQL. Intro al lenguaje Cypher.](https://drive.google.com/file/d/1sJkytduTJHxQbpFzmdSLi5EZNv5cI9hj/view?usp=sharing)
