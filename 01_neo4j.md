@@ -625,11 +625,22 @@ JOIN orders o ON o.order_id  = od.order_id
 	ORDER BY(units) desc limit 2 -- Verificar si si es el máximo;
 ```
 
+Con order.freight
 ```
 match (o:Order)
 return o.shipCountry as ship_country, max(toFloat(o.freight)) as max_freight
 order by max_freight desc
 ```
+
+Con order_details.quantity
+```
+match (o:Order)-[od:ORDERS]->(p:Product)
+return o.shipCountry as ship_ctry, max(od.quantity) as max_qty
+order by max_qty desc
+```
+
+TBD: Exporar responder esta pregunta con la suma de quantities de todas las ordenes de un país, y luego sacar el max
+
 
 ### Qué productos mandamos en navidad?
 
