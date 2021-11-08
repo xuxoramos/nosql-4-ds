@@ -27,13 +27,14 @@ Debe entregarse un notebook en [Google Colab](https://colab.research.google.com/
 
 ### Presentación 1
 - Fecha: 17 de Nov, 14:30
-- Entregable: análisis preliminar estático de conteo de iniciativas rechazadas y aprobadas por sexenio, por trimestre, por ley que modifica, por partido y sus combinaciones
+- Entregable: 1) análisis preliminar estático de conteo de iniciativas rechazadas y aprobadas por sexenio, por trimestre, por ley que modifica, por partido y sus combinaciones, 2) selección de una combinación de 2 criterios de interés para realizar análisis de texto en la siguiente entrega - se debe JUSTIFICAR la selección y el motivo de interés. No puede repetirse entre los 2 equipos.
 - Valor: 10%
 - No estará presente A19 ni SocialTIC
+- Se pueden ayudar de Selma. Ella ya sabe que la contactarán.
 
 ### Presentación 2
 - Fecha: 1o de Dic, 14:30
-- Entregable: el análisis preliminar TF/IDF de 3 iniciativas de ley de particular interés para el equipo y el guardado del resultado en AWS S3. No pueden ser las mismas de los 2 equipos.
+- Entregable: el análisis preliminar TF/IDF de todas las iniciativas de ley de particular interés definido en la entrega anterior y el guardado del resultado en AWS S3. 
 - Valor: 20%
 - No estará presente A19 ni SocialTIC
 
