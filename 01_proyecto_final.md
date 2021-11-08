@@ -12,7 +12,7 @@ Todo este proyecto final utilizará el [APILegislativo](https://backend.apilegis
 
 ## Producto final y estipulaciones
 
-1. Comparación de conteos de propuestas de ley por por sexenio, por trimestre, por tópico o temática, por partido y sus combinaciones, con especial énfasis en comparativa durante el último año del sexenio de EPN y lo que va del sexenio de AMLO.
+1. Comparación de conteos de propuestas de ley aprobadas y rechazadas por por sexenio, por trimestre, por tópico o temática, por partido y sus combinaciones, con especial énfasis en comparativa durante el último año del sexenio de EPN y lo que va del sexenio de AMLO.
 2. Análisis de [Term Frequency/Inverse Document Frequency](https://en.wikipedia.org/wiki/Tf%E2%80%93idf) de las propuestas de ley para detección de anomalías dentro de las propuestas.
 3. En el bloque inicial debe haber 2 variables que deben automatizar el resto de la ejecución del notebook por parte de **CUALQUIER PERSONA QUE CLONE SU REPO**:
    - `id_propuesta_ley` de tipo entera en la que pondré cualquier ID de iniciativa dentro del APILegislativo para poder correr todo el análisis del punto 2 arriba.
