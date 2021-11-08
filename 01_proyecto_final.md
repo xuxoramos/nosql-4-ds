@@ -27,7 +27,7 @@ Debe entregarse un notebook en [Google Colab](https://colab.research.google.com/
 
 ### Presentación 1
 - Fecha: 17 de Nov, 14:30
-- Entregable: análisis preliminar estático de conteo de iniciativas por sexenio, por trimestre, por tópico o temática, por partido y sus combinaciones
+- Entregable: análisis preliminar estático de conteo de iniciativas rechazadas y aprobadas por sexenio, por trimestre, por ley que modifica, por partido y sus combinaciones
 - Valor: 10%
 - No estará presente A19 ni SocialTIC
 
