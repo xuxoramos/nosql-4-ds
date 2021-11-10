@@ -712,6 +712,14 @@ order by cust_name
 
 ## Carga de los Panama Papers en Neo4j
 
+La versión de Neo4j Community, que es la que estamos usando y es gratuita, **SOLO PUEDE TENER 1 BD!**
+
+![](https://c.tenor.com/No8u0Yip0lwAAAAC/so-pissed.gif)
+
+Entonces vamos a tener que crear OOOOOTRA instancia de EC2 para VOLVER a instalar Neo4j y poder hacer este ejercicio :/
+
+
+
 Es una BD grande, por lo que primero tenemos que hacer unas modificaciones a la config de Neo4j:
 
 1. Cambiar el directorio de default para importar archivotes. Esto lo logramos comentando la línea `#dbms.directories.import=/var/lib/neo4j/import
