@@ -709,3 +709,28 @@ match (c:Customer)-[pr:PURCHASED]->(o:Order)-[od:ORDERS]->(p:Product)<-[sp:SUPPL
 return c.companyName as cust_name, s.companyName as supp_name, avg(toFloat(o.freight)) as avg_freight
 order by cust_name
 ```
+
+## Carga de los Panama Papers en Neo4j
+
+Es una BD grande, por lo que primero tenemos que hacer unas modificaciones a la config de Neo4j:
+
+1. Cambiar el directorio de default para importar archivotes. Esto lo logramos comentando la línea `#dbms.directories.import=/var/lib/neo4j/import
+` del archivo `/etc/neo4j/neo4j.conf`. Es un archivo de sistema, por lo que hay que editarlo con `sudo nano /etc/neo4j/neo4j.conf`.
+
+2. Igual editar el archivo `/etc/security/limits.conf` con `sudo nano /etc/security/limits.conf` y agregar hasta el final los siguientes 2 registros para poder abrir archivos grandes desde el filesystem de Ubuntu:
+
+```
+root   soft    nofile  40000
+root   hard    nofile  40000
+```
+
+3. Finalmente, en los archivos `/etc/pam.d/common-session` y `/etc/pam.d/common-session-noninteractive` agregar `session required pam_limits.so
+`.
+
+4. Vamos a crear una BD desde la consolita de Neo4j que se llame `panamapapers`:
+
+```
+create database panamapapers
+```
+
+5. Vamos a clonar [este repo](https://github.com/neo4j-graph-examples/icij-panama-papers.git) con el comando `git clone https://github.com/neo4j-graph-examples/icij-panama-papers.git` en nuestro _home directory_ de nuestra instancia de AWS.
