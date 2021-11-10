@@ -641,8 +641,12 @@ order by max_qty desc
 
 TBD: Exporar responder esta pregunta con la suma de quantities de todas las ordenes de un país, y luego sacar el max
 
+```
+```
 
 ### Qué productos mandamos en navidad?
+
+En SQL
 
 ```sql
 select p.product_name 
@@ -651,9 +655,27 @@ join orders o on od.order_id = o.order_id
 where extract(month from o.shipped_date) = 12 and extract(day from o.shipped_date) = 25;
 ```
 
+En Cypher
+```
+match (o:Order)-[od:ORDERS]->(p:Product)
+where apoc.date.field(apoc.date.parse(o.orderDate), 'month') = 12 and apoc.date.field(apoc.date.parse(o.orderDate), 'd') = 25
+return o.orderID, o.orderDate, collect(p.productName)
 ```
 
-```
+OJO! Debemos instalar la librería APOC para poder correr las funciones de arriba.
+
+`apoc.date.field` es similar al `extract([day|month|year|hour|second] from date)`
+
+`apoc.date.parse()` es similar a `date([string representando date])`
+
+La instalación de APOC es como sigue:
+
+1. Entrar a la máquina virtual de EC2 en donde tenemos el Neo4j con `ssh -i labsuser.pem ubuntu@[LA IP DE SU MÁQUINA]`
+2. Entrar el comando `wget https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases/download/4.3.0.3/apoc-4.3.0.3-all.jar` - esto va a descargar la librería
+3. Debemos copiar esta librería a `/var/lib/neo4j/plugins/` con el comando `cp apoc-4.3.0.3-all.jar /var/lib/neo4j/plugins/`
+4. Ahora debemos reiniciar el Neo4j con el comando `sudo systemctl restart neo4j.service`
+
+Con eso ya debemos tener acceso a las funciones de APOC.
 
 ### Cuál es el promedio de flete gastado para enviar productos de un proveedor a un cliente?
 
@@ -663,4 +685,10 @@ from orders o join shippers s on (o.ship_via = s.shipper_id)
 join order_details od on (od.order_id = o.order_id) 
 join customers c on (c.customer_id = o.customer_id)
 group by c.company_name, s.company_name;
+```
+
+```
+match (c:Customer)-[pr:PURCHASED]->(o:Order)-[od:ORDERS]->(p:Product)<-[sp:SUPPLIES]-(s:Supplier)
+return c.companyName as cust_name, s.companyName as supp_name, avg(toFloat(o.freight)) as avg_freight
+order by cust_name
 ```
