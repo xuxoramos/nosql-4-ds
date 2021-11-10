@@ -615,24 +615,29 @@ order by units_stock
 
 ### A donde va nuestro envío más voluminoso?
 
+La respuesta más correcta en SQL:
+
 ```sql
-SELECT 
-	o.ship_country, 
-	max(od.quantity) AS units 
-FROM order_details od
-JOIN orders o ON o.order_id  = od.order_id 
-	GROUP BY(o.ship_country)
-	ORDER BY(units) desc limit 2 -- Verificar si si es el máximo;
+with summary as (
+	select o.order_id as ord_id , o.ship_country as shp_ctry, sum(od.quantity) as sum_qty
+	from orders o join order_details od using (order_id)
+	join products p using (product_id)
+	group by o.order_id , o.ship_country
+)
+select ord_id, shp_ctry , max(sum_qty) as max_qty
+from summary
+group by ord_id, shp_ctry
+order by max_qty desc;
 ```
 
-Con order.freight
+Con order.freight (otra respuesta correcta en SQL):
 ```
 match (o:Order)
 return o.shipCountry as ship_country, max(toFloat(o.freight)) as max_freight
 order by max_freight desc
 ```
 
-Con order_details.quantity
+Con order_details.quantity (respuesta incorrecta, pero la ponemos aquí para respetar el replicado en Cypher de respuestas en SQL)
 ```
 match (o:Order)-[od:ORDERS]->(p:Product)
 return o.shipCountry as ship_ctry, max(od.quantity) as max_qty
@@ -642,7 +647,17 @@ order by max_qty desc
 TBD: Exporar responder esta pregunta con la suma de quantities de todas las ordenes de un país, y luego sacar el max
 
 ```
+call {
+	match (o:Order)-[od:ORDERS]->(p:Product)
+	return o.orderID as ord_id,
+	o.shipCountry as ship_country,
+	sum(od.quantity) as sum_qty_per_order
+	order by sum_qty_per_order desc
+}
+return ord_id, ship_country, max(sum_qty_per_order)
 ```
+
+Veamos que el comando `call` se parece algo a los _common table expressions_ de SQL.
 
 ### Qué productos mandamos en navidad?
 
@@ -679,6 +694,7 @@ Con eso ya debemos tener acceso a las funciones de APOC.
 
 ### Cuál es el promedio de flete gastado para enviar productos de un proveedor a un cliente?
 
+En SQL
 ```sql
 select c.company_name as customer, s.company_name as shipper, avg(o.freight) as flete
 from orders o join shippers s on (o.ship_via = s.shipper_id) 
@@ -687,6 +703,7 @@ join customers c on (c.customer_id = o.customer_id)
 group by c.company_name, s.company_name;
 ```
 
+En Cypher
 ```
 match (c:Customer)-[pr:PURCHASED]->(o:Order)-[od:ORDERS]->(p:Product)<-[sp:SUPPLIES]-(s:Supplier)
 return c.companyName as cust_name, s.companyName as supp_name, avg(toFloat(o.freight)) as avg_freight
