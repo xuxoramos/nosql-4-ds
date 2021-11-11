@@ -710,15 +710,42 @@ return c.companyName as cust_name, s.companyName as supp_name, avg(toFloat(o.fre
 order by cust_name
 ```
 
-## Carga de los Panama Papers en Neo4j
+## Carga de los Pandora Papers en Neo4j
+
+Los [Pandora Papers](https://www.icij.org/investigations/pandora-papers/about-pandora-papers-leak-dataset/) son documentos de constitución y quiebra de empresas, transferencias millonarias y cambios de board que, como los [Panama Papers](https://www.icij.org/investigations/panama-papers/five-years-later-panama-papers-still-having-a-big-impact/) en su momento, han develado las obscenas fortunas de muchísima gente poderosa: deportistas, políticos, personas de negocios, realeza, políticos y celebridades, y peor de todo, como evitan ser gravados por sus paises de residencia.
+
+Es la opinión de este profesor que ser rico no es malo, y que la recaudación mediante mecanismos de gravamen de riqueza frecuentemente se usan en programas clientelares o no se usan en el interés verdadero de los ciudadanos.
+
+Pero evadir el fisco si es ilegal, y da pie a otras actividades ilegales como lavado de dinero, lo cual habilita redes criminales como narcotráfico, trata, prostitución, etc.
+
+Encima de esto, estos _offshore leaks_ muestran algo que raya en lo inmoral. En medio de la pandemia de COVID19, cuando millones de personas están atravesando por una crisis económica que está ampliando la brecha entre los menos afortunados, y cuando cientos de gobiernos están experimentando una recuperación anémica, por decir lo menos, **esconder** fortunas para que no sean gravadas, es decir, para no compartir con la población ni contribuir al fisco, es, por definición, malvado.
+
+Neo4j puso a disposición del [International Consortium of Investigative Journalists](https://www.icij.org/) no solo licencias empresariales de su BD de Grafos, sino infraestructura, servers, graph visualizers, y todo el resto de sus productos **for free** para que el ICIJ hiciera su chamba.
+
+[El resultado de los Panama Papers](https://www.icij.org/investigations/panama-papers/what-happened-after-the-panama-papers/) a 2019:
+
+1. Investigaciones de la policía fiscal en 82 paises (incluído MX)
+2. La firma que habilitó todo este desmadre, Mossack Fonseca, fue desmantelada y sus dueños a la cárcel (aunque solo por meses y sus assets personales no fueron incautados).
+   - Hay una película buenísima en Netflix de este escandalazo: [The Laundromat](https://en.wikipedia.org/wiki/The_Laundromat_(2019_film))
+3. Nueva Zelanda, Alemania, UK y otros reformaron su miscelánea fiscal para incrementar vigilancia e incentivar disclosure de hidden assets
+4. Renuncia de políticos en Mongolia, Pakistán, España, Islandia (donde renunció la cabeza de gobierno) y otros.
+5. $1,200 mdd recuperados por agencias de revenue nacionales a nivel global
+
+En México hubo 33 personalidades entre deporitistas, artistas y políticos implicados en el leak:
+
+1. La actriz Edith González a través de su esposo Lorenzo Margain
+2. Salinas Pliego abrió 9 empresas en Nueva Zelanda para comprar 1 yate y 1 cuadro de Goya
+3. Juan Armando Hinojosa, el constructor preferido en el sexenio de EPN, creo a través de Mossack Fonseca 4 empresas offshore para esconder dinero proveniente de contratos de adjudicación directa por $2,800 mdd y a cambio, otorgar regalos a la pareja presidencial
+
+Y las consecuencias seguirán, sobre todo alimentadas por otros leaks. La tecnología de Neo4j por fin ha puesto a los prosecutors pasos adelante de los offenders.
+
+### Preparación de la carga
 
 La versión de Neo4j Community, que es la que estamos usando y es gratuita, **SOLO PUEDE TENER 1 BD!**
 
 ![](https://c.tenor.com/No8u0Yip0lwAAAAC/so-pissed.gif)
 
 Entonces vamos a tener que crear OOOOOTRA instancia de EC2 para VOLVER a instalar Neo4j y poder hacer este ejercicio :/
-
-
 
 Es una BD grande, por lo que primero tenemos que hacer unas modificaciones a la config de Neo4j:
 
@@ -735,10 +762,55 @@ root   hard    nofile  40000
 3. Finalmente, en los archivos `/etc/pam.d/common-session` y `/etc/pam.d/common-session-noninteractive` agregar `session required pam_limits.so
 `.
 
-4. Vamos a crear una BD desde la consolita de Neo4j que se llame `panamapapers`:
+4. Vamos a instalar la librería APOC como lo vimos en uno de los ejercicios aquí: 
+
+5. Vamos a usar el siguiente _gist_ de Github: https://gist.github.com/rvanbruggen/00d259a453de13106091e2d507c2d86c, ejecutando sección por sección. Estas secciones van a resultar en el siguiente esquema, que podemos obtener ejecutando `call db.schema.visualization` en la consola web de Neo4j.
+
+![image](https://user-images.githubusercontent.com/1316464/141233405-529102cf-f42d-4297-9031-60941591e599.png)
+
+### Explorando los Pandora Papers
+
+1. Cuántas jurisdicciones hay entre todas las entidades?
 
 ```
-create database panamapapers
+MATCH (n:Entity)
+RETURN distinct n.jurisdiction, count(n);
 ```
 
-5. Vamos a clonar [este repo](https://github.com/neo4j-graph-examples/icij-panama-papers.git) con el comando `git clone https://github.com/neo4j-graph-examples/icij-panama-papers.git` en nuestro _home directory_ de nuestra instancia de AWS.
+2. Qué entidades hay en la jurisdicción más "popular"?
+
+```
+MATCH (o:Officer)-[rel]->(e:Entity) 
+WHERE e.jurisdiction CONTAINS “British Virgin Islands”
+RETURN o, rel, e;
+```
+
+3. De las entidades, cuáles son proveedoras y cuales son las más usadas?
+
+```
+MATCH (e:Entity) return e.provider, count(*) as c order by c desc;
+```
+
+4. Cuantos oficiales (shareholder, director, representante legal, etc) de un país están asociados con entidades de los paraísos fiscales?
+
+```
+MATCH (c1:Country)<--(o:Officer)-->(e:Entity)--(c2:Country)
+WITH distinct c1.name as OfficerCountry, c2.name as EntityCountry, count(*) as PatternFrequency
+WHERE PatternFrequency >= 5
+RETURN OfficerCountry, EntityCountry, PatternFrequency
+ORDER BY PatternFrequency desc;
+```
+
+5. Mostrar el grafo de la familia Aliyev de Azerbaijan
+
+Esta familia es de interés por su actual patriarca, [Ilham Aliyev](https://www.occrp.org/en/poy/2012/), "presidente" (en realidad, dictadorsillo) de Azerbaiján y ganador 2012 del premio a la persona más corrupta por el Organized Crime and Corruption Project.
+
+![image](https://user-images.githubusercontent.com/1316464/141236487-f8547bcf-9cd1-44d1-8777-db54fa6adffe.png)
+
+Su familia controla TODA la actividad económica del país, y con ayuda de cuentas offshore y paraísos fiscales han logrado lavar o esconder una fortuna multimillonaria proveniente del petróleo.
+
+```
+MATCH (o:Officer)-->(e:Entity)
+WHERE toLower(o.name) CONTAINS 'aliyev'
+RETURN *;
+```
