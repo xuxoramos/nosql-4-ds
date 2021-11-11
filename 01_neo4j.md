@@ -866,27 +866,98 @@ RETURN gds.util.asNode(nodeId).name AS name, score
 ORDER BY score DESC, name ASC
 ```
 
+En este comando, `YIELD` es el keyword con el que **extraemos** info de la tabla de resultados, mientras que `RETURN` sirve igual como `from` de SQL pero tomando como base lo contenido en `YIELD` y el grafo de entrada.
+
 El resultado es:
 
-│"name"                                                              │"score"            │
-╞════════════════════════════════════════════════════════════════════╪═══════════════════╡
-│"ODIAN CONSULTING LTD"                                              │0.5325000000000001 │
-├────────────────────────────────────────────────────────────────────┼───────────────────┤
-│"Luntrel Investments Limited "                                      │0.44750000000000006│
-├────────────────────────────────────────────────────────────────────┼───────────────────┤
-│"Milrun International Limited"                                      │0.405              │
-├────────────────────────────────────────────────────────────────────┼───────────────────┤
-│"ROMANSTONE INTERNATIONAL LIMITED"                                  │0.405              │
-├────────────────────────────────────────────────────────────────────┼───────────────────┤
-│"Varies Foundation"                                                 │0.405              │
-├────────────────────────────────────────────────────────────────────┼───────────────────┤
-│"MC2 Internacional SA"                                              │0.34125000000000005│
-├────────────────────────────────────────────────────────────────────┼───────────────────┤
-│"Pacific Trust"                                                     │0.2934375          │
-├────────────────────────────────────────────────────────────────────┼───────────────────┤
-│"The Sri Nithi Trust"                                               │0.2934375          │
-├────────────────────────────────────────────────────────────────────┼───────────────────┤
-│"ALLSTAR CONSULTANCY SERVICES LIMITED"                              │0.2775             │
-├────────────────────────────────────────────────────────────────────┼───────────────────┤
-│"AND Holding Ltd"                                                   │0.2775             │
-├────────────────────────────────────────────────────────────────────┼───────────────────┤
+|  | name |score|
+|---|---|---|
+| 1 | "ODIAN CONSULTING LTD" | 0.5325000000000001 |
+| 2 | "Luntrel Investments Limited " | 0.44750000000000006 |
+| 3 | "Milrun International Limited" | 0.405 |
+| 4 | "ROMANSTONE INTERNATIONAL LIMITED" | 0.405 |
+| 5 | "Varies Foundation" | 0.405 |
+| 6 | "MC2 Internacional SA" | 0.34125000000000005 |
+| 7 | "Pacific Trust" | 0.2934375 |
+| 8 | "The Sri Nithi Trust" | 0.2934375 |
+| 9 | "ALLSTAR CONSULTANCY SERVICES LIMITED" | 0.2775 |
+| 10 | "AND Holding Ltd" | 0.2775 |
+| 11 | "Brockville Development Ltd" | 0.2775 |
+| 12 | "Candace Management Limited " | 0.2775 |
+| 13 | "Dominicana Acquisition S.A." | 0.2775 |
+| 14 | "Dorado Asset Management Ltd " | 0.2775 |
+
+Esta medida de centralidad no resultó muy buena, lo cual se debe a que, por la misma actividad criminal, no existen `Officer` que sea plenipotenciario sobre TOOOODOS los `Entity`.
+
+Tampoco es recomendable buscar "comunidades" entre los `Officer` y los `Entities` debido a que todos los algoritmos implementados por Neo4j suponen grafos no dirigidos y nodos homogéneos, es decir, de 1 solo tipo.
+
+#### Node similarity
+
+Vamos a intentar algoritmos de similitud: buscar `Officer` similares de acuerdo a sus relaciones con sus entities, y así quizá encontrar testaferros o prestanombres:
+
+```
+CALL gds.nodeSimilarity.stream('entitiesAndOfficers')
+YIELD node1, node2, similarity
+RETURN gds.util.asNode(node1).name AS officer1, gds.util.asNode(node2).name AS officer2, similarity
+ORDER BY similarity desc
+```
+
+Vemos que el resultado es:
+
+|  | officer1 | officer2 | similarity |
+|---|---|---|---|
+| 1 | "Uhuru Muigai Kenyatta" | "Mama Ngina Kenyatta" | 1.0 |
+| 2 | "Mama Ngina Kenyatta" | "Uhuru Muigai Kenyatta" | 1.0 |
+| 3 | "Ngina Kenyatta" | "Kristina Pratt" | 1.0 |
+| 4 | "Kristina Pratt" | "Ngina Kenyatta" | 1.0 |
+| 5 | "Zakaria Idriss Deby" | "Youssouf Boy Yosko Youssouf" | 1.0 |
+| 6 | "Zakaria Idriss Deby" | "David Abtour" | 1.0 |
+| 7 | "David Abtour" | "Youssouf Boy Yosko Youssouf" | 1.0 |
+| 8 | "David Abtour" | "Zakaria Idriss Deby" | 1.0 |
+| 9 | "Youssouf Boy Yosko Youssouf" | "David Abtour" | 1.0 |
+| 10 | "Youssouf Boy Yosko Youssouf" | "Zakaria Idriss Deby" | 1.0 |
+| 11 | "Sanara Niranthara Rajapaksa Nadesan" | "Thirukumar Ayanaka Nadesan" | 1.0 |
+| 12 | "Thirukumar Ayanaka Nadesan" | "Sanara Niranthara Rajapaksa Nadesan" | 1.0 |
+| 13 | "Anthony Charles Lynton Blair" | "Cherie Blair" | 1.0 |
+| 14 | "Cherie Blair" | "Anthony Charles Lynton Blair" | 1.0 |
+| 15 | "Francisco Flores" | "Juan José Daboub" | 1.0 |
+| 16 | "Juan José Daboub" | "Francisco Flores" | 1.0 |
+| 17 | "Ernesto Pérez Balladares" | "María Enriqueta Pérez Balladares de Iglesias" | 0.6666666666666666 |
+| 18 | "María Enriqueta Pérez Balladares de Iglesias" | "Ernesto Pérez Balladares" | 0.6666666666666666 |
+| 19 | "Dora María Pérez Balladares Boyd " | "Isabella Pérez Balladares de Pretelt " | 0.5 |
+| 20 | "Isabella Pérez Balladares de Pretelt " | "María Enriqueta Pérez Balladares de Iglesias" | 0.5 |
+| 21 | "Isabella Pérez Balladares de Pretelt " | "Dora María Pérez Balladares Boyd " | 0.5 |
+| 22 | "María Enriqueta Pérez Balladares de Iglesias" | "Isabella Pérez Balladares de Pretelt " | 0.5 |
+| 23 | "Luis Enrique Martinelli Linares" | "Ricardo Alberto Martinelli Linares" | 0.5 |
+| 24 | "Ricardo Alberto Martinelli Linares" | "Luis Enrique Martinelli Linares" | 0.5 |
+| 25 | "César Gaviria" | "Luis Fernando Gaviria Trujillo" | 0.5 |
+| 26 | "Luis Fernando Gaviria Trujillo" | "César Gaviria" | 0.5 |
+| 27 | "Muhoho Kenyatta" | "Jomo Kamau Muhoho Kenyatta" | 0.4 |
+| 28 | "Jomo Kamau Muhoho Kenyatta" | "Muhoho Kenyatta" | 0.4 |
+| 29 | "Ernesto Pérez Balladares" | "Isabella Pérez Balladares de Pretelt " | 0.3333333333333333 |
+| 30 | "Dora María Pérez Balladares Boyd " | "María Enriqueta Pérez Balladares de Iglesias" | 0.3333333333333333 |
+| 31 | "Isabella Pérez Balladares de Pretelt " | "Ernesto Pérez Balladares" | 0.3333333333333333 |
+| 32 | "María Enriqueta Pérez Balladares de Iglesias" | "Dora María Pérez Balladares Boyd " | 0.3333333333333333 |
+| 33 | "Ernesto Pérez Balladares" | "Dora María Pérez Balladares Boyd " | 0.25 |
+| 34 | "Dora María Pérez Balladares Boyd " | "Ernesto Pérez Balladares" | 0.25 |
+| 35 | "Sanara Niranthara Rajapaksa Nadesan" | "Thirukumar Nadesan" | 0.25 |
+| 36 | "Nirupama Rajapaska" | "Thirukumar Nadesan" | 0.25 |
+| 37 | "Thirukumar Nadesan" | "Thirukumar Ayanaka Nadesan" | 0.25 |
+| 38 | "Thirukumar Nadesan" | "Nirupama Rajapaska" | 0.25 |
+| 39 | "Thirukumar Nadesan" | "Sanara Niranthara Rajapaksa Nadesan" | 0.25 |
+| 40 | "Thirukumar Ayanaka Nadesan" | "Thirukumar Nadesan" | 0.25 |
+| 41 | "Leyla Aliyeva" | "Arzu Aliyeva" | 0.02702702702702703 |
+| 42 | "Arzu Aliyeva" | "Leyla Aliyeva" | 0.02702702702702703 |
+
+Podemos ver que no solamente hay testaferros y prestanombres, sino que además pertenecen a la misma familia. En este caso los primeros 4 registros tienen a prominentes miembros de la familia Kenyatta, descendientes de Jomo Kenyatta, el primer presidente de Kenya post-colonial.
+
+## Más ejemplos de law enforcement y proyectos sociales con grafos
+
+- Identificación de células terroristas: https://neo4j.com/blog/graph-technology-fight-terrorist-threats/
+- Graphs4Good Project: https://neo4j.com/graphs4good/
+
+## Further reading
+
+![image](https://user-images.githubusercontent.com/1316464/141257973-bc80ad2c-c4a2-412a-8aae-9664deaa312e.png)
+
+https://go.neo4j.com/rs/710-RRC-335/images/Neo4j_Graph_Algorithms.pdf
