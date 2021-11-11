@@ -814,3 +814,79 @@ MATCH (o:Officer)-->(e:Entity)
 WHERE toLower(o.name) CONTAINS 'aliyev'
 RETURN *;
 ```
+
+### Análisis avanzado de grafos
+
+Con ayuda de la librería **Neo4j Graph Data Science** podemos realizar análisis más avanzados de los Pandora Papers.
+
+#### Instalación de GDS
+
+1. `https://s3-eu-west-1.amazonaws.com/com.neo4j.graphalgorithms.dist/graph-data-science/neo4j-graph-data-science-1.7.2-standalone.zip`
+2. `unzip neo4j-graph-data-science-1.7.2-standalone.zip`
+3. `sudo cp neo4j-graph-data-science-1.7.2.jar /var/lib/neo4j/plugins/`
+4. Modificar el archivo `/etc/neo4j/neo4j.conf` con `sudo nano /etc/neo4j/neo4j.conf` y agregar la línea `dbms.security.procedures.unrestricted=gds.*`
+5. Y la línea `dbms.security.procedures.allowlist=apoc.coll.*,apoc.load.*,gds.*` - probablemente ya está si ya instalaron APOC.
+6. Reiniciar Neo4j con `sudo systemctl restart neo4j.service`
+
+#### Centralidad con _Page Rank_
+
+Page Rank fue el 1er algoritmo de búsqueda de Google. Forma parte de un grupito de algoritmos muy, muy, muy poderosos pero también muy, muy, muy subestimados fuera de "clasificación" y "regresión" llamados _**information retrieval**_, y mide la importancia de cada nodo en el grafo ponderando el número de _edges_ que entran a cada uno, porque "una página es solo tan importante como las otras páginas que ligan a ella".
+
+Similar a la muy perversa métrica de producción científica de que un paper es más importante entre más sea citado.
+
+![image](https://user-images.githubusercontent.com/1316464/141239146-2ed04f2f-82fc-42cc-a350-33a00c3e4109.png)
+
+
+Si visualizamos todo nuestro grafo de Pandora Papers, vemos que, evidentemente, las British Virgin Islands es el nodo central, sin el cual el grafo simplemente no existiría:
+
+![graph](https://user-images.githubusercontent.com/1316464/141248147-1644e401-4851-409b-9f3f-2c087a608fa0.png)
+
+Pero qué tal las entities?
+
+El algoritmo _Page Rank_ de Neo4j funciona de la siguiente forma:
+
+1. Primero debemos de crear una **proyección** de nodos y relaciones, parecido a lo que hacíamos en MongoDB, donde **preseleccionabamos** un conjunto de atributos y documentos, así en Neo4j tenemos que seleccionar un conjunto de _nodes_ y _edges_ para delimitar y dar contexto a nuestro análisis. En este caso, con la función `gds.graph.create()` proyectaremos los nodos `Entity` y `Officer`, y la relación entre ellos `[OFFICER_OF]`, y guardaremos esa proyección en la variable `entitiesAndOfficers`:
+
+```
+call gds.graph.create(
+  'entitiesAndOfficers',    
+  ['Entity', 'Officer'],   
+  ['OFFICER_OF']     
+)
+YIELD
+  graphName AS graph, nodeProjection, nodeCount AS nodes, relationshipCount AS rels
+```
+
+2. Enviaremos ahora esta proyección al algoritmo `PageRank` de esta forma:
+
+```
+CALL gds.pageRank.stream('entitiesAndOfficers')
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score
+ORDER BY score DESC, name ASC
+```
+
+El resultado es:
+
+│"name"                                                              │"score"            │
+╞════════════════════════════════════════════════════════════════════╪═══════════════════╡
+│"ODIAN CONSULTING LTD"                                              │0.5325000000000001 │
+├────────────────────────────────────────────────────────────────────┼───────────────────┤
+│"Luntrel Investments Limited "                                      │0.44750000000000006│
+├────────────────────────────────────────────────────────────────────┼───────────────────┤
+│"Milrun International Limited"                                      │0.405              │
+├────────────────────────────────────────────────────────────────────┼───────────────────┤
+│"ROMANSTONE INTERNATIONAL LIMITED"                                  │0.405              │
+├────────────────────────────────────────────────────────────────────┼───────────────────┤
+│"Varies Foundation"                                                 │0.405              │
+├────────────────────────────────────────────────────────────────────┼───────────────────┤
+│"MC2 Internacional SA"                                              │0.34125000000000005│
+├────────────────────────────────────────────────────────────────────┼───────────────────┤
+│"Pacific Trust"                                                     │0.2934375          │
+├────────────────────────────────────────────────────────────────────┼───────────────────┤
+│"The Sri Nithi Trust"                                               │0.2934375          │
+├────────────────────────────────────────────────────────────────────┼───────────────────┤
+│"ALLSTAR CONSULTANCY SERVICES LIMITED"                              │0.2775             │
+├────────────────────────────────────────────────────────────────────┼───────────────────┤
+│"AND Holding Ltd"                                                   │0.2775             │
+├────────────────────────────────────────────────────────────────────┼───────────────────┤
