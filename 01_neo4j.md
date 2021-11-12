@@ -654,7 +654,7 @@ call {
 	sum(od.quantity) as sum_qty_per_order
 	order by sum_qty_per_order desc
 }
-return ord_id, ship_country, max(sum_qty_per_order)
+return ship_country, max(sum_qty_per_order)
 ```
 
 Veamos que el comando `call` se parece algo a los _common table expressions_ de SQL.
