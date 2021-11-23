@@ -135,6 +135,7 @@ Ya estamos adentro de la consola de Lake Formation. Ahora debemos configurar má
 
 
 
+![image](https://user-images.githubusercontent.com/1316464/142999421-649f32f8-9f26-478d-8732-50dc02cbfe9d.png)
 
 
 
