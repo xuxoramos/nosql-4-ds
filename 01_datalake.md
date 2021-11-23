@@ -69,13 +69,13 @@ Pasos para crear el Lake:
 
 ## 0. Seguridad
 
-0.1. Como este producto no lo tenemos con nuestro usr de AWS Academy, vamos a tener que crear un nuevo usr con su cuenta de correo.
+**0.1. Como este producto no lo tenemos con nuestro usr de AWS Academy, vamos a tener que crear un nuevo usr con su cuenta de correo.**
 
 ![image](https://user-images.githubusercontent.com/1316464/142986386-2e82e37c-7eb7-4422-9726-815aeab3033a.png)
 
 ![image](https://user-images.githubusercontent.com/1316464/142986508-63361b62-fec1-4d58-8bcd-79068baafc01.png)
 
-0.2. Este usuario va a ser el _root_, pero esto no es suficiente. El usr _root_ **no puede ser el administrador del data lake**. Tenemos que crear otro usuario, al cual llamaremos `datalakeadmin` y le asignaremos rol de administrador.
+**0.2. Este usuario va a ser el _root_, pero esto no es suficiente. El usr _root_ **no puede ser el administrador del data lake**. Tenemos que crear otro usuario, al cual llamaremos `datalakeadmin` y le asignaremos rol de administrador.**
 
 ![image](https://user-images.githubusercontent.com/1316464/142992693-12fb4dfd-01a5-43e7-a954-946682c2abdc.png)
 
@@ -87,13 +87,25 @@ Pasos para crear el Lake:
 
 ![image](https://user-images.githubusercontent.com/1316464/142993314-cce09284-c0f4-4ed2-acaa-276aece822aa.png)
 
-![image](https://user-images.githubusercontent.com/1316464/142995603-ca651434-0fd1-4da7-ba1d-8447233a89e7.png)
+⚠️Obviamente en producción no podemos ser tan laxos, pero para propósitos didácticos, vamos a ser permisivos.⚠️
 
+![image](https://user-images.githubusercontent.com/1316464/142996507-6cd13322-8a96-488b-affa-8d63ba1e186f.png)
 
 ![image](https://user-images.githubusercontent.com/1316464/142994218-cf8168c9-7304-439a-8594-f6e159b4a614.png)
 
+**0.3. Entrar al servicio de Lake Formation**
 
-0.3. Vamos a hacer _logout_ y vamos a volver a entrar a la consola de AWS con este usuario recién creado.
+
+![image](https://user-images.githubusercontent.com/1316464/142997613-d5c73b1a-e69a-42dd-bf6e-3414309c4a22.png)
+
+Y asignar al usuario que acabamos de crear como administrador
+
+![image](https://user-images.githubusercontent.com/1316464/142997840-263daee9-6bf8-4731-99f9-e3eaf583afe8.png)
+
+![image](https://user-images.githubusercontent.com/1316464/142998036-6624bbb0-4468-4e97-ab91-4e083dce563a.png)
+
+
+**0.4. Vamos a hacer _logout_ y vamos a volver a entrar a la consola de AWS con este usuario recién creado.**
 
 Para volver a hacer login con este usuario no _root_ y que está asociado a nuestra cuenta, debemos de fijarnos bien en nuestro _account id_. Lo podemos ver acá:
 
@@ -113,11 +125,16 @@ Aquí es donde vamos a poner nuestro _account id_:
 Posiblemente les pida cambiar el password. Cámbienlo.
 
 
-
-
 Lake Formation va a preguntarles que asignen un administrador y si quieren ser uds (osea, su usuario). Obvio acepten los defaults.
 
-![image](https://user-images.githubusercontent.com/1316464/142796934-34b6cf90-73a6-4e3c-b989-f043bc8c54e8.png)
+![image](https://user-images.githubusercontent.com/1316464/142997096-187519cd-f00f-47e9-b507-6b6edd0eb4ca.png)
+
+Ya estamos adentro de la consola de Lake Formation. Ahora debemos configurar más perimsos para nuestro usuario nuevo:
+
+![image](https://user-images.githubusercontent.com/1316464/142998741-0c0c8d10-9d02-4a91-acad-31b76ccd5a47.png)
+
+
+
 
 
 
