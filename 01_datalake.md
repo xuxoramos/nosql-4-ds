@@ -438,4 +438,32 @@ Listo, ahora si regresamos a LakeFormation!
 
 ![image](https://user-images.githubusercontent.com/1316464/143192868-52b5d46a-679f-4969-8b15-8c1cc1fc8280.png)
 
+![image](https://user-images.githubusercontent.com/1316464/143203954-3b966ba3-4c2c-4a32-a3ab-3a2d18bf6dc9.png)
+
+Tenemos ahora una BD vacía.
+
+Con qué la vamos a llenar?
+
+Vamos a dejar que Lake Formation vaya a nuestra BD transaccional de juguete en PostgreSQL, la examine, saque sus datos y sus metadatos, y los meta al data lake:
+
+## 5. Utilizar un "Blueprint"
+
+**5.1. Vamos a crear una conexión a nuestra BD en PostgreSQL con AWS Glue**
+
+Recordemos que AWS Glue es la herramienta de AWS para hacer ETLs, es decir, los procesos que pasan datos de un lugar a otro.
+
+![image](https://user-images.githubusercontent.com/1316464/143209472-4f8f1289-e1b0-4c2a-8f0a-3ed197f72cce.png)
+
+![image](https://user-images.githubusercontent.com/1316464/143209584-07abb78d-7546-4ae9-b9fa-5a44462f3078.png)
+
+![image](https://user-images.githubusercontent.com/1316464/143209709-18255765-fb85-4721-8209-0eb77d60c961.png)
+
+
+
+
+![image](https://user-images.githubusercontent.com/1316464/143209173-9510d8d8-2cbe-4082-80a1-ae391b63c42a.png)
+
+
+
+
 
