@@ -501,12 +501,18 @@ Continúa la explicación:
 
 Finalmente, con estos datos terminamos de definir nuestro workflow
 
-1. 
+1. Definimos una _cron expression_ para ejecutar el workflow cada 59 mins
+2. Nombramos el workflow como deseemos
+3. Las tablas de catálogo se les agrega el prefijo `_catalog`
 
 ![image](https://user-images.githubusercontent.com/1316464/143216890-b298ce93-778f-4e5b-a66e-bc2551520eac.png)
 
 
+Ya que está creado el workflow, AWS nos preguntará si queremos arrancarlo. Digámos que si.
 
+![image](https://user-images.githubusercontent.com/1316464/143218079-da36a6e8-9152-40ee-a3a7-b20ecab370cd.png)
+
+![image](https://user-images.githubusercontent.com/1316464/143218365-cba58012-be16-4ae0-9d0f-b04aaaf76cc8.png)
 
 
 
