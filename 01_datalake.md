@@ -249,7 +249,67 @@ Chequen su tabla, debe haber un registro cada 2 mins:
 ![image](https://user-images.githubusercontent.com/1316464/141933580-853e72de-88be-4648-8fa3-c1087df18d54.png)
 
 
+Antes de regresar a Lake Formation, debemos crear un _endpoint_ de nuestra VPC de AWS.
 
+## 3. 2a parte de Seguridad y Permisos
+
+**3.1. VPC Endpoint**
+
+Cada vez que nosotros creamos recursos en AWS, se crea una _Virtual Private Cloud_, que es una estructura de networking dentr de la cual cae todo lo que creamos.
+
+Sin embargo, hay recursos de AWS, sobre todo los servicios **administrados** (i.e. los que son plataformas más que infraestructura, como RDS en lugar de EC2 + PostgreSQL o DocumentDB en lugar de EC2 + MongoDB) que no tienen VPC.
+
+AWS Lake Formation es un servicio adminsitrado, y va a ingerir datos desde un PostgreSQL en una EC2. EC2 está en una VPC, por lo que para tener acceso a ella, debemos de crear un _VPC Endpoint_ para que Lake Formation pueda a través de él llegar a nuestro PostgreSQL en la EC2.
+
+![image](https://user-images.githubusercontent.com/1316464/143184752-fc24c4c5-0b0e-44b5-8158-7bd4ec1d3348.png)
+
+![image](https://user-images.githubusercontent.com/1316464/143184980-507d5ea7-c26d-4fee-94eb-ebeaae12ed28.png)
+
+![image](https://user-images.githubusercontent.com/1316464/143185041-94b20011-e9f6-406f-a588-917476a1b85a.png)
+
+![image](https://user-images.githubusercontent.com/1316464/143185194-0c05bbff-309e-49ae-82fc-865c6d1bd441.png)
+
+![image](https://user-images.githubusercontent.com/1316464/143185256-f966a998-093d-4c69-9ea8-b521790ce354.png)
+
+![image](https://user-images.githubusercontent.com/1316464/143185309-1813338a-70d1-4a21-9f81-7d13eeadbe85.png)
+
+![image](https://user-images.githubusercontent.com/1316464/143185374-f3c8167b-842a-49de-b62f-502660f3062e.png)
+
+Y listo!
+
+**3.2. Darle permisos de Admin a `AWSGlueServiceRole`**
+
+En AWS, como en todas las nubes, todo, **absolutamente todo** se corre con un usuario o rol asignado.
+
+En AWS hay _Service Roles_ que son un conjunto de permisos con los que se ejeuta un servicio.
+
+`AWSGlueServiceRole` es el rol con el que se corren los procesos de **Glue**, que es la herramienta de ETLs de AWS y con la cual vamos a "ingerir" datos desde nuestro PostgreSQL en EC2 para copiarlos a nuestro Data Lake.
+
+Para hacer esto necesitamos hacer lo siguiente:
+
+![image](https://user-images.githubusercontent.com/1316464/143185856-41c25c11-5074-4489-91c9-6a37d1295a88.png)
+
+![image](https://user-images.githubusercontent.com/1316464/143190057-5829cf6c-8cd4-4186-81d2-ffeb26d24e75.png)
+
+
+![image](https://user-images.githubusercontent.com/1316464/143190174-ac780352-be37-4405-9699-8dd6186ead06.png)
+
+
+![image](https://user-images.githubusercontent.com/1316464/143190225-7d01d7a1-9573-4d16-ae7b-ff22eccf0653.png)
+
+![image](https://user-images.githubusercontent.com/1316464/143190290-d5b19ae6-28b7-431d-85ab-69f23a436d08.png)
+
+
+
+
+
+
+
+
+
+------
+
+Es por eso que 
 
 ![image](https://user-images.githubusercontent.com/1316464/142795546-3bcb9ba0-2150-410d-93f9-f416181c50cb.png)
 
