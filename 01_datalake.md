@@ -446,7 +446,7 @@ Con qué la vamos a llenar?
 
 Vamos a dejar que Lake Formation vaya a nuestra BD transaccional de juguete en PostgreSQL, la examine, saque sus datos y sus metadatos, y los meta al data lake:
 
-## 5. Utilizar un "Blueprint"
+## 5. Importar data de PostgreSQL al Data Lake
 
 **5.1. Vamos a crear una conexión a nuestra BD en PostgreSQL con AWS Glue**
 
@@ -476,7 +476,7 @@ Después de dar click en el botón de _Finish_, podemos probar la conexión:
 
 ![image](https://user-images.githubusercontent.com/1316464/143213292-5ce7385a-f8f8-4db8-95b2-ab9578f562c0.png)
 
-**5.2. Vamos ahora a utilizar el blueprint
+**5.2. Vamos ahora a utilizar el blueprint**
 
 ![image](https://user-images.githubusercontent.com/1316464/143209173-9510d8d8-2cbe-4082-80a1-ae391b63c42a.png)
 
@@ -501,22 +501,137 @@ Continúa la explicación:
 
 Finalmente, con estos datos terminamos de definir nuestro workflow
 
-1. Definimos una _cron expression_ para ejecutar el workflow cada 59 mins
+1. Definimos una _cron expression_ para ejecutar el workflow cada 59 mins mediante una expresión **CRON**
 2. Nombramos el workflow como deseemos
 3. Las tablas de catálogo se les agrega el prefijo `_catalog`
 
 ![image](https://user-images.githubusercontent.com/1316464/143216890-b298ce93-778f-4e5b-a66e-bc2551520eac.png)
 
-
 Ya que está creado el workflow, AWS nos preguntará si queremos arrancarlo. Digámos que si.
 
 ![image](https://user-images.githubusercontent.com/1316464/143218079-da36a6e8-9152-40ee-a3a7-b20ecab370cd.png)
+
+**5.3. Validando ejecución del workflow**
 
 Cómo podemos ver si está corriendo o qué caramba está haciendo?
 
 Debemos ir a AWS Glue y examinar el "grafo de ejecución" del ETL que acabamos de hacer:
 
 ![image](https://user-images.githubusercontent.com/1316464/143218365-cba58012-be16-4ae0-9d0f-b04aaaf76cc8.png)
+
+Dejamos corriendo el workflow toda la noche y a la mañana siguiente nos encontramos con esto:
+
+![image](https://user-images.githubusercontent.com/1316464/143276483-2d38d3b3-7c9f-4940-8f2b-5a57d0c9fcc9.png)
+
+Vamos a inspeccionar las ejecuciones del workflow:
+
+![image](https://user-images.githubusercontent.com/1316464/143276846-fdb2f53a-44c8-4f53-81af-f5c3bcb33355.png)
+
+Examinemos la última ejecución:
+
+![image](https://user-images.githubusercontent.com/1316464/143276982-cd30aefc-a68a-4ac9-8800-516a98d92a0a.png)
+
+![image](https://user-images.githubusercontent.com/1316464/143277230-494783d9-b0d6-43e6-be8e-4346f73a9a66.png)
+
+Vemos que la fase de _crawling_ tuvo un error.
+
+La fase de _crawling_ es en donde Lake Formation inspecciona nuestro PostgreSQL, la tabla, los registros, y las estructuras para en automático generar los catálogos de metadatos y preparar la extracción de datos de SQL a archivos Parquet como lo especificamos en el paso 5.2.
+
+Si hacemos click en esa fase del grafo de ejecución, podemos ver el error:
+
+![image](https://user-images.githubusercontent.com/1316464/143277988-29be2fc9-3c9a-4e62-8cda-c5110ffc5a75.png)
+
+Parece que 2 ejecuciones se comenzaron a "pisar las agujetas".
+
+Esto sucede cuando el espacio entre ejecuciones del workflow no es suficiente para dejar terminar a uno cuando ya está comenzando otro.
+
+Pero esto significa que **la ejecución anterior debió haber terminado**, no? Veamos.
+
+![image](https://user-images.githubusercontent.com/1316464/143278482-544a49d6-87af-48b0-a4c9-12773206090d.png)
+
+![image](https://user-images.githubusercontent.com/1316464/143278570-347002f8-9ef3-48a8-9691-efd1b353a8bb.png)
+
+🥳
+
+Entonces seguramente de todas nuestras ejecuciones, tenemos una que si terminó, y otra que no, y así sucesivamente. Esto se debe a que no dejamos tiempo suficiente entre ejecuciones.
+
+Antes de arreglarlo, vamos a ver el resultado en la zona `bronze` de nuestro data lake en S3:
+
+![image](https://user-images.githubusercontent.com/1316464/143279617-b21def0b-373a-4043-b6f1-d339527e5b9b.png)
+
+Vemos aquí 2 tablas creadas por Lake Formation:
+
+1. una con _Classification_ en `postgresql`, que no es mas que la **descripción** de nuestra tabla dentro de Lake Formation, como lo podemos ver cuando le damos click:
+
+![image](https://user-images.githubusercontent.com/1316464/143280382-7ef53f6d-b292-401a-8e4f-b439364106d9.png)
+
+2. otra con _Classification_ en `s3://lakeformation-nosql4ds/bronze/ingest/catalog__transactionaldb_public_random_data/`, que es la materialización de la tabla de PostgreSQL en archivos Parquet.
+
+![image](https://user-images.githubusercontent.com/1316464/143281415-2feba4d8-3b30-40fc-b5d6-a47c6719c0ea.png)
+
+Demos click en la liga _Location_ para ir a S3 :
+
+![image](https://user-images.githubusercontent.com/1316464/143286399-8b6c0e07-031c-4599-99cd-fa59aaf4b479.png)
+
+Como estamos ejecutando un workflow de un _blueprint_ incremental, esto significa que la 1a ejecución del workflow nos traería toda la BD hasta ese punto, y ejecuciones subsecuentes nos traerían al datalake solamente los incrementos o _deltas_, es decir, los registros creados o presentes desde la última ejecución hasta la siguiente.
+
+Los archivos **parquet** son columnares binarios, por lo que no serviría de mucho descargar uno y explorar su interior. Más bien debemos de explorar esta data con otra herramienta, pero antes, vamos a arreglar la frecuencia de ejecución de nuestro workflow.
+
+**5.4. Corrigiendo la frecuencia de ejecución del workflow**
+
+![image](https://user-images.githubusercontent.com/1316464/143288005-1c0e2f64-e371-438e-a344-315cecc975fe.png)
+
+![image](https://user-images.githubusercontent.com/1316464/143288129-28ca967f-864d-41d2-b04e-5460eaab0cc1.png)
+
+Dar click en el botón `Next` hasta llegar a esta pantalla y seleccionar ejecución CADA HORA y comenzar en el minuto 00:
+
+![image](https://user-images.githubusercontent.com/1316464/143288394-bdeeb1a9-361f-46ce-ac1e-d0f5cdb3a01f.png)
+
+Dar click en `Next` hasta llegar al botón `Finish` y terminar.
+
+Con esto ya hemos corregido las ejecuciones para que sean cada hora, y no cada 59 mins.
+
+Vamos ahora a examinar la data en nuestro data lake:
+
+## 6. Explorando el data lake con AWS Athena
+
+Athena es un servicio de AWS que nos permite correrle queries tipo SQL a archivos que estén guardados en S3.
+
+## 7. Explorando la data con Quicksight
+
+Primero accedamos a Quicksight.
+
+![image](https://user-images.githubusercontent.com/1316464/143289209-ab934e88-300b-4be9-b55b-e458c2c5eaf9.png)
+
+
+Y pidamos acceso al servicio.
+
+![image](https://user-images.githubusercontent.com/1316464/143289288-3c290bd4-479e-4ec3-99b8-2c875f9c9ade.png)
+
+Muy vivillos, los de AWS nos quieren enjaretar una suscripción Enterprise, y no conformes con eso, están subrepresentando el botón para las suscripciones estándar usando un viejo truco de UX. No vamos a caer en su trampa y vamos a darle click en _Standard_ arriba a la derecha:
+
+![image](https://user-images.githubusercontent.com/1316464/143289733-5f7cf1df-d1a6-4c31-ba3c-06161d79ef67.png)
+
+Vamos ahora a configurar Quicksight con las siguientes opciones.
+
+![image](https://user-images.githubusercontent.com/1316464/143290079-f9bd1719-429e-4535-a06f-8953a7ed80c2.png)
+
+Más abajo debemos configurar a qué tendrá acceso Quicksight. Lo más importante es que tenga acceso al bucket de S3 donde tenemos nuestro Data Lake.
+
+![image](https://user-images.githubusercontent.com/1316464/143290302-607e9548-db7f-4eda-b6e7-47e53ef790c1.png)
+
+
+![image](https://user-images.githubusercontent.com/1316464/143290391-ae1df989-f3e5-47e0-a0ce-e5ee6385a9fe.png)
+
+Una vez que nuestra cuenta de Qucksight esté lista, y nos brinquemos el tutorial, 
+
+
+
+
+
+
+
+
 
 
 
