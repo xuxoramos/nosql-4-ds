@@ -597,6 +597,14 @@ Vamos ahora a examinar la data en nuestro data lake:
 
 Athena es un servicio de AWS que nos permite correrle queries tipo SQL a archivos que estén guardados en S3.
 
+Vamos a ir al home de este servicio:
+
+![image](https://user-images.githubusercontent.com/1316464/143298129-925220d4-2c55-48a8-8c9b-395ffd5a53cc.png)
+
+Vemos que el costo es de $5 USD por terabyte. Este es uno de los servicios más caros de AWS, y con justa razón, imagínense aventarle lo que sea al S3 y poderle tirar queries con SQL normalito! Esta funcionalidad es poderosa.
+
+
+
 ## 7. Explorando la data con Quicksight
 
 Primero accedamos a Quicksight.
