@@ -512,6 +512,10 @@ Ya que está creado el workflow, AWS nos preguntará si queremos arrancarlo. Dig
 
 ![image](https://user-images.githubusercontent.com/1316464/143218079-da36a6e8-9152-40ee-a3a7-b20ecab370cd.png)
 
+Cómo podemos ver si está corriendo o qué caramba está haciendo?
+
+Debemos ir a AWS Glue y examinar el "grafo de ejecución" del ETL que acabamos de hacer:
+
 ![image](https://user-images.githubusercontent.com/1316464/143218365-cba58012-be16-4ae0-9d0f-b04aaaf76cc8.png)
 
 
