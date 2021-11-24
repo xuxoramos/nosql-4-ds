@@ -41,9 +41,12 @@ AWS Lake Formation. De los productos más chonchos de AWS.
 Qué nos da AWS Lake Formation?
 
 1. Secciones dedicadas para limpieza y procesamiento de datos de menor refinamiento a mayor refinamiento.
-2. Secciones dedicadas para diferentes frecuencias de uso de datos, de mayor frecuencia hasta el "glaciar", donde están los datos de menor uso. La morgue, pues☠️
-3. Separación total de cómputo y storage: podemos aumentar disco, o aumentar procesamiento totalmente por separado.
-4. Servicio administrado: 0 configuración de archivos, 0 mantenimiento.
+   - zona `bronze` para _raw data_, osea, la que se ingiere desde nuestras fuentes transaccionales
+   - zona `silver` para data procesada y limpiada
+   - zona `gold` para agregados y sumarizados para presentar directo a herramientas de BI
+3. Secciones dedicadas para diferentes frecuencias de uso de datos, de mayor frecuencia hasta el "glaciar", donde están los datos de menor uso. La morgue, pues☠️
+5. Separación total de cómputo y storage: podemos aumentar disco, o aumentar procesamiento totalmente por separado.
+6. Servicio administrado: 0 configuración de archivos, 0 mantenimiento.
    - Aún hay que hacer algunas maromas con redes en AWS, pero nada que ver con la config de bajo nivel que se requiere cuando hacemos esto _on premises_, osea, local, no en la nube.
 
 ## Qué vamos a provisionar?
@@ -137,11 +140,9 @@ Ya estamos adentro de la consola de Lake Formation. Ahora debemos configurar má
 
 ![image](https://user-images.githubusercontent.com/1316464/142999421-649f32f8-9f26-478d-8732-50dc02cbfe9d.png)
 
-
+Ahora vamos a crear un bucket de S3 que servirá como data lake.
 
 ## 1. Creación de buckets de S3
-
-![image](https://user-images.githubusercontent.com/1316464/142792467-b361f579-c778-4e9b-a4c9-20e7bfe35a34.png)
 
 S3 (Simple Storage Service) es el servicio de almacenamiento genérico de AWS. Podemos meter lo que sea ahí.
 
@@ -153,7 +154,15 @@ Tenemos que crear 1 bucket con 3 áreas (como directorios):
 2. uno para silver (la data refinada, con registros individuales, pero unificada)
 3. uno para golden (la data agregada, como "cubos de información")
 
+![image](https://user-images.githubusercontent.com/1316464/142792467-b361f579-c778-4e9b-a4c9-20e7bfe35a34.png)
+
+**1.1. Crear un bucket**
+
 ![image](https://user-images.githubusercontent.com/1316464/142794981-e285f33f-7347-4172-b056-844d007c1365.png)
+
+⚠️**OJO! El nombre del bucket debe ser único A LO LARGO DE AWS**⚠️
+
+En cuanto a la región, puede ser donde uds quieran.
 
 ![image](https://user-images.githubusercontent.com/1316464/142795019-22c9fa22-fdb8-49fe-88f8-fee951011d12.png)
 
@@ -163,6 +172,7 @@ Tenemos que crear 1 bucket con 3 áreas (como directorios):
 
 ![image](https://user-images.githubusercontent.com/1316464/142795158-7dfd775c-483a-4caf-a380-3c30c26aab15.png)
 
+**1.2. Crear folders en el bucket para cada zona `bronze`, `silver` y `gold`
 
 ![image](https://user-images.githubusercontent.com/1316464/142795220-fb745158-012f-4d2e-94ba-e942cfea5dc0.png)
 
@@ -171,6 +181,75 @@ Tenemos que crear 1 bucket con 3 áreas (como directorios):
 
 
 Lo mismo para `silver` y `gold`.
+
+Con esto terminamos hasta este momento con S3. Vamos ahora a simular una BD transaccional.
+
+## 2. Simulación de una BD transaccional
+
+Para simular estos movimientos transaccionales, vamos a crear una tabla y disparar un evento cada X tiempo para que se inserte 1 nuevo registro en ella.
+
+Vamos a configurar los siguientes componentes en AWS:
+
+1. Una instancia de EC2 con una _elastic ip_
+2. Un PostgreSQL dentro de esa instancia de EC2, de acuerdo [a esta guía](https://computingforgeeks.com/how-to-install-postgresql-13-on-ubuntu/)
+3. Crear una tabla de juguete que representará nuestros sistemas transaccionales
+4. Crear una _lambda function_ que insertará en dicha tabla de juguete
+5. Configurar un evento en AWS EventBridge para que se dispare cada 2 min y llame a la _lambda function_ de arriba
+
+**2.1. Tabla de juguete**
+
+```sql
+CREATE TABLE random_data (
+	id serial4 NOT NULL,
+	valor text NULL,
+	fecha timestamp NULL,
+	CONSTRAINT random_data_pkey PRIMARY KEY (id)
+);
+```
+
+**2.2. Lambda Function**
+
+Pueden descargar el código fuente de la _lambda_ de mi repo: https://github.com/xuxoramos/lambda-transactionaldb-insert
+
+![image](https://user-images.githubusercontent.com/1316464/141932380-2b746db0-22b1-4d90-ba28-570e29813ac7.png)
+
+![image](https://user-images.githubusercontent.com/1316464/141932505-c4b30d99-a92d-4053-9a0b-2150b856bc2e.png)
+
+![image](https://user-images.githubusercontent.com/1316464/141932815-60230a59-33d7-418b-8b39-ef5ecb7b2086.png)
+
+![image](https://user-images.githubusercontent.com/1316464/141932954-3044a36a-0b33-4cb3-9adb-e84b2025836b.png)
+
+![image](https://user-images.githubusercontent.com/1316464/141933032-2c4b18ea-442c-4812-a9d1-3babe757530f.png)
+
+Al descargar este repo, deben:
+
+1. modificar el archivo `/db.ini` y capturar sus credenciales de su instalación de PostgreSQL
+2. zipear el contenido del repo
+3. subirlo a la creación de la función lambda como se muestra acá abajo
+
+![image](https://user-images.githubusercontent.com/1316464/141933120-cc4285e6-54d2-4d16-8964-a843d5df8218.png)
+
+
+**2.3. Evento en EventBridge**
+
+![image](https://user-images.githubusercontent.com/1316464/141931577-098846ed-7985-4ca7-98e4-f9528ee951a2.png)
+
+![image](https://user-images.githubusercontent.com/1316464/141931836-4f27aec2-3d13-4de3-9eb6-e2c27b7d79de.png)
+
+![image](https://user-images.githubusercontent.com/1316464/141932107-56a319ec-1aeb-4345-83b0-9e84ae96abc7.png)
+
+![image](https://user-images.githubusercontent.com/1316464/141932169-ba8e3b14-0dd4-41d5-92f3-124bf823e32d.png)
+
+![image](https://user-images.githubusercontent.com/1316464/141932249-683a1ca5-0122-4243-8ea8-06369c286b01.png)
+
+**2.4. Verificar**
+
+Chequen su tabla, debe haber un registro cada 2 mins:
+
+![image](https://user-images.githubusercontent.com/1316464/141933580-853e72de-88be-4648-8fa3-c1087df18d54.png)
+
+
+
 
 ![image](https://user-images.githubusercontent.com/1316464/142795546-3bcb9ba0-2150-410d-93f9-f416181c50cb.png)
 
