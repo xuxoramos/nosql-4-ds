@@ -94,6 +94,68 @@ Pasos para crear el Lake:
 
 ![image](https://user-images.githubusercontent.com/1316464/142996507-6cd13322-8a96-488b-affa-8d63ba1e186f.png)
 
+Vamos a hacer lo mismo con los siguientes permisos:
+
+3. AWSGlueConsoleFullAccess
+4. CloudWatchLogsReadOnlyAccess
+5. AmazonAthenaFullAccess
+
+Y vamos a agregar 2 _in-line policies_:
+
+![image](https://user-images.githubusercontent.com/1316464/143195589-9a6b0a4a-93d6-48f6-b3bf-81a89c0afeb8.png)
+
+![image](https://user-images.githubusercontent.com/1316464/143195646-aa738a5b-7958-45f5-b88b-8639b23c9d75.png)
+
+Y pegar los siguientes policies, **por separado**, sin olvidar de reemplazar `<account-id>` por el número que sacamos en el paso **0.4** más abajo.
+
+6. In-line policy `LakeFormationSLR`
+
+```javascript
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": "iam:CreateServiceLinkedRole",
+            "Resource": "*",
+            "Condition": {
+                "StringEquals": {
+                    "iam:AWSServiceName": "lakeformation.amazonaws.com"
+                }
+            }
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "iam:PutRolePolicy"
+            ],
+            "Resource": "arn:aws:iam::<>account-id:role/aws-service-role/lakeformation.amazonaws.com/AWSServiceRoleForLakeFormationDataAccess"
+        }
+    ]
+}
+```
+
+7. In-line policy `UserPassRole`
+
+```javascript
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "PassRolePermissions",
+            "Effect": "Allow",
+            "Action": [
+                "iam:PassRole"
+            ],
+            "Resource": [
+                "arn:aws:iam::<account-id>:role/LakeFormationWorkflowRole"
+            ]
+        }
+    ]
+}
+```
+
+
 ![image](https://user-images.githubusercontent.com/1316464/142994218-cf8168c9-7304-439a-8594-f6e159b4a614.png)
 
 **0.3. Entrar al servicio de Lake Formation**
