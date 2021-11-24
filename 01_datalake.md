@@ -277,39 +277,86 @@ AWS Lake Formation es un servicio adminsitrado, y va a ingerir datos desde un Po
 
 Y listo!
 
-**3.2. Darle permisos de Admin a `AWSGlueServiceRole`**
+**3.2. Crear un _Service Role_ para ejecutar tareas de ETL**
 
 En AWS, como en todas las nubes, todo, **absolutamente todo** se corre con un usuario o rol asignado.
 
 En AWS hay _Service Roles_ que son un conjunto de permisos con los que se ejeuta un servicio.
 
-`AWSGlueServiceRole` es el rol con el que se corren los procesos de **Glue**, que es la herramienta de ETLs de AWS y con la cual vamos a "ingerir" datos desde nuestro PostgreSQL en EC2 para copiarlos a nuestro Data Lake.
+`LakeFormationWorkflowRole` es el rol con el que se van a corren los procesos de **Glue**, que es la herramienta de ETLs de AWS y con la cual vamos a "ingerir" datos desde nuestro PostgreSQL en EC2 para copiarlos a nuestro Data Lake.
 
-Para hacer esto necesitamos hacer lo siguiente:
+Necesitamos darle permiso a este rol nuevo de que acceda sin restricciones a S3, y que haga las veces de administrador.
+
+⚠️OJO! Esto obviamente en un setting productivo no es recomendable, pero para propósitos educativos lo vamos a hacer.⚠️
+
+Para hacer esto necesitamos crear un rol:
 
 ![image](https://user-images.githubusercontent.com/1316464/143185856-41c25c11-5074-4489-91c9-6a37d1295a88.png)
 
-![image](https://user-images.githubusercontent.com/1316464/143190057-5829cf6c-8cd4-4186-81d2-ffeb26d24e75.png)
+![image](https://user-images.githubusercontent.com/1316464/143190812-8438fa08-335a-4e45-a671-735608e11d05.png)
 
 
-![image](https://user-images.githubusercontent.com/1316464/143190174-ac780352-be37-4405-9699-8dd6186ead06.png)
+![image](https://user-images.githubusercontent.com/1316464/143190861-b8500edc-92ce-4280-ba5b-cc5f3dbd3490.png)
 
 
-![image](https://user-images.githubusercontent.com/1316464/143190225-7d01d7a1-9573-4d16-ae7b-ff22eccf0653.png)
-
-![image](https://user-images.githubusercontent.com/1316464/143190290-d5b19ae6-28b7-431d-85ab-69f23a436d08.png)
+![image](https://user-images.githubusercontent.com/1316464/143190959-7ebee910-ec3f-4f44-afe5-7bea1a68d36d.png)
 
 
+![image](https://user-images.githubusercontent.com/1316464/143191011-beb08f8d-4bf1-4c0a-96e0-ed6261b238bc.png)
 
 
+![image](https://user-images.githubusercontent.com/1316464/143191210-52c33b12-5ffa-48a9-b3c8-6e1717d82c16.png)
+
+![image](https://user-images.githubusercontent.com/1316464/143191280-f0ddf17b-b846-45d3-a89b-bfe863734d21.png)
 
 
+![image](https://user-images.githubusercontent.com/1316464/143191342-08028295-8571-476d-9903-dbf36a6d0b24.png)
 
 
+![image](https://user-images.githubusercontent.com/1316464/143191529-e749adfd-7220-4554-be8b-84f4301d5dde.png)
 
-------
+Finalmente, agregamos el siguiente _inline policy_:
 
-Es por eso que 
+![image](https://user-images.githubusercontent.com/1316464/143195589-9a6b0a4a-93d6-48f6-b3bf-81a89c0afeb8.png)
+
+![image](https://user-images.githubusercontent.com/1316464/143195646-aa738a5b-7958-45f5-b88b-8639b23c9d75.png)
+
+
+Y pegar lo siguiente.
+
+⚠️OJO! reemplazar la parte de `<account_id>` por el _account id_ que obtuvieron en el paso **0.4**
+
+```javascript
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                 "lakeformation:GetDataAccess",
+                 "lakeformation:GrantPermissions"
+             ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": ["iam:PassRole"],
+            "Resource": [
+                "arn:aws:iam::<account-id>:role/LakeFormationWorkflowRole"
+            ]
+        }
+    ]
+}
+```
+
+
+Listo, ahora si regresamos a LakeFormation!
+
+## 4. Usar "Blueprint" de ingesta de BD incremental
+
+⚠️OJO! Fíjense que siempre estén usando la región donde estamos agregando toda la infra. En este caso es `us-east-2`, u "Ohio".⚠️
+
+**4.1. Asignarle a Lake Formation el bucket de S3 que creamos en paso 1)**
 
 ![image](https://user-images.githubusercontent.com/1316464/142795546-3bcb9ba0-2150-410d-93f9-f416181c50cb.png)
 
@@ -323,5 +370,10 @@ Es por eso que
 
 
 ![image](https://user-images.githubusercontent.com/1316464/142795884-6fe3ddaf-9aa4-4d4a-9aa5-f60e933e647c.png)
+
+
+**4.2. Crear una BD dentro del Lake**
+
+![image](https://user-images.githubusercontent.com/1316464/143192868-52b5d46a-679f-4969-8b15-8c1cc1fc8280.png)
 
 
