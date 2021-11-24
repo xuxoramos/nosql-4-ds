@@ -458,10 +458,55 @@ Recordemos que AWS Glue es la herramienta de AWS para hacer ETLs, es decir, los 
 
 ![image](https://user-images.githubusercontent.com/1316464/143209709-18255765-fb85-4721-8209-0eb77d60c961.png)
 
+En la siguiente pantalla vamos a capturar la info de nuestra BD en PostgreSQL.
 
+La VPC y la subnet las obtenemos de la máquina EC2 donde vive nuestro PostgreSQL.
 
+⚠️OJO! El URL de nuestra BD debe contener la IP address interna de la EC2, no la _Elastic IP_ que le asignamos!⚠️
+
+Esto se debe a que la _Elastic IP_ es visible hacia el mundo exterior, PERO el AWS Glue y demás servicios **ESTÁN EN EL INTERIOR** de la red de AWS! Por lo que Glue **NUNCA** va a alcanzar esa IP pública, por lo que tiene que utilizar la interna!
+
+![image](https://user-images.githubusercontent.com/1316464/143212791-15a02855-2b47-4578-a9c7-7cf5a80fb1d2.png)
+
+Y de dónde sacamos la IP interna? De la consola de EC2.
+
+![image](https://user-images.githubusercontent.com/1316464/143212972-35daa315-7ca3-4ef3-b0cd-9fe259c5bb21.png)
+
+Después de dar click en el botón de _Finish_, podemos probar la conexión:
+
+![image](https://user-images.githubusercontent.com/1316464/143213292-5ce7385a-f8f8-4db8-95b2-ab9578f562c0.png)
+
+**5.2. Vamos ahora a utilizar el blueprint
 
 ![image](https://user-images.githubusercontent.com/1316464/143209173-9510d8d8-2cbe-4082-80a1-ae391b63c42a.png)
+
+Va la explicación:
+
+1. Vamos a elegir "Incremental Database" porque, dado que es una "tabla viva" (aunque con datos de juguete), necesitaremos que los datos se copien periódicamente para "mantenerlos frescos".
+2. La fuente de importación va a ser la conexión que acabamos de crear en la consola de Glue
+3. La ruta va a ser `database/schema/table`, en nuestro caso `transactionaldb/public/random_data`
+
+![image](https://user-images.githubusercontent.com/1316464/143213662-9d75e0d1-f748-47f8-8dfb-a3d5f96dca0e.png)
+
+Continúa la explicación:
+
+1. En la sección de _Incremental Data_ debemos poner los detalles de la tabla que le ayudará a Glue a saber qué renglones ya se copiaron y qué renglones aún no.
+   - _Table name_ es la tabla que contiene el campo que nos va a ayudar a distinguir un renglón de otro
+   - _Bookmark Keys_ es el campo de esa tabla que nos va a decir si un registro ya fue copiado o no.
+2. En la sección de "Import Target", en la parte de _Target Database_ vamos a asignar la BD dentro del lake que creamos en el paso 4.2
+3. El _storage location se va a llenar solo.
+4. _Data format_ tenemos la opción de CSV o Parquet. Parquet es la mejor opción para fuentes de datos con millones de registros. Es un formato columnar de archivo **similar** a como los crea MonetDB.
+
+![image](https://user-images.githubusercontent.com/1316464/143214357-7270ec3f-de52-4493-9fa2-f479bcbfb77d.png)
+
+Finalmente, con estos datos terminamos de definir nuestro workflow
+
+1. 
+
+![image](https://user-images.githubusercontent.com/1316464/143216890-b298ce93-778f-4e5b-a66e-bc2551520eac.png)
+
+
+
 
 
 
