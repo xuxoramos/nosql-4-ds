@@ -172,7 +172,7 @@ En cuanto a la región, puede ser donde uds quieran.
 
 ![image](https://user-images.githubusercontent.com/1316464/142795158-7dfd775c-483a-4caf-a380-3c30c26aab15.png)
 
-**1.2. Crear folders en el bucket para cada zona `bronze`, `silver` y `gold`
+**1.2. Crear folders en el bucket para cada zona `bronze`, `silver` y `gold`**
 
 ![image](https://user-images.githubusercontent.com/1316464/142795220-fb745158-012f-4d2e-94ba-e942cfea5dc0.png)
 
