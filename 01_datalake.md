@@ -603,7 +603,101 @@ Vamos a ir al home de este servicio:
 
 Vemos que el costo es de $5 USD por terabyte. Este es uno de los servicios más caros de AWS, y con justa razón, imagínense aventarle lo que sea al S3 y poderle tirar queries con SQL normalito! Esta funcionalidad es poderosa.
 
+![image](https://user-images.githubusercontent.com/1316464/143387828-c9aea77d-cb54-4651-99d4-be2bd16f2c03.png)
 
+Este es el home de Athena. Como podemos ver, han pasado 3 cosas interesantes:
+
+1. Ya nos puso el data source seteado a `AwsDataCatalog`. Este es el catálogo creado automágicamente por Lake Formation cuando ejecutamos el workflow, particularmente en la fase de _crawling_.
+2. Como solo tenemos 1 base de datos en nuestro `AwsDataCatalog` creado por Lake Formation, pues Athena nos la asigna por default. Esta BD `transactionaldb-ingest` fue creada por nosotros en el paso **4.2** arriba
+3. El resultado de los queries tiene que caer en algún lado, no es como DBeaver donde el resultado solo se muestra en pantalla y ya, y es por eso que Athena nos está "sugiriendo" que **antes de que corramos nuestro 1er query, que asignemos un lugar en S3 para los resultados".
+   - Y como lo deben estar imaginando, este resultado deberá caer en la zona/capa `silver` de nuestro data lake.
+   - por qué? porque estos queries van a refinar/limpiar/procesar lo que ha caído como data "cruda" o _raw_ en la zona `bronze`
+   - Y como ya dijimos, eso va en `silver`.
+
+![image](https://user-images.githubusercontent.com/1316464/143393620-d0e10d48-0b9f-43cf-aead-509dc38b7d32.png)
+
+![image](https://user-images.githubusercontent.com/1316464/143393547-41b54bea-4822-498e-b455-b70c4d609063.png)
+
+Una vez que tenemos seleccionada la zona `silver`, vamos a imaginar la siguiente pregunta.
+
+> **Qué tan diferente es el promedio de la distancia de Levenshtein de los registros cuyo `value` comienza con 'D' contra los registros cuyo `value` comienza con 'Z'?**
+
+Como se los enseñé el semestre pasado, vamos a partir el problema en cachos:
+
+1. Seleccionar todos los registros cuyo `valor` comience con 'D'
+2. Aplicar la window function `lag` para poder comparar 2 campos `value` en el mismo registro
+3. Aplicar función `levenshtein` a ambos campos `value` y ponerlo en una columna `leven_dist`
+4. Guardar en zona `silver`
+5. Correr función `avg` a columna `leven_dist`.
+6. Repetir todos los pasos con registros cuyo `valor` comience con 'Z'
+
+⚠️OJO! Los pasos 5 y 6, estrictamente hablando, deben de realizarse con otra base de datos dentro del lake, otro blueprint, otro crawler y otro workflow enteramente distinto (tecnicamente desde el paso **4.2**), porque estamos consumiendo datos procesados de `silver` y estamos agregando, y los agregados, ortodoxamente, van en `gold`, pero no lo vamos a hacer aquí porque si no se haría laaaaaargo el tutorial.⚠️
+
+El query que nos va a ayudar a resolver todo el merequetengue de arriba es el siguiente. Para más info, ver [la documentación de Athena respecto a funciones](https://docs.aws.amazon.com/athena/latest/ug/presto-functions.html) **y mis apuntes del semestre pasado 😠** tanto de [window functions](https://github.com/xuxoramos/db-4-ds/blob/gh-pages/18_window_functions.md) como de [common table expressions](https://github.com/xuxoramos/db-4-ds/blob/gh-pages/15_common_table_expressions.md):
+
+```sql
+with lagged_values_z as 
+(
+	SELECT id, valor, 
+	       lag(valor,1) OVER (ORDER BY id) AS prev_valor
+	FROM "catalog__transactionaldb_public_random_data"
+	where valor like 'Z%'
+	ORDER BY id
+),
+lagged_values_d as 
+(
+	SELECT id, valor, 
+	       lag(valor,1) OVER (ORDER BY id) AS prev_valor
+	FROM "catalog__transactionaldb_public_random_data"
+	where valor like 'D%'
+	ORDER BY id
+),
+leven_dist_d as
+(
+	select id, valor, prev_valor, 'd' as start_with, levenshtein_distance(valor, prev_valor) as leven_dist_valor
+	from lagged_values_d
+),
+leven_dist_z as
+(
+	select id, valor, prev_valor, 'z' as start_with, levenshtein_distance(valor, prev_valor) as leven_dist_valor
+	from lagged_values_z
+),
+all_levens as
+(
+	select * from leven_dist_d
+	union
+	select * from leven_dist_z
+)
+select start_with, avg(leven_dist_valor) as avg_leven_dist
+from all_levens
+group by start_with;
+```
+
+Vamos a ejecutarlo:
+
+![image](https://user-images.githubusercontent.com/1316464/143405552-c3d77128-ff95-4d62-ad47-dcb20481a398.png)
+
+Luego vamos a guardarlo...
+
+![image](https://user-images.githubusercontent.com/1316464/143405664-2a9c8122-3927-457d-b8de-71bad72cde93.png)
+
+...como tabla
+
+![image](https://user-images.githubusercontent.com/1316464/143405757-f3be71c9-0a23-410d-a1bf-673f7a18377c.png)
+
+Y vamos a configurar el guardado con las siguientes opciones:
+
+![image](https://user-images.githubusercontent.com/1316464/143409059-33ec10f7-08f5-44c6-8269-303cb275ab4e.png)
+
+⚠️OJO! el folder `output` de la zona `silver` en nuestro bucket de S3 no existe y debemos crearlo **ANTES** de crear la tabla!⚠️
+
+Athena nos va a mostrar un preview de como va a crear la tabla desde nuestro query, y solo damos click en **`Create table`**.
+
+Y listo!
+
+![image](https://user-images.githubusercontent.com/1316464/143409376-16507393-cd95-4610-a0e7-2f698fdd4bdc.png)
+
+Vamos a visualizar ahora esta tabla con AWS Quicksight!
 
 ## 7. Explorando la data con Quicksight
 
@@ -631,7 +725,49 @@ Más abajo debemos configurar a qué tendrá acceso Quicksight. Lo más importan
 
 ![image](https://user-images.githubusercontent.com/1316464/143290391-ae1df989-f3e5-47e0-a0ce-e5ee6385a9fe.png)
 
-Una vez que nuestra cuenta de Qucksight esté lista, y nos brinquemos el tutorial, 
+Una vez que nuestra cuenta de Qucksight esté lista, y nos brinquemos el tutorial, vamos a tener unas visualizaciones y datasets pre-hechos como ejemplo.
+
+Vamos a dar click en **Datasets**, luego en **New Dataset**.
+
+![image](https://user-images.githubusercontent.com/1316464/143409915-b3f408a8-406f-490c-968e-1d2160228571.png)
+
+![image](https://user-images.githubusercontent.com/1316464/143410021-a960181e-b5c4-4a23-8111-314082a3118f.png)
+
+Vemos que tenemos muchísimas opciones para conectarnos. Vamos a dar click en **Athena**:
+
+![image](https://user-images.githubusercontent.com/1316464/143410403-b816b430-797b-4793-adf6-3fc6921d7706.png)
+
+Y nos va a pedir que nombremos el **data source**. De dónde sale ese **[primary]**?
+
+![image](https://user-images.githubusercontent.com/1316464/143410641-e15492b2-1634-433e-bd9e-ee8722db2e4d.png)
+
+
+De acá:
+
+![image](https://user-images.githubusercontent.com/1316464/143410765-e25e9b15-12ff-4c55-baa3-fd7479990ddb.png)
+
+Vamos ahora a seleccionar la tabla que acabamos de crear con los resultados del query de la sección 6:
+
+![image](https://user-images.githubusercontent.com/1316464/143410973-d57131f0-69e5-4a87-be33-2285192cc9a1.png)
+
+Vamos a setear estas opciones. Es importante mencionar que nos conviene dejar la conf de **SPICE** porque nos va a ayudar a refrescar la visualización que vamos a crear en caso de que la data cambie.
+
+![image](https://user-images.githubusercontent.com/1316464/143411389-4dbc50ac-234d-4264-9e3a-c3ae2b7e0906.png)
+
+Y listo. Quicksight nos va a seleccionar la mejor visualización para nuestra gráfica:
+
+![image](https://user-images.githubusercontent.com/1316464/143414528-788832d8-6e96-48aa-9e35-560529cc0a25.png)
+
+
+## 8. Conclusiones
+
+😠 **TANTO PARA UNA GRÁFICA DE 2 BARRAS?!?!?!** 😠
+
+Tengan en cuenta que esto es un ejemplo de juguete. En un setting empresarial van a tener cientos de tablas, decenas de gráficas, y veintenas de queries y analíticos, lo que justifica el uso del data lake. Lo más importante es que una vez que terminamos todo este flujo, ya se queda forever, y entonces habremos construido un pipeline que va desde datos crudos hasta datos refinados.
+
+
+
+
 
 
 
