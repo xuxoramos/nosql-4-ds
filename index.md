@@ -121,4 +121,9 @@ A continuación el temario, fecha por fecha:
 | 28             |   2021/11/03    | [Conexión a Neo4j. Carga de BD Northwind a Neo4j. Similitudes y diferencias entre Neo4j y SQL. Intro al lenguaje Cypher.](https://xuxoramos.github.io/nosql-4-ds/01_neo4j) / [video](https://drive.google.com/file/d/1sJkytduTJHxQbpFzmdSLi5EZNv5cI9hj/view?usp=sharing)
 | 29             |   2021/11/08    | [Ejercicios de queries con Cypher a la BD Northwind. Intro a Proyecto Final.](https://xuxoramos.github.io/nosql-4-ds/01_neo4j) / [video](https://drive.google.com/file/d/15Qaoikj9A0xC4vBCotetb4JfvKvDopAJ/view?usp=sharing)
 | 30             |   2021/11/10    | [Ejercicios de queries con Cypher a la BD Northwind II. Carga de los Pandora Papers. Análisis avanzado de grafos: centralidad y similitud. Grafos para law enforcement](https://xuxoramos.github.io/nosql-4-ds/01_neo4j) / [video](https://drive.google.com/file/d/1mCbechLS_-4aQc6J1Dd9s8Qgiu-aoKrL/view?usp=sharing)
-
+| 31             |   2021/11/15    | **CLASE A REPONER**
+| 32             |   2021/11/17    | Presentaciones del 1er avance del proyecto final / [video](https://zoom.us/rec/play/2izcLUDmBHU7YREltYmlqwZfkzN6vpOZsMBPC_mof-nJaWvlYWdFAwt6heXExBgYMhap2QMqdYLb45tC.UWNTuyMTOMmfBK24?autoplay=true&startTime=1637181266000)
+| 33             |   2021/11/17    | Presentaciones del 1er avance del proyecto final / [video](https://zoom.us/rec/play/2izcLUDmBHU7YREltYmlqwZfkzN6vpOZsMBPC_mof-nJaWvlYWdFAwt6heXExBgYMhap2QMqdYLb45tC.UWNTuyMTOMmfBK24?autoplay=true&startTime=1637181266000)
+| 34             |   2021/11/22    | **CLASE A REPONER**
+| 35             |   2021/11/24    | Sesión de Paco Mekler (no fue posible grabarla porque la información presentada está protegida por NDAs)
+| 36             |   2021/11/29    | [Creación y operación de un Data Lake con AWS](https://xuxoramos.github.io/nosql-4-ds/01_datalake) / [video](https://zoom.us/rec/play/4ntH6Nbc-799LaexFfWEHvLyw7-E4wSlWlORSpNnym2ilKAxPvRlISD5efcIvhQ-b5vajEYY9NujDOlC.QIBKLNMBFtBH-0df?autoplay=true&startTime=1638218040000)
