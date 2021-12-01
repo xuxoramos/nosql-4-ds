@@ -72,13 +72,17 @@ Pasos para crear el Lake:
 
 ## 0. Seguridad
 
-**0.1. Como este producto no lo tenemos con nuestro usr de AWS Academy, vamos a tener que crear un nuevo usr con su cuenta de correo.**
+### 0.1. Cuenta de AWS
+
+Como este producto no lo tenemos con nuestro usr de AWS Academy, vamos a tener que crear un nuevo usr con su cuenta de correo.
 
 ![image](https://user-images.githubusercontent.com/1316464/142986386-2e82e37c-7eb7-4422-9726-815aeab3033a.png)
 
 ![image](https://user-images.githubusercontent.com/1316464/142986508-63361b62-fec1-4d58-8bcd-79068baafc01.png)
 
-**0.2. Este usuario va a ser el _root_, pero esto no es suficiente. El usr _root_ **no puede ser el administrador del data lake**. Tenemos que crear otro usuario, al cual llamaremos `datalakeadmin` y le asignaremos rol de administrador.**
+### 0.2. Usuario IAM asociado a cuenta de AWS
+
+Este usuario va a ser el _root_, pero esto no es suficiente. El usr _root_ **no puede ser el administrador del data lake**. Tenemos que crear otro usuario, al cual llamaremos `datalakeadmin` y le asignaremos rol de administrador.**
 
 ![image](https://user-images.githubusercontent.com/1316464/142992693-12fb4dfd-01a5-43e7-a954-946682c2abdc.png)
 
@@ -158,8 +162,7 @@ Y pegar los siguientes policies, **por separado**, sin olvidar de reemplazar `<a
 
 ![image](https://user-images.githubusercontent.com/1316464/142994218-cf8168c9-7304-439a-8594-f6e159b4a614.png)
 
-**0.3. Entrar al servicio de Lake Formation**
-
+## 0.3. Asignar usuario IAM como admin de Lake Formation
 
 ![image](https://user-images.githubusercontent.com/1316464/142997613-d5c73b1a-e69a-42dd-bf6e-3414309c4a22.png)
 
@@ -170,7 +173,9 @@ Y asignar al usuario que acabamos de crear como administrador
 ![image](https://user-images.githubusercontent.com/1316464/142998036-6624bbb0-4468-4e97-ab91-4e083dce563a.png)
 
 
-**0.4. Vamos a hacer _logout_ y vamos a volver a entrar a la consola de AWS con este usuario recién creado.**
+## 0.4. Logout de usuario _root_ y login con usuario IAM
+
+Vamos a hacer _logout_ y vamos a volver a entrar a la consola de AWS con este usuario recién creado.
 
 Para volver a hacer login con este usuario no _root_ y que está asociado a nuestra cuenta, debemos de fijarnos bien en nuestro _account id_. Lo podemos ver acá:
 
@@ -218,11 +223,13 @@ Tenemos que crear 1 bucket con 3 áreas (como directorios):
 
 ![image](https://user-images.githubusercontent.com/1316464/142792467-b361f579-c778-4e9b-a4c9-20e7bfe35a34.png)
 
-**1.1. Crear un bucket**
+### 1.1. Crear un bucket
 
 ![image](https://user-images.githubusercontent.com/1316464/142794981-e285f33f-7347-4172-b056-844d007c1365.png)
 
 ⚠️**OJO! El nombre del bucket debe ser único A LO LARGO DE AWS**⚠️
+
+De **TODO* AWS.
 
 En cuanto a la región, puede ser donde uds quieran.
 
@@ -234,7 +241,7 @@ En cuanto a la región, puede ser donde uds quieran.
 
 ![image](https://user-images.githubusercontent.com/1316464/142795158-7dfd775c-483a-4caf-a380-3c30c26aab15.png)
 
-**1.2. Crear folders en el bucket para cada zona `bronze`, `silver` y `gold`**
+### 1.2. Crear folders en el bucket para cada zona `bronze`, `silver` y `gold`**
 
 ![image](https://user-images.githubusercontent.com/1316464/142795220-fb745158-012f-4d2e-94ba-e942cfea5dc0.png)
 
@@ -258,7 +265,7 @@ Vamos a configurar los siguientes componentes en AWS:
 4. Crear una _lambda function_ que insertará en dicha tabla de juguete
 5. Configurar un evento en AWS EventBridge para que se dispare cada 2 min y llame a la _lambda function_ de arriba
 
-**2.1. Tabla de juguete**
+### 2.1.  Creación de Tabla de juguete
 
 ```sql
 CREATE TABLE random_data (
@@ -269,7 +276,7 @@ CREATE TABLE random_data (
 );
 ```
 
-**2.2. Lambda Function**
+### 2.2. Creación de Lambda Function
 
 Pueden descargar el código fuente de la _lambda_ de mi repo: https://github.com/xuxoramos/lambda-transactionaldb-insert
 
@@ -292,7 +299,7 @@ Al descargar este repo, deben:
 ![image](https://user-images.githubusercontent.com/1316464/141933120-cc4285e6-54d2-4d16-8964-a843d5df8218.png)
 
 
-**2.3. Evento en EventBridge**
+### 2.3. Creación de Evento en EventBridge
 
 ![image](https://user-images.githubusercontent.com/1316464/141931577-098846ed-7985-4ca7-98e4-f9528ee951a2.png)
 
@@ -304,7 +311,7 @@ Al descargar este repo, deben:
 
 ![image](https://user-images.githubusercontent.com/1316464/141932249-683a1ca5-0122-4243-8ea8-06369c286b01.png)
 
-**2.4. Verificar**
+### 2.4. Verificar
 
 Chequen su tabla, debe haber un registro cada 2 mins:
 
@@ -315,7 +322,7 @@ Antes de regresar a Lake Formation, debemos crear un _endpoint_ de nuestra VPC d
 
 ## 3. 2a parte de Seguridad y Permisos
 
-**3.1. VPC Endpoint**
+### 3.1. VPC Endpoint
 
 Cada vez que nosotros creamos recursos en AWS, se crea una _Virtual Private Cloud_, que es una estructura de networking dentr de la cual cae todo lo que creamos.
 
@@ -339,7 +346,7 @@ AWS Lake Formation es un servicio adminsitrado, y va a ingerir datos desde un Po
 
 Y listo!
 
-**3.2. Crear un _Service Role_ para ejecutar tareas de ETL**
+### 3.2. Crear un _Service Role_ para ejecutar tareas de Glue (ETL)
 
 En AWS, como en todas las nubes, todo, **absolutamente todo** se corre con un usuario o rol asignado.
 
@@ -418,7 +425,7 @@ Listo, ahora si regresamos a LakeFormation!
 
 ⚠️OJO! Fíjense que siempre estén usando la región donde estamos agregando toda la infra. En este caso es `us-east-2`, u "Ohio".⚠️
 
-**4.1. Asignarle a Lake Formation el bucket de S3 que creamos en paso 1)**
+### 4.1. Asignar a Lake Formation el bucket de S3 que creamos en paso 1)
 
 ![image](https://user-images.githubusercontent.com/1316464/142795546-3bcb9ba0-2150-410d-93f9-f416181c50cb.png)
 
@@ -434,7 +441,7 @@ Listo, ahora si regresamos a LakeFormation!
 ![image](https://user-images.githubusercontent.com/1316464/142795884-6fe3ddaf-9aa4-4d4a-9aa5-f60e933e647c.png)
 
 
-**4.2. Crear una BD dentro del Lake**
+### 4.2. Crear una BD dentro del Lake
 
 ![image](https://user-images.githubusercontent.com/1316464/143192868-52b5d46a-679f-4969-8b15-8c1cc1fc8280.png)
 
@@ -448,7 +455,7 @@ Vamos a dejar que Lake Formation vaya a nuestra BD transaccional de juguete en P
 
 ## 5. Importar data de PostgreSQL al Data Lake
 
-**5.1. Vamos a crear una conexión a nuestra BD en PostgreSQL con AWS Glue**
+### 5.1. Crear una conexión a nuestra BD en PostgreSQL en AWS Glue
 
 Recordemos que AWS Glue es la herramienta de AWS para hacer ETLs, es decir, los procesos que pasan datos de un lugar a otro.
 
@@ -476,7 +483,7 @@ Después de dar click en el botón de _Finish_, podemos probar la conexión:
 
 ![image](https://user-images.githubusercontent.com/1316464/143213292-5ce7385a-f8f8-4db8-95b2-ab9578f562c0.png)
 
-**5.2. Vamos ahora a utilizar el blueprint**
+### 5.2. Crear workflow con base al blueprint
 
 ![image](https://user-images.githubusercontent.com/1316464/143209173-9510d8d8-2cbe-4082-80a1-ae391b63c42a.png)
 
@@ -501,17 +508,17 @@ Continúa la explicación:
 
 Finalmente, con estos datos terminamos de definir nuestro workflow
 
-1. Definimos una _cron expression_ para ejecutar el workflow cada 59 mins mediante una expresión **CRON**
+1. Podríamos definir una _CRON Expression_ al estilo Unix, pero para este ejemplo lo ejecutaremos _On Demand_
 2. Nombramos el workflow como deseemos
-3. Las tablas de catálogo se les agrega el prefijo `_catalog`
+3. Las tablas de catálogo se les agrega el prefijo `incremental`
 
-![image](https://user-images.githubusercontent.com/1316464/143216890-b298ce93-778f-4e5b-a66e-bc2551520eac.png)
+![image](https://user-images.githubusercontent.com/1316464/144179397-4cebc710-bc5c-493b-a4c9-d8492f12dc3e.png)
 
 Ya que está creado el workflow, AWS nos preguntará si queremos arrancarlo. Digámos que si.
 
 ![image](https://user-images.githubusercontent.com/1316464/143218079-da36a6e8-9152-40ee-a3a7-b20ecab370cd.png)
 
-**5.3. Validando ejecución del workflow**
+### 5.3. Validando ejecución del workflow
 
 Cómo podemos ver si está corriendo o qué caramba está haciendo?
 
@@ -519,7 +526,21 @@ Debemos ir a AWS Glue y examinar el "grafo de ejecución" del ETL que acabamos d
 
 ![image](https://user-images.githubusercontent.com/1316464/143218365-cba58012-be16-4ae0-9d0f-b04aaaf76cc8.png)
 
-Dejamos corriendo el workflow toda la noche y a la mañana siguiente nos encontramos con esto:
+Esperamos unos minutos a que se termine de ejecutar...en este caso, 10 mins es suficiente...
+
+![image](https://user-images.githubusercontent.com/1316464/143278570-347002f8-9ef3-48a8-9691-efd1b353a8bb.png)
+
+🥳
+
+### 5.4. Errores comunes al lanzar workflows de blueprints
+
+El error más común es el definir la frecuencia de ejecución de los workflows de tal forma que queden muy cerca una de la siguiente.
+
+Por ejemplo, si definiéramos esta ejecución cada 30 mins tendríamos lo siguiente:
+
+---------------
+
+Dejamos corriendo el workflow y nos encontramos con esto:
 
 ![image](https://user-images.githubusercontent.com/1316464/143276483-2d38d3b3-7c9f-4940-8f2b-5a57d0c9fcc9.png)
 
@@ -547,15 +568,21 @@ Esto sucede cuando el espacio entre ejecuciones del workflow no es suficiente pa
 
 Pero esto significa que **la ejecución anterior debió haber terminado**, no? Veamos.
 
-![image](https://user-images.githubusercontent.com/1316464/143278482-544a49d6-87af-48b0-a4c9-12773206090d.png)
 
 ![image](https://user-images.githubusercontent.com/1316464/143278570-347002f8-9ef3-48a8-9691-efd1b353a8bb.png)
 
-🥳
 
 Entonces seguramente de todas nuestras ejecuciones, tenemos una que si terminó, y otra que no, y así sucesivamente. Esto se debe a que no dejamos tiempo suficiente entre ejecuciones.
 
-Antes de arreglarlo, vamos a ver el resultado en la zona `bronze` de nuestro data lake en S3:
+Cómo lo corregimos? Vamos a tener que eliminar completamente el blueprint y crear otro con la frecuencia adecuada. Esto es lo más certero que intentar modificar el parámetro en Glue.
+
+Esto se logra repitiendo desde el paso **5.2**.
+
+------------
+
+### 5.5. Examinando resultado de ejecución del workflow
+
+Ya que el blueprint tuvo una ejecución exitosa, vamos a ver el resultado en la zona `bronze` de nuestro data lake en S3:
 
 ![image](https://user-images.githubusercontent.com/1316464/143279617-b21def0b-373a-4043-b6f1-d339527e5b9b.png)
 
@@ -565,7 +592,7 @@ Vemos aquí 2 tablas creadas por Lake Formation:
 
 ![image](https://user-images.githubusercontent.com/1316464/143280382-7ef53f6d-b292-401a-8e4f-b439364106d9.png)
 
-2. otra con _Classification_ en `s3://lakeformation-nosql4ds/bronze/ingest/catalog__transactionaldb_public_random_data/`, que es la materialización de la tabla de PostgreSQL en archivos Parquet.
+2. otra con _Classification_ en `s3://lakeformation-nosql4ds/bronze/ingest/incremental_transactionaldb_public_random_data/`, que es la materialización de la tabla de PostgreSQL en archivos Parquet.
 
 ![image](https://user-images.githubusercontent.com/1316464/143281415-2feba4d8-3b30-40fc-b5d6-a47c6719c0ea.png)
 
@@ -576,20 +603,6 @@ Demos click en la liga _Location_ para ir a S3 :
 Como estamos ejecutando un workflow de un _blueprint_ incremental, esto significa que la 1a ejecución del workflow nos traería toda la BD hasta ese punto, y ejecuciones subsecuentes nos traerían al datalake solamente los incrementos o _deltas_, es decir, los registros creados o presentes desde la última ejecución hasta la siguiente.
 
 Los archivos **parquet** son columnares binarios, por lo que no serviría de mucho descargar uno y explorar su interior. Más bien debemos de explorar esta data con otra herramienta, pero antes, vamos a arreglar la frecuencia de ejecución de nuestro workflow.
-
-**5.4. Corrigiendo la frecuencia de ejecución del workflow**
-
-![image](https://user-images.githubusercontent.com/1316464/143288005-1c0e2f64-e371-438e-a344-315cecc975fe.png)
-
-![image](https://user-images.githubusercontent.com/1316464/143288129-28ca967f-864d-41d2-b04e-5460eaab0cc1.png)
-
-Dar click en el botón `Next` hasta llegar a esta pantalla y seleccionar ejecución CADA HORA y comenzar en el minuto 00:
-
-![image](https://user-images.githubusercontent.com/1316464/143288394-bdeeb1a9-361f-46ce-ac1e-d0f5cdb3a01f.png)
-
-Dar click en `Next` hasta llegar al botón `Finish` y terminar.
-
-Con esto ya hemos corregido las ejecuciones para que sean cada hora, y no cada 59 mins.
 
 Vamos ahora a examinar la data en nuestro data lake:
 
@@ -681,7 +694,7 @@ Luego vamos a guardarlo...
 
 ![image](https://user-images.githubusercontent.com/1316464/143405664-2a9c8122-3927-457d-b8de-71bad72cde93.png)
 
-...como tabla
+...como vista
 
 ![image](https://user-images.githubusercontent.com/1316464/143405757-f3be71c9-0a23-410d-a1bf-673f7a18377c.png)
 
