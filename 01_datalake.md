@@ -265,9 +265,10 @@ Vamos a configurar los siguientes componentes en AWS:
 
 1. Una instancia de EC2 con una _elastic ip_
 2. Un PostgreSQL dentro de esa instancia de EC2, de acuerdo [a esta guía](https://computingforgeeks.com/how-to-install-postgresql-13-on-ubuntu/)
-3. Crear una tabla de juguete que representará nuestros sistemas transaccionales
-4. Crear una _lambda function_ que insertará en dicha tabla de juguete
-5. Configurar un evento en AWS EventBridge para que se dispare cada 2 min y llame a la _lambda function_ de arriba
+   - Si estás instalando PostgreSQL 14, el setting en el archivo `pg_hba.conf` debe ser **`host   all   all   trust`** en lugar de `host   all   all   md5`.
+4. Crear una tabla de juguete que representará nuestros sistemas transaccionales
+5. Crear una _lambda function_ que insertará en dicha tabla de juguete
+6. Configurar un evento en AWS EventBridge para que se dispare cada 2 min y llame a la _lambda function_ de arriba
 
 ### 2.1.  Creación de Tabla de juguete
 
