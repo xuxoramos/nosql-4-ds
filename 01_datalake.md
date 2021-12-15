@@ -133,7 +133,7 @@ Y pegar los siguientes policies, **por separado**, sin olvidar de reemplazar `<a
             "Action": [
                 "iam:PutRolePolicy"
             ],
-            "Resource": "arn:aws:iam::<>account-id:role/aws-service-role/lakeformation.amazonaws.com/AWSServiceRoleForLakeFormationDataAccess"
+            "Resource": "arn:aws:iam::<account-id>:role/aws-service-role/lakeformation.amazonaws.com/AWSServiceRoleForLakeFormationDataAccess"
         }
     ]
 }
@@ -250,6 +250,10 @@ En cuanto a la región, puede ser donde uds quieran.
 
 
 Lo mismo para `silver` y `gold`.
+
+Dentro de `bronze`, crear directorio `ingest`.
+
+Dentro de `silver`, crear directorio `output`.
 
 Con esto terminamos hasta este momento con S3. Vamos ahora a simular una BD transaccional.
 
