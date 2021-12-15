@@ -776,13 +776,28 @@ Y listo. Quicksight nos va a seleccionar la mejor visualización para nuestra gr
 
 ![image](https://user-images.githubusercontent.com/1316464/143414528-788832d8-6e96-48aa-9e35-560529cc0a25.png)
 
-
 ## 8. Conclusiones
 
 😠 **TANTO PARA UNA GRÁFICA DE 2 BARRAS?!?!?!** 😠
 
 Tengan en cuenta que esto es un ejemplo de juguete. En un setting empresarial van a tener cientos de tablas, decenas de gráficas, y veintenas de queries y analíticos, lo que justifica el uso del data lake. Lo más importante es que una vez que terminamos todo este flujo, ya se queda forever, y entonces habremos construido un pipeline que va desde datos crudos hasta datos refinados.
 
+## 9. Costo
+
+Los data lakes son caros. En AWS lo más caro es el servicio de Glue (ETL), sobre todo porque cataloga, importa y organiza la info automática y periódicamente. Esto reemplaza a un grupo pequeño de ingenieros de datos programando queries y ETL jobs sin ningún problema.
+
+Solo por esta demo, AWS me mandó esta factura:
+
+![image](https://user-images.githubusercontent.com/1316464/146146296-e7d5207b-2df1-408a-ab37-ab815d6f0804.png)
+
+
+En qué gastamos $270 USD?
+
+![image](https://user-images.githubusercontent.com/1316464/146146391-f836dce5-fb2f-49d9-b678-210e7586e82b.png)
+
+Como podemos ver, menos de $10 USD por la maquinita donde tenemos nuestro PostgreSQL.
+
+⚠️Y $260 USD por los jobs de Glue para extraer de nuestra BD transaccional, catalogar, convertir a Parquet, grabar en S3, y formar una BD con esos archivos!⚠️
 
 
 
