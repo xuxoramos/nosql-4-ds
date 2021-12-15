@@ -715,7 +715,15 @@ Y listo!
 
 ![image](https://user-images.githubusercontent.com/1316464/143409376-16507393-cd95-4610-a0e7-2f698fdd4bdc.png)
 
-Vamos a visualizar ahora esta tabla con AWS Quicksight!
+### 6.1 ⚠️Schema-on-read⚠️
+
+Lo que acabamos de hacer es **súuuuuuper poderoso**. Recordemos que la BD se compone de archivos parquet. Los archivos parquet tienen una estructura columnar, **PERO NO SABEN NADA DEL TIPO DE DATO QUE GUARDAN**.
+
+Cómo es posible, entonces, que con `select` podamos hacer operaciones numéricas, aritméticas, o de strings sobre estos datos **si no tienen un esquema definido**?
+
+La respuesta está en una funcionalidad poderosa de los componentes de lectura SQL de los data lakes llamado _schema-on-read_, esto es, no necesitamos definir la estructura de los datos que vamos a consumir **sino hasta que los consumimos**, a diferencia de una BD SQL relacional, donde el esquema, es decir, la estructura, está definida desde que estamod diseñando la BD en una diagrama Entidad-Relación.
+
+Ahora si, vamos a visualizar ahora esta tabla con AWS Quicksight!
 
 ## 7. Explorando la data con Quicksight
 
