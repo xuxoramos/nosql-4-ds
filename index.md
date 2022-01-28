@@ -19,11 +19,9 @@ En una frase, esta materia trata de **consolidación de datos** para contar una 
 
 ### Cómo vamos a calificar?
 
-1. 1er Parcial (teórico): 10%
-2. 2o Parcial (avance proyecto final): 10%
-3. 3er Parcial (avance proyecto final): 20%
-4. Proyecto final: 50%
-5. Tareas: 10%
+1. 1er y único parcial individual: 60%
+2. 1er avance proyecto final: 20%
+3. 2o y último avance proyecto final: 20%
 
 ### Cómo serán los exámenes?
 Tendrán un componente teórico y/o un componente práctico.
@@ -36,38 +34,36 @@ El componente teórico es un examen de opción múltiplemen la plataforma [Socra
 Será enteramente práctico y consistirá en el desarrollo de un proyecto integral con todo lo visto en el semestre. Daremos más detalles más adelante durante el curso.
 
 ### Cómo me contacto con ud, prof?
-Usen el el correo institucional (jesus.ramos@itam.mx) o Slack, o escriban a ramos.cardona@gmail.com.
+Usen el el correo institucional (jesus.ramos@itam.mx) o Slack.
 
 Pero preferentemente usen Slack.
 
 ### Cómo nos comunicaremos?
-Por [Slack](https://slack.com), que es un chat orientado a equipos y trabajo. Comenzó como un juego tipo "Among Us", pero cuando hicieron el chat para el juego quedó tan chingón, que lo sacaron como producto separado. Abajo las ligas de descarga:
+Por [Slack](https://slack.com). Abajo las ligas de descarga:
 - [Windows](https://slack.com/downloads/windows)
 - [Mac](https://slack.com/help/articles/207677868-Download-Slack-for-Mac)
 - [Linux](https://slack.com/downloads/linux) - .rpm para Fedora o RedHat, .deb para Ubuntu
 
-Una vez que descarguen Slack, hagan click [en esta liga](https://join.slack.com/t/nosql4ds-aug-dec-2021/shared_invite/zt-ty8xeun7-KGFTNAdK1D7ylLa5XnoZsg) para que sean automágicamente agregados a nuestro workspace.
+Una vez que descarguen Slack, hagan click [en esta liga](https://join.slack.com/t/slack-phh3413/shared_invite/zt-12jco12g3-XkoahXqMXkx4mdNiIi2VUg) para que sean automágicamente agregados a nuestro workspace.
 
 ### Por dónde serán las sesiones?
 
-Lunes y Miércoles de 2:30pm a 4:00pm.
+Viernes de 8AM a 11AM.
 
-La sesión 0 será por [Teams de Microsoft](https://www.microsoft.com/es-mx/microsoft-365/microsoft-teams/download-app), y posteriormente nos moveremos a [Zoom](https://zoom.us/download), en [este link](https://itam.zoom.us/my/xuxoramos).
+La sesión 1 será por [Zoom](https://zoom.us/download), en [este link](https://itam.zoom.us/my/xuxoramos), y solo durará de 8 a 10.
+
+A partir de la 2a sesión estaremos presenciales en el salón **RHCC302** de 8 a 11.
 
 ### Dónde estará el material?
-Aquí en Github. Github es una plataforma de colaboración y control de versiones para no andar como este meme:
-![](https://i.redd.it/05b6u19pseoz.png)
-
-Es importante que si nunca has usado Github, o algún otro sistema de control de versiones, [leas esta guía](https://guides.github.com/activities/hello-world/) para que no te agarren en curva y tengas de menos los fundamentos de estas plataformas.
+Aquí en Github. Es importante que si nunca has usado Github, o algún otro sistema de control de versiones, [leas esta guía](https://guides.github.com/activities/hello-world/) para que no te agarren en curva y tengas de menos los fundamentos de estas plataformas.
 
 ### Qué necesito para la clase?
 
 1. Document - MongoDB - [Download](https://www.mongodb.com/try/download/community)
 2. Graph - Neo4J - [Download](https://neo4j.com/download/)
 3. Wide column - MonetDB - [Download](https://www.monetdb.org/Downloads)
-3. Key-value store - Apache Ignite - [Download](https://ignite.apache.org/)
-4. DAta lake - Spark - [Download](https://spark.apache.org/)
-5. Cuenta de AWS - [Download](https://aws.amazon.com/free/?sc_icampaign=acq_aws_takeover-1st-visit-free-tier&sc_ichannel=ha&sc_icontent=awssm-evergreen-1st-visit&sc_iplace=hero&trk=ha_awssm-evergreen-1st-visit&all-free-tier.sort-by=item.additionalFields.SortRank&all-free-tier.sort-order=asc&awsf.Free%20Tier%20Types=*all&awsf.Free%20Tier%20Categories=*all)
+4. Data lake - AWS Lake Formation - [Download](https://spark.apache.org/)
+5. Cuenta de AWS - Suministrada por mi
 
 #### Solamente eso?
 
@@ -75,16 +71,10 @@ Dependiendo de como vengan de experiencia y las materias previas que hayan cursa
 
 1. VSCode - [Download](https://code.visualstudio.com/download)
 2. Python (mediante miniconda) - [Download](https://docs.conda.io/en/latest/miniconda.html)
-3. .NET SDK - [Download](https://dotnet.microsoft.com/download)
-
-Ya veremos qué necesitaremos de todos estos.
 
 ### NEWS & UPDATES
 
 Check back here often.
-
-#### 2021-08-04
-Bienvenidos!
 
 ### Temario + Fechas = Plan de Materia
 A continuación el temario, fecha por fecha:
