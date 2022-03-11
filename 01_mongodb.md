@@ -2460,181 +2460,25 @@ db.languagenames.insertMany([{"locale":"af-ZA", "languages":[
 
 1. Qué idiomas base son los que más tuitean con hashtags? Cuál con URLs? Y con @?
 
-```javascript
-# Con Hashtags
-db.tweets.aggregate([
-	{$lookup: {from:"primarydialects","localField":"user.lang","foreignField":"lang","as":"language"}},
-	{$lookup: {from:"languagenames","localField":"language.locale","foreignField":"locale","as":"fulllocale"}},
-	{$match:{"entities.hashtags":{$not:{$size:0}}}},
-	{$group: {_id:"$fulllocale.languages", "conteo": {$count:{}}}}
-])
 
-# Con URLs
-db.tweets.aggregate([
-	{$lookup: {from:"primarydialects","localField":"user.lang","foreignField":"lang","as":"language"}},
-	{$lookup: {from:"languagenames","localField":"language.locale","foreignField":"locale","as":"fulllocale"}},
-	{$match:{"entities.urls":{$not:{$size:0}}}},
-	{$group: {_id:"$fulllocale.languages", "conteo": {$count:{}}}}
-])
-
-# Con User Mentions
-db.tweets.aggregate([
-	{$lookup: {from:"primarydialects","localField":"user.lang","foreignField":"lang","as":"language"}},
-	{$lookup: {from:"languagenames","localField":"language.locale","foreignField":"locale","as":"fulllocale"}},
-	{$match:{"entities.user_mentions":{$not:{$size:0}}}},
-	{$group: {_id:"$fulllocale.languages", "conteo": {$count:{}}}}
-])
-```
-
-⚠️ _OFERTA!! Puntos extra por jalar los 3 resultados en 1 solo query!_ ⚠️
-
-➡️ _Podemos hacer este query más eficiente?_ ➡️
-
-```javascript
-db.tweets.aggregate([
-	{$lookup: {from:"primarydialects","localField":"user.lang","foreignField":"lang","as":"language"}},
-	{$lookup: {from:"languagenames","localField":"language.locale","foreignField":"locale","as":"fulllocale"}},
-	{$match:{"entities.user_mentions":{$not:{$size:0}}}},
-	{$group: {_id:"$fulllocale.languages", "conteo": {$count:{}}}}
-]).explain()
-
-# 4413 ms
-```
-
-⚔️ _**VERSUS**_ ⚔️
-
-```javascript
-db.tweets.aggregate([
-	{$match:{"entities.user_mentions":{$not:{$size:0}}}},
-	{$group: {_id:"$user.lang", "conteo": {$count:{}}}},
-	{$lookup: {from:"primarydialects","localField":"_id","foreignField":"lang","as":"language"}},
-	{$lookup: {from:"languagenames","localField":"language.locale","foreignField":"locale","as":"fulllocale"}},
-]).explain()
-
-# 4 ms 😲
-```
 
 2. Qué idioma base es el que más hashtags usa en sus tuits?
 
-Planteamiento: "sum del size de los arrays previo filtrado"
 
-```javascript
-db.tweets.aggregate([
-	{$group: {_id:"$user.lang", "totalHashtags": {$sum:{$size:"$entities.hashtags"}}}},
-	{$lookup: {from:"primarydialects","localField":"_id","foreignField":"lang","as":"language"}},
-	{$lookup: {from:"languagenames","localField":"language.locale","foreignField":"locale","as":"fulllocale"}},
-	{$project:{"language":0}},
-	{$sort:{"totalHashtags":-1}}
-])
-```
 
 4. Cómo podemos saber si los tuiteros hispanohablantes interactúan más en las noches?
 
-- Breakdown por lenguaje y cerrando la búsqueda a las 20h ⭐⭐
-```javascript
-db.tweets.aggregate([
-	{ $group: { _id: { "lang": "$user.lang", "hour": { $substr: ["$created_at", 11, 2] } }, "counter": { $count: {} } } }, 
-	{ $match: { "_id.hour": "20" } }, 
-	{ $sort: { "counter": -1 } }
-]);
-```
 
-- Usando regexp y con ellas hacer match de horas [19h, 20h y en adelante] ⭐⭐⭐⭐
-```javascript
-db.tweets.aggregate([ 
-	{ $lookup: { from: "primarydialects", "localField": "user.lang", "foreignField": "lang", "as": "language" } }, 
-	{ $lookup: { from: "languagenames", "localField": "language.locale", "foreignField": "locale", "as": "fulllocale" } }, 
-	{ $match: { "user.lang": 'es', "created_at": /^[A-Z]+[a-z]{1,2}\s+[A-Z]+[a-z]{1,2}\s+[0-9]{1,2}\s+([1]+[9]|[2]+[0-3])+:+[0-5]+[0-9]+:+[0-5]+[0-9].........../ } },
-	{ $group: { _id: "$fulllocale.languages", "conteo": { $count: {} } } }
-])
-```
-
-- Crear variable artificial para dividir horas y a través de la cual agrupar ⭐⭐⭐⭐⭐
-```javascript
-db.tweets.aggregate([
-	{ $match: { "user.lang": "es" } }, 
-	{ $project: { "hora": { $substr: ["$created_at", 11, 8] } } }, 
-	{ $project: { "team": { $cond: 
-		{ if: 
-			{ $and: [ { $gte: [{ $toInt: { $substr: ["$hora", 0, 2] } }, 6] }, 
-			{ $lte: [{ $toInt: { $substr: ["$hora", 0, 2] } }, 18] }] }, 
-		then: "Mañaneros", else: "Nocheros" } } } 
-	},
-	{ $group: { _id: "$team", "Twits": { $count: {} } } }
-]);
-```
-
-- Agrupar por lang y por substring de hora ⭐⭐⭐
-```javascript
-db.tweets.aggregate([ 
-	{ $group: { _id: { "lang": "$user.lang", "hour": { $substr: ["$created_at", 11, 2] } }, "counter": { $count: {} } } }, 
-	{ $match: { "_id.lang": "es" } }, 
-	{ $sort: { "counter": -1 } }
-]);
-```
 
 6. Cómo podemos saber de dónde son los tuiteros que más tiempo tienen en la plataforma?
 
-- Sobreescribir el campo created_at SOLO DURANTE EL PIPELINE, y ordenar ⭐⭐ - _los resultados están expresados en términos de IDs_ 👎
-```javascript
-db.tweets.aggregate([ 
-	{ $addFields: { "user.created_at": { "$toDate": "$user.created_at" } } }, 
-	{ $project: { "user.created_at": 1, "user.time_zone": 1 } }, 
-	{ $sort: { "user.created_at": 1 } }
-]);
-```
 
-- Armar la fecha con extracción de partes individuales, join con una BD externa de meses, reensamblar fecha con componentes individuales y ordernar ⭐⭐⭐⭐ - _uso de la base externa quizá no era necesario_
-```javascript
-db.months.insertMany([ 
-	{ month: "Jan", order: "01" }, 
-	{ month: "Feb", order: "02" }, 
-	{ month: "Mar", order: "03" }, 
-	{ month: "Apr", order: "04" }, 
-	{ month: "May", order: "05" }, 
-	{ month: "Jun", order: "06" }, 
-	{ month: "Jul", order: "07" }, 
-	{ month: "Aug", order: "08" }, 
-	{ month: "Sep", order: "09" }, 
-	{ month: "Oct", order: "10" }, 
-	{ month: "Nov", order: "11" }, 
-	{ month: "Dec", order: "12" }
-]);
-
-db.tweets.aggregate([ 
-	{ $project: { "month": { $substr: ["$user.created_at", 4, 3] }, "day": { $substr: ["$user.created_at", 8, 2] }, "year": { $substr: ["$user.created_at", 26, 4] }, "user.screen_name": 1 } }, 
-	{ $lookup: { from: "months", localField: "month", foreignField: "month", as: "order" } }, 
-	{ $unwind: "$order" }, 
-	{ $project: { "date": { $concat: ["$year", "-", "$order.order", "-", "$day"] }, "user.screen_name": 1, "user.time_zone": 1 } }, 
-	{ $sort: { "date": 1 } }, { $project: { "_id": 0, "user.screen_name": 1, "date": 1 } }, 
-	{ $limit: 5 }
-]);
-```
 
 7. En intervalos de 7:00:00pm a 6:59:59am y de 7:00:00am a 6:59:59pm, de qué paises la mayoría de los tuits?
 
-- $lookup de colecciones de lenguajes/idiomas, match con regexp de created at, agrupación por timezone, y conteo - ⭐⭐ - _hubiera sido mejor en un solo query ambos intervalos_
-```javascript
-# Esto es para el intervalo 0700 a 1800
-db.tweets.aggregate([
-	{$lookup:{from:"primarydialects","localField":"user.lang","foreignField":"lang","as":"language"}},
-	{$lookup:{from:"languagenames","localField":"language.locale","foreignField":"locale","as":"fulllocale"}},
-	{$match:{created_at:{$regex:/[a-z]{3}.[a-z]{3}.[0-9]{2}.(07|08|09|10|11|12|13|14|15|16|17|18).*/i}}},
-	{$group:{_id:"$user.time_zone",count:{$sum:1}}}
-]).sort({"count":-1})
-``` 
+
 
 8. De qué país son los tuiteros más famosos de nuestra colección?
-
-- Seleccionar con project, ordenar por friends_count (cuestionable porque está el campo followers_count) y mostrar el top N
-   - _planteamiento cuestionable porque hay N tuits de 1 usuario y cada tuit en tiempo T tiene variables de usuario que otro tuit del mismo usuario en tiempo T+10_
-   - Nadie lo hizo así...ni yo 🤣
-
-🧰 _**Tarea**_ 🧰
-1. Ejercicios 4 al 6 arriba
-2. Valor: 8/20 (i.e. 5 puntos del total de 20 que valen todas las tareas - la tarea anterior valía 5)
-3. Deadline: Jueves 23, 23:59:59
-4. Método de entrega: Archivo MD o JS en repo de Github
 
 ### Extracción de Datos de APIs con MongoDB
 
