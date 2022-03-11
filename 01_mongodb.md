@@ -907,135 +907,353 @@ Vamos a responder las siguientes preguntas:
 
 1. Escribe una función find() para mostrar todos los documentos de la colección de restaurantes.
 
-
+```javascript
+db.restaurants.find()
+```
 
 
 2. Escribe una función find() para mostrar los campos restaurant_id, nombre, municipio y cocina para todos los documentos en el restaurante de la colección.
 
-
+```javascript
+db.restaurants.find({},{restaurant_id:1,name:1,borough:1,cuisine:1})
+```
 
 
 3. Escribe una función find() para mostrar los campos restaurant_id, nombre, municipio y cocina, pero excluya el campo \_id para todos los documentos de la colección restaurant.
 
-
+```javascript
+db.restaurants.find({},{restaurant_id:1,name:1,borough:1,cuisine:1,_id:0})
+```
 
 
 4. Escribe una función find() para mostrar los campos restaurant_id, nombre, municipio y código postal, pero excluya el campo \_id para todos los documentos de la colección restaurant.
 
-
+```javascript
+db.restaurants.find({},{restaurant_id:1,name:1,borough:1,"address.zipcode":1,_id:0})
+```
 
 
 5. Escribe una función find() para mostrar todos los restaurantes que se encuentran en el distrito del Bronx.
 
-
+```javascript
+db.restaurants.find({borough:"Bronx"})
+```
 
 
 6. Escribe una función find() para mostrar los primeros 5 restaurantes que se encuentran en el condado del Bronx.
 
-
+```javascript
+db.restaurants.find({borough:"Bronx"}).limit(5)
+```
 
 
 7. Escribe una función find() para mostrar los siguientes 5 restaurantes después de omitir los primeros 5 que se encuentran en el condado del Bronx.
 
-
+```javascript
+db.restaurants.find({borough:"Bronx"}).skip(5).limit(5)
+```
 
 
 8. Escribe una función find() para encontrar los restaurantes que obtuvieron una puntuación de más de 90.
 
-
+```javascript
+db.restaurants.find({"grades.score":{$gt:90}},{"grades.score":1})
+```
 
 Como podemos ver aquí, se cumple la regla de MongoDB donde en un query a un array, si todas las condiciones por separado son cumplidas por algunos elementos del array, se regresa todo el array.
 
 
 9. Escribe una función find() para encontrar los restaurantes que obtuvieron una puntuación, más de 80 pero menos de 100.
 
+El siguiente query cumple con la regla que mencionamos arriba.
 
+```javascript
+db.restaurants.find({"grades.score":{$gt:80,$lt:100}},{"grades.score":1})
+```
 
+Y por ello tenemos elementos del array de `score` como `131`, el cual es mayor a 80, y `11`, que es menor a 100.
+
+Para buscar los elementos que cumplan **exactamente** con ambos criterios debemos usar el operador `$elemMatch`:
+
+```javascript
+db.restaurants.find({"grades":{$elemMatch:{"score":{$gt:80,$lt:100}}}},{"grades.score":1})
+```
+
+Y de ese modo obtenemos arreglos que tengan al menos 1 elemento que cumpla con ambos criterios.
 
 10. Escribe una función find() para encontrar los restaurantes que se ubican en un valor de latitud menor que -95.754168.
 
+Suponiendo que el atributo tipo array `coord` tiene la latitud en el índice 0:
 
-
+```javascript
+db.restaurants.find({"address.coord.0":{$lte:-95.754168}},{"address.coord":1})
+```
 
 
 11. Escribe una función find() para encontrar los restaurantes que no preparan ningún tipo de cocina de 'estadounidense' y su puntuación de calificación es superior a 70 y latitud inferior a -65.754168.
 
+Tenemos 2 opciones. Sin expresiones regulares, usando el oeprador _not equals_ (`$ne`) y atendiendo que por alguna razón el tipo de cocina `"American "` tiene un espacio al final:
 
+```javascript
+db.restaurants.find({"cuisine":{$ne:"American "},"grades.score":{$gt:70},"address.coord.0":{$lt:-65.754168}},{"cuisine":1,"grades":1,"address.coord":1})
+```
+
+O con expresiones regulares y ayudándonos del operador booleano `$not`. Usamos el `^` para indicar "inicio de línea", y así evitar sacar del query a los restaurantes de cocina "Latin American/Caribbean":
+
+```javascript
+db.restaurants.find({"cuisine":{$not:/^American/},"grades.score":{$gt:70},"address.coord.0":{$lt:-65.754168}},{"cuisine":1,"grades":1,"address.coord":1})
+```
 
 
 12. Escribe una función find() para encontrar los restaurantes que no preparan ninguna cocina del continente americano y lograron una puntuación superior a 70 y se ubicaron en la longitud inferior a -65.754168.
 
-
+```javascript
+db.restaurants.find(
+                           {
+                             "cuisine" : {$ne : "American "},
+                             "grades.score" :{$gt: 70},
+                             "address.coord" : {$lt : -65.754168}
+                            }
+                     );
+```
 
 
 13. Escribe una función find() para encontrar los restaurantes que no preparan ninguna cocina del continente americano y obtuvieron una calificación de 'A' que no pertenece al distrito de Brooklyn. El documento debe mostrarse según la cocina en orden descendente.
 
-
+```javascript
+db.restaurants.find( {
+                             "cuisine" : {$ne : "American "},
+                             "grades.grade" :"A",
+                             "borough": {$ne : "Brooklyn"}
+                       } 
+                    ).sort({"cuisine":-1});
+```
 
 
 14. Escribe una función find() para encontrar el ID del restaurante, el nombre, el municipio y la cocina de aquellos restaurantes que contienen 'Wil' como las primeras tres letras de su nombre.
 
-
+```javascript
+db.restaurants.find({name: /^Wil/}, {"restaurant_id":1, "name":1, "borough":1, "cuisine":1});
+```
 
 
 15. Escribe una función find() para encontrar el ID del restaurante, el nombre, el municipio y la cocina de aquellos restaurantes que contienen "ces" como las últimas tres letras de su nombre.
 
-
+```javascript
+db.restaurants.find({name: /ces$/},{"restaurant_id" : 1,"name":1,"borough":1,"cuisine" :1});
+```
 
 
 16. Escribe una función find() para encontrar el ID del restaurante, el nombre, el municipio y la cocina de aquellos restaurantes que contienen 'Reg' como tres letras en algún lugar de su nombre.
 
+```javascript
+db.restaurants.find( { "name": /Reg/ }, { "restaurant_id": 1, "name": 1, "borough": 1, "cuisine": 1 });
+```
 
+O alternativamente:
 
+```javascript
+db.restaurants.find( { "name": /.*Reg.*/ }, { "restaurant_id": 1, "name": 1, "borough": 1, "cuisine": 1 });
+```
 
 
 17. Escribe una función find() para encontrar los restaurantes que pertenecen al municipio del Bronx y que prepararon platos estadounidenses o chinos.
 
-
+```javascript
+db.restaurants.find(
+	{ 
+		"borough": "Bronx" , 
+		$or : [
+			{ "cuisine" : "American " },
+			{ "cuisine" : "Chinese" }
+		] 
+	} 
+);
+```
 
 18. Escribe una función find() para encontrar la identificación del restaurante, el nombre, el municipio y la cocina de los restaurantes que pertenecen al municipio de Staten Island o Queens o Bronxor Brooklyn.
 
-
+```javascript
+db.restaurants.find(
+	{"borough" :
+		{$in :["Staten Island","Queens","Bronx","Brooklyn"]}
+	},
+	{
+		"restaurant_id" : 1,
+		"name":1,
+		"borough":1,
+		"cuisine" :1
+	}
+);
+```
 
 19. Escribe una función find() para encontrar el ID del restaurante, el nombre, el municipio y la cocina de aquellos restaurantes que no pertenecen al municipio de Staten Island o Queens o Bronxor Brooklyn.
 
-
+```javascript
+db.restaurants.find(
+	{"borough" :
+		{$nin :["Staten Island","Queens","Bronx","Brooklyn"]}
+	},
+	{
+		"restaurant_id" : 1,
+		"name":1,
+		"borough":1,
+		"cuisine" :1
+	}
+);
+```
 
 20. Escribe una función find() para encontrar el ID del restaurante, el nombre, el municipio y la cocina de aquellos restaurantes que obtuvieron una puntuación que no sea superior a 10.
 
+```javascript
+db.restaurants.find(
+	{"grades.score" : 
+		{ $not: {$gt : 10}}
+	},
+	{
+		"restaurant_id" : 1,
+		"name":1,
+		"borough":1,
+		"cuisine" :1
+	}
+);
+```
 
+Alternativamente...
 
-
+```javascript
+db.restaurants.find(
+	{"grades.score" : 
+		{$lte : 10}
+	},
+	{
+		"restaurant_id" : 1,
+		"name":1,
+		"borough":1,
+		"cuisine" :1
+	}
+);
+```
 
 
 21. Escribe una función find() para encontrar el ID del restaurante, el nombre, el municipio y la cocina de aquellos restaurantes que prepararon platos excepto 'Americano' y 'Chinese' o el nombre del restaurante comienza con la letra 'Wil'.
 
-
+```javascript
+db.restaurants.find(
+	{$or: [
+		{name: /^Wil/}, 
+		{"$and": [
+			{"cuisine" : {$ne :"American "}}, 
+			{"cuisine" : {$ne :"Chinese"}}	]
+		}]
+	}
+	,{
+		"restaurant_id" : 1,
+		"name":1,
+		"borough":1,
+		"cuisine" :1
+	}
+);
+```
 
 22. Escribe una función find() para encontrar el ID del restaurante, el nombre y las calificaciones de los restaurantes que obtuvieron una calificación de "A" y obtuvieron una puntuación de 11 en un ISODate "2014-08-11T00: 00: 00Z" entre muchas de las fechas de la encuesta. .
 
+```javascript
+db.restaurants.find( 
+	{
+		"grades.date": ISODate("2014-08-11T00:00:00Z"), 
+		"grades.grade":"A" , 
+		"grades.score" : 11
+	}, 
+	{
+		"restaurant_id" : 1,
+		"name":1,
+		"grades":1
+	}
+);
+```
+
+**👀OJO👀**: Aquí la palabra clave es _"entre muchas de las fechas de la encuesta"_, porque implica el comportamiento esperado de los queries sobre los arrays, en donde todos sus elementos deben de ayudar a cumplir todas las condiciones. En este caso, entre todos los grades deben ayudar a cumplir el criterio de 1) fecha del 11 de Agosto de 2014, 2) grade = A, y 3) score = 11.
 
 23. Escribe una función find() para encontrar el ID del restaurante, el nombre y las calificaciones de aquellos restaurantes donde el segundo elemento de la matriz de calificaciones contiene una calificación de "A" y una puntuación de 9 en un ISODate "2014-08-11T00: 00: 00Z".
 
+```javascript
+db.restaurants.find( 
+	{
+		"grades.1.date":ISODate("2014-08-11T00:00:00Z"),
+		"grades.1.grade":"A", 
+		"grades.1.score" : 9
+	},
+	{
+		restaurant_id" : 1,
+		"name":1,
+		"grades":1
+	}
+);
+```
+
+Si intentamos buscar estos criterios y que los satisfaga 1 y solo 1 elemento del array con `$elemMatch`:
+
+```javascript
+db.restaurants.find( {"grades.1": {$elemMatch:{"date": ISODate("2014-08-11T00:00:00Z"), "grade": "A", "score": 9 }}}, { "restaurant_id": 1, "name": 1, "grades": 1 });
+```
+
+No vamos a encontrar nada.
+
+Esto es porque `$elemMatch` espera como entrada un array, y al apuntar la búsqueda a `grades.1` estamos pasando solo 1 elemento.
+
+Si en lugar de `grades.1` pasamos todo el arreglo de `grades` a `$elemMatch`:
+
+```javascript
+db.restaurants.find( {"grades": {$elemMatch:{"date": ISODate("2014-08-11T00:00:00Z"), "grade": "A", "score": 9 }}}, { "restaurant_id": 1, "name": 1, "grades": 1 });
+```
+
+Nos regresa los 2 restaurantes cuyos `grades` tienen elementos que cumplen con los 3 criterios.
 
 24. Escribe una función find() para encontrar el ID del restaurante, el nombre, la dirección y la ubicación geográfica para aquellos restaurantes donde el segundo elemento de la matriz de coordenadas contiene un valor que sea más de 42 y hasta 52.
 
-
+```javascript
+db.restaurants.find( 
+	{ 
+		"address.coord.1": {$gt : 42, $lte : 52}
+	},
+	{
+		"restaurant_id" : 1,
+		"name":1,
+		"address":1,
+		"coord":1
+	}
+);
+```
 
 25. Escribe una función find() para organizar el nombre de los restaurantes en orden ascendente junto con todas las columnas.
 
-
+```javascript
+db.restaurants.find().sort({"name":1});
+```
 
 26. Escribe una función find() para organizar el nombre de los restaurantes en orden descendente junto con todas las columnas.
 
-
+```javascript
+db.restaurants.find().sort({"name":-1});
+```
 
 27. Escribe una función find() para organizar el nombre de la cocina en orden ascendente y para ese mismo distrito de cocina debe estar en orden descendente.
 
-
+```javascript
+db.restaurants.find().sort({"cuisine":1,"borough" : -1,});
+```
 
 28. Escribe una función find() para saber si todas las direcciones contienen la calle o no.
 
+```javascript
+db.restaurants.find({"address.street" : { $exists : true } } );
+```
+
+Otras formas de checar existencia (o nulidad) son:
+
+- usando la condición `{"address.street" : {$type : 10}}`, que checa que el tipo sea `null` (ver ejercicio 29)
+- usando `{"address.street" : null}`
 
 29. Escribe una función find() que seleccionará todos los documentos de la colección de restaurantes donde el valor del campo coord es Double.
 
