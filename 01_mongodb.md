@@ -2658,6 +2658,34 @@ db.tweets.aggregate([
 ]).sort({"count":-1})
 ``` 
 
+- Conversión a _int_ de _created\_at_ y **$sortByCount** ⭐⭐⭐⭐⭐:
+
+```javascript
+db.tweets.aggregate([
+  { $project : {
+        'user.time_zone' : 1,
+        date_array : { $split: [ "$created_at", " " ]}
+      }
+  },
+  {$addFields: {
+    hora_raw : {$arrayElemAt: [ "$date_array", 3 ]}
+    }
+  },
+    {$addFields : {
+      hora_num_str: {
+        $replaceAll: { input : '$hora_raw', find : ":", replacement : '' }
+      }
+    }
+  },
+    {$addFields :{
+      hora_num: { $toInt: "$hora_num_str" }
+      }
+    },
+  { $match : { $or: [ { hora_num: { $gt: 70000 } }, { hora_num: {$lt : 185959} } ]  }},
+  { $sortByCount : "$user.time_zone" }
+])
+```
+
 8. De qué país son los tuiteros más famosos de nuestra colección?
 
 - Seleccionar con project, ordenar por friends_count (cuestionable porque está el campo followers_count) y mostrar el top N
