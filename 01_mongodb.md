@@ -2573,6 +2573,40 @@ db.tweets.aggregate([
 ]);
 ```
 
+- Extrayendo la parte de **hora** en campo _created\_at_ y convirtiendo a _int_ ⭐⭐⭐⭐
+
+```javascript
+db.tweets.aggregate([
+  { $project : {
+        text : 1,
+        'user.lang' : 1,
+        date_array : { $split: [ "$created_at", " " ]}
+      }
+  },
+  {$addFields: {
+    hora_raw : {$arrayElemAt: [ "$date_array", 3 ]}
+    }
+  },
+    {$addFields : {
+      hora_num_str: {
+        $replaceAll: { input : '$hora_raw', find : ":", replacement : '' }
+      }
+    }
+  },
+    {$addFields :{
+      hora_num: { $toInt: "$hora_num_str" }
+      }
+    },
+  { $match : { $or: [ { hora_num: { $lt: 30000 } }, { hora_num: {$gt : 195959} } ]  }},
+  {$project : {
+    _id : 0,
+    hora_num : 1,
+	"user.lang":1
+    }
+  },
+	{$group:{_id:{"lang":"$user.lang"}, "cuantos":{$count:{}}}}
+])
+```
 6. Cómo podemos saber de dónde son los tuiteros que más tiempo tienen en la plataforma?
 
 - Sobreescribir el campo created_at SOLO DURANTE EL PIPELINE, y ordenar ⭐⭐ - _los resultados están expresados en términos de IDs_ 👎
