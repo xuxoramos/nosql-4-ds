@@ -344,11 +344,14 @@ cd ~
 mkdir monetdb
 mkdir monetdb/farm
 monetdbd create monetdb/farm
+monetdbd set listenaddr=0.0.0.0 monetdb/farm/
 monetdbd start monetdb/farm
 ```
 Con estos comandos creamos un directorio monetdb/myfarm donde va a vivir nuestra BD.
 
 Luego usamos el comando `monetdbd` para crear y arrancar el servidor de MonetDB con 1 nodo en su farm.
+
+**_👀OJO👀 el penúltimo comando le dice a MonetDB que arranque sus procesos de servidor escuchando desde cualquier dirección IP._**
 
 Cuando vean comandos de Unix que terminen con una `d`, seguro son _daemon_. Si, viene de la palabra _demon_, pero con este significado:
 
