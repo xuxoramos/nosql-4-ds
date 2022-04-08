@@ -502,7 +502,7 @@ Luego en MonetDB:
 En la consola:
 ```console
 monetdb create ecobici
-monetdb release ecobici
+monetdb release ecobici	
 mclient -u monetdb -d ecobici
     password: "monetdb"
 ```
@@ -569,7 +569,6 @@ create table ecobici_historico (
   duracion_viaje_minutos  VARCHAR(80)  
 );
 ```
-👀OJO👀: estamos creando la tabla `ecobici_historico` con 40 columnas y 1 columna de tipo `serial`, la cual MonetDB **automágicamente** la considera como llave primaria secuencial. Todos los campos serán `VARCHAR` solo para facilidad de inserción.
 
 Aquí el videito donde utilizamos la utilería de DBeaver para cargar las tablas:
 
