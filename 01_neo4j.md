@@ -848,7 +848,7 @@ El algoritmo _Page Rank_ de Neo4j funciona de la siguiente forma:
 1. Primero debemos de crear una **proyección** de nodos y relaciones, parecido a lo que hacíamos en MongoDB, donde **preseleccionabamos** un conjunto de atributos y documentos, así en Neo4j tenemos que seleccionar un conjunto de _nodes_ y _edges_ para delimitar y dar contexto a nuestro análisis. En este caso, con la función `gds.graph.create()` proyectaremos los nodos `Entity` y `Officer`, y la relación entre ellos `[OFFICER_OF]`, y guardaremos esa proyección en la variable `entitiesAndOfficers`:
 
 ```
-call gds.graph.create(
+call gds.graph.project(
   'entitiesAndOfficers',    
   ['Entity', 'Officer'],   
   ['OFFICER_OF']     
